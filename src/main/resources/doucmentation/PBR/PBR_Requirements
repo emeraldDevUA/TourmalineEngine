@@ -1,0 +1,16 @@
+1. Albedo (Base Color) Map: This map contains the base color information of the material without any lighting or shadowing effects. It represents the intrinsic color of the surface.
+2. Normal Map: This map is used to add surface detail without increasing the geometric complexity. It alters the surface normals to create the illusion of depth and detail.
+3. Metalness (Metallic) Map: This map defines which parts of the material are metallic and which are non-metallic (dielectric). It influences the reflectivity and the way light interacts with the surface.
+4. Roughness Map: This map determines the smoothness or roughness of the surface. It affects the spread and blurriness of reflections on the material.
+5. Ambient Occlusion (AO) Map: This map is used to simulate self-shadowing where indirect lighting is occluded. It adds depth and realism to the scene by darkening crevices and other areas where light is less likely to reach.
+6. Height (Displacement) Map: This map is used for more accurate parallax effects and can be used to displace the actual geometry of the surface, adding real geometric detail rather than just shading effects.
+7. Specular Map (if using the specular workflow instead of metalness): This map defines the intensity and color of the specular highlights. It can be used in workflows that separate specular and glossiness from metalness and roughness.
+8. Emission Map: This map is used for materials that emit light. It defines the parts of the surface that should glow and the intensity of the emitted light.
+9. Subsurface Scattering (SSS) Map: For materials that allow light to penetrate their surface and scatter within, like skin or wax, this map helps define how light scatters beneath the surface.
+10. Anisotropy Map: This map controls the direction and intensity of anisotropic reflections, which are common in materials like brushed metal or hair.
+11. Opacity (Transparency) Map: This map controls the transparency levels of the surface, determining which parts are transparent and by how much.
+
+These maps have to be implemented.
+
+Also what needs to be implemented is deferred rendering. This type of rendering is going to
+ensure that enough post-processing capacity is provided for you as a developer.

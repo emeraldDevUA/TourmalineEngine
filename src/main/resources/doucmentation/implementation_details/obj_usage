@@ -1,0 +1,12 @@
+It's mostly that the Wavefront OBJ is going to be used to load 3D models and material libraries.
+
+    By default, a 3d resource folder is configured. let it be ..../3d_res
+after which you have to create a folder with a 3d model and a .mtl file.
+If all the files are parsed correctly, this mechanism provides a developer with a
+convenient and framework-like way to load 3D model in PBR.
+
+If you are not willing to do that, you can still load models and textures manually, however
+this option may result in unnecessary code overhead, which is rarely a good idea.
+
+Obj splines are only expected to have limited support:
+One at a file and standalone(They won't be interpreted together with obj files).
