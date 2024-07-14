@@ -16,7 +16,7 @@ public class ResourceLoadScheduler {
     public ResourceLoadScheduler(){
         workingThreads = new ArrayList<>(coreNumber);
         for(int i = 0; i < coreNumber; i++){
-            workingThreads.set(i, new ResourceLoader(new ArrayList<>(), new ArrayList<>()));
+            workingThreads.add(i, new ResourceLoader(new ArrayList<>(), new ArrayList<>()));
         }
     }
 
@@ -39,8 +39,24 @@ public class ResourceLoadScheduler {
 
     }
 
+
     public void loadResources(){
         workingThreads.forEach(ResourceLoader::start);
     }
 
+    public void reset(){
+        workingThreads.clear();
+        for(int i = 0; i < coreNumber; i++){
+            workingThreads.add(i, new ResourceLoader(new ArrayList<>(), new ArrayList<>()));
+        }
+    }
+
+    public float getReadiness(){
+        int alive = 0;
+        for(int i = 0; i < coreNumber; i ++){
+            if(workingThreads.get(i).isAlive()){ alive++;}
+        }
+
+        return ((float) (coreNumber-alive)/ (float) (coreNumber));
+    }
 }
