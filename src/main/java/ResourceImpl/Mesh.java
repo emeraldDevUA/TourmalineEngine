@@ -1,13 +1,18 @@
 package ResourceImpl;
 
-import Interfaces.Loadable;
-
+import Interfaces.EnhancedLoadable;
 import java.io.FileNotFoundException;
 
-public class Mesh implements Loadable {
+public class Mesh implements EnhancedLoadable {
     
     @Override
     public void load(String path) throws FileNotFoundException {
 
     }
+
+    @Override
+    public void assemble() {
+
+    }
+
 }
