@@ -155,9 +155,12 @@ public class Texture implements EnhancedLoadable {
         glBindTexture(GL_TEXTURE_2D, 0);
 
         assert textureData != null;
-        stbi_image_free(textureData);
-
-        loadedTextures.put(path, texture);
-        loadedInstances.put(path, 1);
+        try {
+            stbi_image_free(textureData);
+            loadedTextures.put(path, texture);
+            loadedInstances.put(path, 1);
+        }catch (NullPointerException e){
+            System.err.println(e.getMessage());
+        }
     }
 }
