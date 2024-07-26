@@ -9,6 +9,7 @@ import org.lwjgl.opengl.ARBVertexArrayObject;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +18,11 @@ import static org.lwjgl.opengl.ARBVertexArrayObject.glBindVertexArray;
 import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
 
 class VBO implements Drawable {
+    private static final int vertex_size = 3*Float.BYTES;
+    private static final int tex_size = 2*Float.BYTES;
+    private static final int normal_size = vertex_size;
+    private static final int color_size = vertex_size;
+
     private ByteBuffer modelBuffer;
     private FloatBuffer vertices, normals, uv;
     private int vbo, vao;
@@ -42,8 +48,8 @@ class VBO implements Drawable {
             this.uv.put(textureCoordinates.get(i).y);
         }
 
-//        vao = glGenVertexArrays();
-//        glBindVertexArray(vao);
+
+        allocate(vertices.size()*(vertex_size+tex_size+normal_size));
 
 
     }
@@ -57,9 +63,15 @@ class VBO implements Drawable {
 
     @Override
     public void compile() {
+        vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
 
     }
-
+    private void allocate(int size) {
+        modelBuffer = ByteBuffer.allocateDirect(size);
+        modelBuffer.order(ByteOrder.nativeOrder()    );
+    }
 }
 
 public class Mesh implements EnhancedLoadable, Drawable {
@@ -171,9 +183,10 @@ public class Mesh implements EnhancedLoadable, Drawable {
 
     }
     private Integer[] getFaces(String line){
-        Integer[] result = new Integer[3];
+
 
         String[] arr = line.split("/");
+        Integer[] result = new Integer[arr.length];
         int i = 0;
         for (String str: arr){
             try {
