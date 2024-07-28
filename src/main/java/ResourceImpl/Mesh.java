@@ -1,11 +1,12 @@
 package ResourceImpl;
 
 import Interfaces.Drawable;
-import Interfaces.EnhancedLoadable;
+
 import Interfaces.Loadable;
 import lombok.Getter;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.ARBVertexBufferObject;
 
 
 import java.io.*;
@@ -20,7 +21,7 @@ import static org.lwjgl.opengl.ARBUniformBufferObject.glBindBufferBase;
 import static org.lwjgl.opengl.ARBVertexArrayObject.glBindVertexArray;
 import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
 import static org.lwjgl.opengl.GL11.*;
-
+@SuppressWarnings("unused")
 class VBO implements Drawable {
     private static final int vertex_size = 3*Float.BYTES;
     private static final int tex_size = 2*Float.BYTES;
@@ -78,6 +79,7 @@ class VBO implements Drawable {
     public void compile() {
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
+        vbo = ARBVertexBufferObject.glGenBuffersARB();
 
 
     }
@@ -90,8 +92,8 @@ class VBO implements Drawable {
 public class Mesh implements Loadable, Drawable {
     @Getter
     private final Map<String, VBO> map;
-    private Vector3f position;
-    private Quaternionf rotQuaternion;
+    private final Vector3f position;
+    private final Quaternionf rotQuaternion;
 
     public Mesh(){
         map = new ConcurrentHashMap<>();
@@ -195,6 +197,7 @@ public class Mesh implements Loadable, Drawable {
         }
 
     }
+
     private Integer[] getFaces(String line){
 
 
@@ -214,6 +217,7 @@ public class Mesh implements Loadable, Drawable {
 
         return result;
     }
+
     private Float[] getFloatValues(String line) {
         String[] args;
         Float[] values;
@@ -230,8 +234,6 @@ public class Mesh implements Loadable, Drawable {
         }
         return values;
     }
-
-
 
     @Override
     public void draw() {
