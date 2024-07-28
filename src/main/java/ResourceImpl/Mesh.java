@@ -102,9 +102,8 @@ public class Mesh implements Loadable, Drawable {
     }
 
     @Override
-    public void load(String path) throws FileNotFoundException {
-        File file = new File(path);
-        try {
+    public void load(String path) throws IOException {
+            File file = new File(path);
             FileInputStream fis = new FileInputStream(file);
             BufferedInputStream bis = new BufferedInputStream(fis);
             Scanner sc = new Scanner(bis);
@@ -191,10 +190,7 @@ public class Mesh implements Loadable, Drawable {
             bis.close();
             sc.close();
 
-        }catch (IOException e){
-            System.err.println(e.getMessage());
 
-        }
 
     }
 

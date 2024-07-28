@@ -4,7 +4,6 @@ import org.joml.Vector3f;
 
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
