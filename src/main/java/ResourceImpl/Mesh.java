@@ -2,10 +2,11 @@ package ResourceImpl;
 
 import Interfaces.Drawable;
 import Interfaces.EnhancedLoadable;
+import Interfaces.Loadable;
 import lombok.Getter;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBVertexArrayObject;
+
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -14,18 +15,23 @@ import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.lwjgl.opengl.ARBUniformBufferObject.GL_UNIFORM_BUFFER;
+import static org.lwjgl.opengl.ARBUniformBufferObject.glBindBufferBase;
 import static org.lwjgl.opengl.ARBVertexArrayObject.glBindVertexArray;
 import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
+import static org.lwjgl.opengl.GL11.*;
 
 class VBO implements Drawable {
     private static final int vertex_size = 3*Float.BYTES;
     private static final int tex_size = 2*Float.BYTES;
     private static final int normal_size = vertex_size;
     private static final int color_size = vertex_size;
-
     private ByteBuffer modelBuffer;
     private FloatBuffer vertices, normals, uv;
     private int vbo, vao;
+    private int ubo;
+
+    private int numFaces;
     public VBO(){
 
     }
@@ -50,15 +56,22 @@ class VBO implements Drawable {
 
 
         allocate(vertices.size()*(vertex_size+tex_size+normal_size));
+        modelBuffer.order(ByteOrder.nativeOrder());
 
-
+        for (int i = 0; i < vertices.size(); i++) {
+            modelBuffer.putInt(i);
+        }
+        numFaces = vertices.size()/3;
     }
 
 
 
     @Override
     public void draw() {
-
+        glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
+        glBindVertexArray(vao);
+        glDrawElements(GL_TRIANGLES, numFaces, GL_UNSIGNED_INT, 0);
+        glBindVertexArray(0);
     }
 
     @Override
@@ -74,7 +87,7 @@ class VBO implements Drawable {
     }
 }
 
-public class Mesh implements EnhancedLoadable, Drawable {
+public class Mesh implements Loadable, Drawable {
     @Getter
     private final Map<String, VBO> map;
     private Vector3f position;
@@ -218,12 +231,7 @@ public class Mesh implements EnhancedLoadable, Drawable {
         return values;
     }
 
-    @Override
-    public void assemble() {
-        for (VBO vbo : map.values()) {
-            vbo.compile();
-        }
-    }
+
 
     @Override
     public void draw() {
@@ -240,6 +248,8 @@ public class Mesh implements EnhancedLoadable, Drawable {
 
     @Override
     public void compile() {
-        assemble();
+        for (VBO vbo : map.values()) {
+            vbo.compile();
+        }
     }
 }
