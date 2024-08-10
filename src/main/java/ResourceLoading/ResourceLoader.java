@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 
 @Getter
@@ -21,7 +22,7 @@ public class ResourceLoader extends Thread{
             for (int i = 0; i < tasks.size(); i++) {
                 tasks.get(i).load(paths.get(i));
             }
-        } catch (FileNotFoundException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

@@ -1,5 +1,6 @@
 package org.tourmaline;
 
+import Annotations.BasicWindow;
 import ResourceImpl.Mesh;
 import ResourceImpl.Texture;
 import ResourceLoading.ResourceLoadScheduler;
@@ -7,19 +8,22 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-
+import Annotations.OpenGLWindow;
 import java.nio.IntBuffer;
 
+import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
-public class Main {
-    public static long window_handle = 0L;
+@OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080})
+public class Main extends BasicWindow {
     public static void main(String[] args){
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
-        window_handle = init();
+
+        init(Main.class);
 
         Texture albedo = new Texture();
         Texture normal = new Texture();
@@ -38,9 +42,12 @@ public class Main {
 
         t1 = System.currentTimeMillis();
         resourceLoadScheduler.loadResources();
-
+        double load = 0;
         while (resourceLoadScheduler.getReadiness() < 1.0){
-            System.out.println(resourceLoadScheduler.getReadiness());
+            if(abs(load-resourceLoadScheduler.getReadiness()) >= 0.1) {
+                load = resourceLoadScheduler.getReadiness();
+                System.out.println(STR."\{load * 100}%");
+            }
         }
         t2 = System.currentTimeMillis();
         albedo.assemble();
@@ -54,6 +61,15 @@ public class Main {
 
 
         while (!glfwWindowShouldClose(window_handle)){
+            glBegin(GL_TRIANGLES);
+                glColor3d(1,0,0);
+                glVertex2d(0,1-0.1);
+                glColor3d(0,1,0);
+                glVertex2d(1-0.1,-1+0.1);
+                glColor3d(0,0,1);
+                glVertex2d(-1+0.1,-1+0.1);
+            glEnd();
+
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
         }
@@ -62,55 +78,6 @@ public class Main {
 
 
 
-
-
-    private static long init(){
-        long window;
-        long NULL = 0L;
-        GLFWErrorCallback.createPrint(System.err).set();
-
-        if(!glfwInit()){
-            throw new RuntimeException();
-        }
-
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
-        window = glfwCreateWindow(1920,1080, "The War To End All Wars",NULL,NULL);
-
-        if (window == NULL) {
-            throw new RuntimeException("Failed to create the GLFW window");
-        }
-
-        try ( MemoryStack stack = stackPush() ) {
-
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
-            // Get the window size passed to glfwCreateWindow
-            glfwGetWindowSize(window, pWidth, pHeight);
-            // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            // Center the window
-            assert vidmode != null;
-            glfwSetWindowPos(
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
-        } // the stack frame is popped automatically
-
-        // Make the OpenGL context current
-        glfwMakeContextCurrent(window);
-        // Enable v-sync
-        glfwSwapInterval(0);
-        // Make the window visible
-        glfwShowWindow(window);
-        GL.createCapabilities();
-
-
-
-        return window;
-
-    }
 
 }
 
