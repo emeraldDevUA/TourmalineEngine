@@ -1,5 +1,7 @@
 package ResourceImpl;
 
+import lombok.Getter;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,6 +25,7 @@ public class Shader implements Closeable {
     public static final int NORMAL_MAP_BINDING = 7;
     public static final int EMISSION_MAP_BINDING = 8;
     public static final int AMBIENT_OCCLUSION_MAP_BINDING = 9;
+    @Getter
     private final int program;
 
     public Shader(String vertexPath, String fragmentPath)
@@ -67,6 +70,9 @@ public class Shader implements Closeable {
         glUseProgram(program);
     }
 
+    public void unbind(){
+        glUseProgram(0);
+    }
     @Override
     public void close() {
 

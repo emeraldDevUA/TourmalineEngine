@@ -2,28 +2,30 @@ package org.tourmaline;
 
 import Annotations.BasicWindow;
 import ResourceImpl.Mesh;
+import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import ResourceLoading.ResourceLoadScheduler;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.opengl.GL;
-import org.lwjgl.system.MemoryStack;
+
 import Annotations.OpenGLWindow;
-import java.nio.IntBuffer;
+
 
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.stackPush;
+
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080})
+
 public class Main extends BasicWindow {
     public static void main(String[] args){
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
 
         init(Main.class);
+
+        Shader shader = new Shader("src/main/glsl/vertex_test.vert",
+                "src/main/glsl/fragment_test.frag");
 
         Texture albedo = new Texture();
         Texture normal = new Texture();
@@ -59,8 +61,8 @@ public class Main extends BasicWindow {
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-
         while (!glfwWindowShouldClose(window_handle)){
+
             glBegin(GL_TRIANGLES);
                 glColor3d(1,0,0);
                 glVertex2d(0,1-0.1);
@@ -77,7 +79,9 @@ public class Main extends BasicWindow {
     }
 
 
+    @Override
+    protected void drawElements() {
 
-
+    }
 }
 

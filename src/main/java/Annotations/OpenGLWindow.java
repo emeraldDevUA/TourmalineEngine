@@ -8,6 +8,6 @@ import java.lang.annotation.RetentionPolicy;
 public @interface OpenGLWindow {
     String windowName();
     int[] defaultDimensions();
-
+    long[] hints() default { };
 
 }

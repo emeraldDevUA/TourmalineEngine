@@ -2,8 +2,7 @@
 
 in vec4 finalPos;
 in vec2 textureCoords;
-
-uniform texture2D albedoMap;
+uniform sampler2D albedoMap;
 
 out vec4 fragmentColor;
 

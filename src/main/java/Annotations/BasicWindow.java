@@ -5,6 +5,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
@@ -12,10 +13,11 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 @Getter
-public class BasicWindow {
+public abstract class BasicWindow {
     public static long window_handle = 0L;
     private static String window_name;
 
@@ -72,5 +74,15 @@ public class BasicWindow {
 
         GL.createCapabilities();
 
+        glfwSetWindowSizeCallback(window_handle, new GLFWWindowSizeCallback() {
+            @Override
+            public void invoke(long l, int width, int height) {
+              //  glViewport(0,0, width,height);
+            }
+        });
     }
+
+    protected abstract void drawElements();
+
+
 }

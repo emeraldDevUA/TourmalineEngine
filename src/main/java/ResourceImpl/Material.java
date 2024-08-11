@@ -19,13 +19,15 @@ public class Material implements Closeable {
     }
 
     public void addProperty(String name, Double value){
+
         physicalProperties.put(name, value);
     }
-
     public void addMap(String name, Texture texture){
+
         pbrMaps.put(name, texture);
     }
     public void addColor(String name, Vector3f color){
+
         colors.put(name, color);
     }
 
