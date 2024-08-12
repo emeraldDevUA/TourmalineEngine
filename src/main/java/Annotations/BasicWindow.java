@@ -1,9 +1,11 @@
 package Annotations;
 
 
+import ResourceImpl.Texture;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
@@ -18,10 +20,11 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 @Getter
 public abstract class BasicWindow {
+    protected static final long NULL = 0L;
     public static long window_handle = 0L;
     private static String window_name;
 
-    protected static void init(@NotNull Class<?> className){
+    protected static void init(@NotNull Class<?> className) {
 
 
         int[] dims = new int[2];
@@ -31,27 +34,27 @@ public abstract class BasicWindow {
             window_name = annotation.windowName();
             dims = annotation.defaultDimensions();
 
-        }else {
+        } else {
             System.err.println("Your annotation is faulty");
             System.exit(1);
         }
 
-        long NULL = 0L;
+
         GLFWErrorCallback.createPrint(System.err).set();
 
-        if(!glfwInit()){
+        if (!glfwInit()) {
             throw new RuntimeException();
         }
 
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_SAMPLES, 4);
-        window_handle = glfwCreateWindow(dims[0],dims[1], window_name,NULL,NULL);
+        window_handle = glfwCreateWindow(dims[0], dims[1], window_name, NULL, NULL);
 
         if (window_handle == NULL) {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
-        try ( MemoryStack stack = stackPush() ) {
+        try (MemoryStack stack = stackPush()) {
 
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
@@ -77,9 +80,23 @@ public abstract class BasicWindow {
         glfwSetWindowSizeCallback(window_handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long l, int width, int height) {
-              //  glViewport(0,0, width,height);
+                //  glViewport(0,0, width,height);
             }
         });
+        try {
+
+
+            Texture icon = new Texture("src/main/resources/miscellaneous/icon2.png", 3);
+
+            GLFWImage image = GLFWImage.malloc();
+            GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
+            image.set(icon.getTextureWidth().get(0), icon.getTextureHeight().get(0), icon.getTextureData());
+
+            imagebf.put(0, image);
+            glfwSetWindowIcon(window_handle, imagebf);
+        } catch (NullPointerException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     protected abstract void drawElements();

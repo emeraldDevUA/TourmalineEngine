@@ -2,7 +2,7 @@ package Rendering;
 
 import ResourceImpl.Shader;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+
 import lombok.Setter;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -10,6 +10,7 @@ import org.joml.Vector3f;
 import static org.lwjgl.opengl.GL20.glGetUniformLocation;
 import static org.lwjgl.opengl.GL20.glUniform4fv;
 
+@SuppressWarnings("unused")
 public class Camera {
   @Setter
   private Vector3f position;

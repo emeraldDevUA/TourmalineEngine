@@ -4,35 +4,48 @@ import Interfaces.Drawable;
 
 import Interfaces.Loadable;
 import lombok.Getter;
+import lombok.Setter;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.opengl.ARBVertexBufferObject;
+import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL31;
 
 
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.lwjgl.opengl.ARBUniformBufferObject.GL_UNIFORM_BUFFER;
-import static org.lwjgl.opengl.ARBUniformBufferObject.glBindBufferBase;
-import static org.lwjgl.opengl.ARBVertexArrayObject.glBindVertexArray;
-import static org.lwjgl.opengl.ARBVertexArrayObject.glGenVertexArrays;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30.glBindVertexArray;
+import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+
 @SuppressWarnings("unused")
-class VBO implements Drawable {
+class VBO implements Drawable, Closeable {
+
+    // size consts
     private static final int vertex_size = 3*Float.BYTES;
     private static final int tex_size = 2*Float.BYTES;
     private static final int normal_size = vertex_size;
     private static final int color_size = vertex_size;
+
+
     private ByteBuffer modelBuffer;
     private FloatBuffer vertices, normals, uv;
-    private int vbo, vao;
-    private int ubo;
+    private int vbo, vao, ubo;
 
+    private int verticesBuffer, normalsBuffer, uvsBuffer;
+
+    private int numVertices, numNormals, numUvs;
     private int numFaces;
+
     public VBO(){
 
     }
@@ -54,51 +67,131 @@ class VBO implements Drawable {
             this.uv.put(textureCoordinates.get(i).x);
             this.uv.put(textureCoordinates.get(i).y);
         }
+        numFaces = vertices.size()/3;
 
+        numVertices = vertices.size();
+        numNormals = normals.size();
+        numUvs = textureCoordinates.size();
 
         allocate(vertices.size()*(vertex_size+tex_size+normal_size));
-        modelBuffer.order(ByteOrder.nativeOrder());
 
-        for (int i = 0; i < vertices.size(); i++) {
-            modelBuffer.putInt(i);
-        }
-        numFaces = vertices.size()/3;
     }
 
 
 
     @Override
-    public void draw() {
-        glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
-        glBindVertexArray(vao);
+    public void draw()     {
+//        if (!matrixUpdated) {
+//            matrixBuffer.clear();
+//            getModelMatrix().get(matrixBuffer);
+//            glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
+//            glBufferData(GL31.GL_UNIFORM_BUFFER, matrixBuffer, GL_STATIC_DRAW);
+//            glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0);
+//
+//            matrixUpdated = true;
+//        }
+//
+//        material.use();
+
+        GL30.glBindBufferBase(GL31.GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
+        GL30.glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, numFaces, GL_UNSIGNED_INT, 0);
-        glBindVertexArray(0);
+        GL30.glBindVertexArray(0);
     }
+
 
     @Override
     public void compile() {
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-        vbo = ARBVertexBufferObject.glGenBuffersARB();
+        modelBuffer.order(ByteOrder.nativeOrder());
 
+        for (int i = 0; i < numVertices; i++) {
+            modelBuffer.putInt(i);
+        }
+
+
+        ubo = glGenBuffers();
+        glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
+        glBufferData(GL31.GL_UNIFORM_BUFFER, 64, GL_STATIC_DRAW);
+        glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0);
+
+        IntBuffer indices = BufferUtils.createIntBuffer(numVertices);
+
+        for (int i = 0; i < numVertices; i++) {
+            indices.put(i);
+        }
+
+        if(numVertices > 0) {
+            vao = GL30.glGenVertexArrays();
+            GL30.glBindVertexArray(vao);
+            this.vertices.rewind();
+            verticesBuffer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, verticesBuffer);
+            glBufferData(GL_ARRAY_BUFFER, this.vertices, GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(Shader.POSITION_LOCATION);
+            glVertexAttribPointer(Shader.POSITION_LOCATION, 3, GL_FLOAT, false, 0, 0);
+        }
+
+        if(numNormals > 0) {
+            this.normals.rewind();
+            normalsBuffer = glGenBuffers();
+            glEnableVertexAttribArray(Shader.NORMAL_LOCATION);
+            glVertexAttribPointer(Shader.NORMAL_LOCATION,3, GL_FLOAT, false,0,0);
+        }
+        if (numUvs > 0) {
+            this.uv.rewind();
+            uvsBuffer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, uvsBuffer);
+            glBufferData(GL_ARRAY_BUFFER,  this.uv, GL_STATIC_DRAW);
+
+            glEnableVertexAttribArray(Shader.UVS_LOCATION);
+            glVertexAttribPointer(Shader.UVS_LOCATION, 2, GL_FLOAT, false, 0, 0);
+        }
+        indices.rewind();
+        int elementsBuffer = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+
+        glBindVertexArray(0);
 
     }
     private void allocate(int size) {
         modelBuffer = ByteBuffer.allocateDirect(size);
         modelBuffer.order(ByteOrder.nativeOrder()    );
     }
+
+    @Override
+    public void close() throws IOException {
+        glDeleteBuffers(ubo);
+//        loadedInstances.put(mapName, loadedInstances.get(mapName) - 1);
+//
+//        if (loadedInstances.get(mapName) != 0)
+//            return;
+
+        glDeleteVertexArrays(vao);
+        glDeleteBuffers(verticesBuffer);
+        glDeleteBuffers(normalsBuffer);
+        glDeleteBuffers(uvsBuffer);
+//
+//        loadedMeshes.remove(mapName);
+//        loadedInstances.remove(mapName);
+    }
 }
 
-public class Mesh implements Loadable, Drawable {
+public class Mesh implements Loadable, Drawable, Closeable {
     @Getter
     private final Map<String, VBO> map;
     private final Vector3f position;
     private final Quaternionf rotQuaternion;
-
+    @Setter
+    private Material material;
+    @Setter
+    private Shader shader;
     public Mesh(){
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0,0,0);
         rotQuaternion = new Quaternionf(0,0,0,1);
+        material = new Material();
     }
 
     @Override
@@ -238,6 +331,12 @@ public class Mesh implements Loadable, Drawable {
         float[] model_matrix = new float[16];
         matrix4f.get(model_matrix);
 
+        // not good, is going to deter performance.
+        if(shader!=null){
+            int shader_pointer = shader.getProgram();
+            glUniform4fv(glGetUniformLocation(shader_pointer, "modelMatrix"), model_matrix);
+        }
+        material.use();
         for (VBO vbo : map.values()) {
             vbo.draw();
         }
@@ -249,5 +348,12 @@ public class Mesh implements Loadable, Drawable {
         for (VBO vbo : map.values()) {
             vbo.compile();
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        map.clear();
+        material.close();
+
     }
 }

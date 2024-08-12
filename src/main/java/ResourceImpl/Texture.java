@@ -1,6 +1,7 @@
 package ResourceImpl;
 
 import Interfaces.EnhancedLoadable;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lwjgl.BufferUtils;
 
@@ -22,8 +23,11 @@ import static org.lwjgl.stb.STBImage.stbi_load;
 public class Texture implements EnhancedLoadable {
     private static final Map<String, Integer> loadedTextures = new HashMap<>();
     private static final Map<String, Integer> loadedInstances = new HashMap<>();
+    @Getter
     private ByteBuffer textureData;
+    @Getter
     private IntBuffer textureWidth = BufferUtils.createIntBuffer(1);
+    @Getter
     private IntBuffer textureHeight = BufferUtils.createIntBuffer(1);
     private int texture;
     private String path;
@@ -51,7 +55,7 @@ public class Texture implements EnhancedLoadable {
         try {
             textureData = stbi_load(path, textureWidth, textureHeight, textureChannels, channels);
         } catch (Exception e) {
-            System.err.println("Texture \"" + path + "\" loading failed");
+            System.err.println(STR."Texture \"\{path}\" loading failed");
         }
 
         texture = glGenTextures();

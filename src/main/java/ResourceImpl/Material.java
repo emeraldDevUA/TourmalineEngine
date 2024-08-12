@@ -37,4 +37,7 @@ public class Material implements Closeable {
         pbrMaps.clear();
         colors.clear();
     }
+
+    public void use() {
+    }
 }
