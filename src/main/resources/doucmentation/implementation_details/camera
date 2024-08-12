@@ -1,0 +1,6 @@
+The camera class
+
+This class is designed to follow the designated target.
+It does so by setting view and projection matrices in
+our shader program(s) which should be accessed statically,
+however this has not been implemented yet.

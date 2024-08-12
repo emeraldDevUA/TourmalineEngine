@@ -10,3 +10,16 @@ this option may result in unnecessary code overhead, which is rarely a good idea
 
 Obj splines are only expected to have limited support:
 One at a file and standalone(They won't be interpreted together with obj files).
+
+All the models are loaded in "Mesh" objects which encapsulate "VBOs".
+It is possible to configure te loading process,
+so it eiter loads all the stuff in a single VBO or separates
+them object by object (not implemented as of 12.08.2024 ).
+
+This ensures that the amount of draw calls is not higher than it should be, yet
+separate texturing is implemented.
+
+
+Model itself is stored as mesh tree (k-ary tree) that is formed by an end user.
+This data structure simply makes more sense than a list or map, besides that, it provides
+matrix-transfer lift ( update root - leaves are updated, etc ). This move saves us a bunch of code lines.

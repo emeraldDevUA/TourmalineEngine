@@ -14,3 +14,6 @@ These maps have to be implemented.
 
 Also what needs to be implemented is deferred rendering. This type of rendering is going to
 ensure that enough post-processing capacity is provided for you as a developer.
+
+an additional requirement is shadow mapping.
+IMO it has to be PCF Soft Shadow Mapping.
