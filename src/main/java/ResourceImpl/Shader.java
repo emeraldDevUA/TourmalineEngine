@@ -25,6 +25,8 @@ public class Shader implements Closeable {
     public static final int NORMAL_MAP_BINDING = 7;
     public static final int EMISSION_MAP_BINDING = 8;
     public static final int AMBIENT_OCCLUSION_MAP_BINDING = 9;
+    public static final int SHADOW_MAP_BINDING = 10;
+
     @Getter
     private final int program;
 

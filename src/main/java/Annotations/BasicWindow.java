@@ -1,6 +1,7 @@
 package Annotations;
 
 
+import Interfaces.Drawable;
 import ResourceImpl.Texture;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +12,9 @@ import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
+import java.io.Closeable;
 import java.nio.IntBuffer;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
@@ -19,11 +22,13 @@ import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 @Getter
-public abstract class BasicWindow {
+public abstract class BasicWindow implements Closeable {
+
     protected static final long NULL = 0L;
     public static long window_handle = 0L;
     private static String window_name;
 
+    protected List<Drawable> drawList;
     protected static void init(@NotNull Class<?> className) {
 
 
@@ -85,15 +90,19 @@ public abstract class BasicWindow {
         });
         try {
 
-
-            Texture icon = new Texture("src/main/resources/miscellaneous/icon2.png", 3);
-
+            Texture icon =
+            new Texture("src/main/resources/miscellaneous/default_icon.png", 4);
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
-            image.set(icon.getTextureWidth().get(0), icon.getTextureHeight().get(0), icon.getTextureData());
+
+            image
+                    .set(icon.getTextureWidth() .get(0),
+                    icon.getTextureHeight().get(0),
+                    icon.getTextureData());
 
             imagebf.put(0, image);
             glfwSetWindowIcon(window_handle, imagebf);
+
         } catch (NullPointerException e) {
             System.err.println(e.getMessage());
         }

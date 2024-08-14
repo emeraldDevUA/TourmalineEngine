@@ -85,7 +85,7 @@ public class Texture implements EnhancedLoadable {
                 internal = GL_RGBA;
                 break;
             default:
-                throw new RuntimeException("Wrong texture channel count: " + channels);
+                throw new RuntimeException(STR."Wrong texture channel count: \{channels}");
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth.get(0), textureHeight.get(0), 0,

@@ -30,9 +30,9 @@ import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 @SuppressWarnings("unused")
 class VBO implements Drawable, Closeable {
 
-    // size consts
-    private static final int vertex_size = 3*Float.BYTES;
-    private static final int tex_size = 2*Float.BYTES;
+    // size constants
+    private static final int vertex_size = 3 * Float.BYTES;
+    private static final int tex_size = 2 * Float.BYTES;
     private static final int normal_size = vertex_size;
     private static final int color_size = vertex_size;
 
@@ -46,15 +46,16 @@ class VBO implements Drawable, Closeable {
     private int numVertices, numNormals, numUvs;
     private int numFaces;
 
-    public VBO(){
+    public VBO() {
 
     }
-    public VBO(List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates){
-        this.vertices = BufferUtils.createFloatBuffer(vertices.size()*3);
-        this.normals = BufferUtils.createFloatBuffer(vertices.size()*3);
-        this.uv = BufferUtils.createFloatBuffer(vertices.size()*2);
 
-        for(int i = 0; i < vertices.size(); i ++){
+    public VBO(List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
+        this.vertices = BufferUtils.createFloatBuffer(vertices.size() * 3);
+        this.normals = BufferUtils.createFloatBuffer(vertices.size() * 3);
+        this.uv = BufferUtils.createFloatBuffer(vertices.size() * 2);
+
+        for (int i = 0; i < vertices.size(); i++) {
             this.vertices.put(vertices.get(i).x);
             this.vertices.put(vertices.get(i).y);
             this.vertices.put(vertices.get(i).z);
@@ -67,20 +68,19 @@ class VBO implements Drawable, Closeable {
             this.uv.put(textureCoordinates.get(i).x);
             this.uv.put(textureCoordinates.get(i).y);
         }
-        numFaces = vertices.size()/3;
+        numFaces = vertices.size() / 3;
 
         numVertices = vertices.size();
         numNormals = normals.size();
         numUvs = textureCoordinates.size();
 
-        allocate(vertices.size()*(vertex_size+tex_size+normal_size));
+        allocate(vertices.size() * (vertex_size + tex_size + normal_size));
 
     }
 
 
-
     @Override
-    public void draw()     {
+    public void draw() {
 //        if (!matrixUpdated) {
 //            matrixBuffer.clear();
 //            getModelMatrix().get(matrixBuffer);
@@ -120,7 +120,7 @@ class VBO implements Drawable, Closeable {
             indices.put(i);
         }
 
-        if(numVertices > 0) {
+        if (numVertices > 0) {
             vao = GL30.glGenVertexArrays();
             GL30.glBindVertexArray(vao);
             this.vertices.rewind();
@@ -132,17 +132,17 @@ class VBO implements Drawable, Closeable {
             glVertexAttribPointer(Shader.POSITION_LOCATION, 3, GL_FLOAT, false, 0, 0);
         }
 
-        if(numNormals > 0) {
+        if (numNormals > 0) {
             this.normals.rewind();
             normalsBuffer = glGenBuffers();
             glEnableVertexAttribArray(Shader.NORMAL_LOCATION);
-            glVertexAttribPointer(Shader.NORMAL_LOCATION,3, GL_FLOAT, false,0,0);
+            glVertexAttribPointer(Shader.NORMAL_LOCATION, 3, GL_FLOAT, false, 0, 0);
         }
         if (numUvs > 0) {
             this.uv.rewind();
             uvsBuffer = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, uvsBuffer);
-            glBufferData(GL_ARRAY_BUFFER,  this.uv, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, this.uv, GL_STATIC_DRAW);
 
             glEnableVertexAttribArray(Shader.UVS_LOCATION);
             glVertexAttribPointer(Shader.UVS_LOCATION, 2, GL_FLOAT, false, 0, 0);
@@ -155,13 +155,14 @@ class VBO implements Drawable, Closeable {
         glBindVertexArray(0);
 
     }
+
     private void allocate(int size) {
         modelBuffer = ByteBuffer.allocateDirect(size);
-        modelBuffer.order(ByteOrder.nativeOrder()    );
+        modelBuffer.order(ByteOrder.nativeOrder());
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         glDeleteBuffers(ubo);
 //        loadedInstances.put(mapName, loadedInstances.get(mapName) - 1);
 //
@@ -181,127 +182,126 @@ class VBO implements Drawable, Closeable {
 public class Mesh implements Loadable, Drawable, Closeable {
     @Getter
     private final Map<String, VBO> map;
+    //private final Map<VBO, Material> materialMap;
     private final Vector3f position;
     private final Quaternionf rotQuaternion;
     @Setter
     private Material material;
     @Setter
     private Shader shader;
-    public Mesh(){
+
+    public Mesh() {
         map = new ConcurrentHashMap<>();
-        position = new Vector3f(0,0,0);
-        rotQuaternion = new Quaternionf(0,0,0,1);
+        position = new Vector3f(0, 0, 0);
+        rotQuaternion = new Quaternionf(0, 0, 0, 1);
         material = new Material();
     }
 
     @Override
     public void load(String path) throws IOException {
-            File file = new File(path);
-            FileInputStream fis = new FileInputStream(file);
-            BufferedInputStream bis = new BufferedInputStream(fis);
-            Scanner sc = new Scanner(bis);
+        File file = new File(path);
+        FileInputStream fis = new FileInputStream(file);
+        BufferedInputStream bis = new BufferedInputStream(fis);
+        Scanner sc = new Scanner(bis);
 
-            String line;
+        String line;
 
-            String name = null;
-            ArrayList<Vector3f> vertices = new ArrayList<>();
-            ArrayList<Vector3f> vectors = new ArrayList<>();
-            ArrayList<Vector2f> textureCoords = new ArrayList<>();
-            Float[] vals;
+        String name = null;
+        ArrayList<Vector3f> vertices = new ArrayList<>();
+        ArrayList<Vector3f> vectors = new ArrayList<>();
+        ArrayList<Vector2f> textureCoords = new ArrayList<>();
+        Float[] vals;
 
-            mainLoop:while (sc.hasNextLine()){
-                line = sc.nextLine();
-                line= line.replace("  "," ");
-                //skipping the comment line
+        mainLoop:
+        while (sc.hasNextLine()) {
+            line = sc.nextLine();
+            line = line.replace("  ", " ");
+            //skipping the comment line
 
-                if(line.isBlank()){ continue ;}
-                if(line.charAt(0) == '#' && line.length()<=2){
-                    continue ;
-                }
-                if (line.contains("object")||line.contains("o")) {
-                    name = line.split(" ")[1];
-                }
-                if(line.substring(0,2).compareTo("v ")==0){
-                    vals = getFloatValues(line);
-                    vertices.add(new Vector3f(vals[0],vals[1],vals[2]));
-                }
+            if (line.isBlank()) {
+                continue;
+            }
+            if (line.charAt(0) == '#' && line.length() <= 2) {
+                continue;
+            }
+            if (line.contains("object") || line.contains("o")) {
+                name = line.split(" ")[1];
+            }
+            if (line.substring(0, 2).compareTo("v ") == 0) {
+                vals = getFloatValues(line);
+                vertices.add(new Vector3f(vals[0], vals[1], vals[2]));
+            } else if (line.substring(0, 2).compareTo("vn") == 0) {
+                vals = getFloatValues(line);
+                if (vals == null) break;
+                vectors.add(new Vector3f(vals[0], vals[1], vals[2]));
+            } else if (line.substring(0, 2).compareTo("vt") == 0) {
+                vals = getFloatValues(line);
+                if (vals == null) break;
+                textureCoords.add(new Vector2f(vals[0], vals[1]));
+            } else if (line.substring(0, 2).compareTo("f ") == 0) {
+                ArrayList<Vector3f> finalVertices = new ArrayList<>();
+                ArrayList<Vector3f> finalNormals = new ArrayList<>();
+                ArrayList<Vector2f> finalUVs = new ArrayList<>();
 
-                else if(line.substring(0,2).compareTo("vn")==0){
-                    vals = getFloatValues(line);
-                    if (vals == null) break;
-                    vectors.add(new Vector3f(vals[0],vals[1],vals[2]));
-                }
-
-                else if(line.substring(0,2).compareTo("vt")==0){
-                    vals = getFloatValues(line);
-                    if(vals==null) break;
-                    textureCoords.add(new Vector2f(vals[0],vals[1]));
-                }
-
-                else if(line.substring(0,2).compareTo("f ") == 0){
-                    ArrayList<Vector3f> finalVertices = new ArrayList<>();
-                    ArrayList<Vector3f> finalNormals = new ArrayList<>();
-                    ArrayList<Vector2f> finalUVs = new ArrayList<>();
-
-                    while (!(line).contains("faces")) {
-                        if(line.charAt(0)=='s'){
-                            line = sc.nextLine();
-                            continue ;
-                        }
-                        String[] temp = line.split(" ");
-                        for (int c = 1; c < temp.length; c++) {
-                            try {
-                                Integer[] array = getFaces(temp[c]);
-                                finalVertices.add(vertices.get(array[0] - 1 ));
-                                finalUVs.add(textureCoords.get((array[1] -1)));
-                                finalNormals.add(vectors.get((array[2]-1 )));
-
-                            } catch (NullPointerException e){
-                                System.err.println(STR."\{vertices.size()}\n\{vectors.size()}\n\{textureCoords.size()}");
-                                break ;
-                            }
-                        }
-
-                        if(!sc.hasNext()){break mainLoop; }
-
+                while (!(line).contains("faces")) {
+                    if (line.charAt(0) == 's') {
                         line = sc.nextLine();
+                        continue;
+                    }
+                    String[] temp = line.split(" ");
+                    for (int c = 1; c < temp.length; c++) {
+                        try {
+                            Integer[] array = getFaces(temp[c]);
+                            finalVertices.add(vertices.get(array[0] - 1));
+                            finalUVs.add(textureCoords.get((array[1] - 1)));
+                            finalNormals.add(vectors.get((array[2] - 1)));
+
+                        } catch (NullPointerException e) {
+                            System.err.println(STR."\{vertices.size()}\n\{vectors.size()}\n\{textureCoords.size()}");
+                            break;
+                        }
                     }
 
+                    if (!sc.hasNext()) {
+                        break mainLoop;
+                    }
 
-                    //setting bias values because of how OBJ format is structured
-                    // [ every new vertex is enumerated sequentially, not from 1 to N for every separate object]
-                    map.put(name, new VBO(finalVertices, finalNormals,finalUVs));
+                    line = sc.nextLine();
                 }
 
+
+                //setting bias values because of how OBJ format is structured
+                // [ every new vertex is enumerated sequentially, not from 1 to N for every separate object]
+                map.put(name, new VBO(finalVertices, finalNormals, finalUVs));
             }
 
-            vertices.clear();
-            vectors.clear();
-            textureCoords.clear();
+        }
 
-            fis.close();
-            bis.close();
-            sc.close();
+        vertices.clear();
+        vectors.clear();
+        textureCoords.clear();
 
+        fis.close();
+        bis.close();
+        sc.close();
 
 
     }
 
-    private Integer[] getFaces(String line){
+    private Integer[] getFaces(String line) {
 
 
         String[] arr = line.split("/");
         Integer[] result = new Integer[arr.length];
         int i = 0;
-        for (String str: arr){
+        for (String str : arr) {
             try {
                 result[i++] = Integer.parseInt(str);
-            }catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 System.err.println("Could read a vertex");
 
             }
         }
-
 
 
         return result;
@@ -317,7 +317,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
             try {
                 values[cnt++] = Float.parseFloat(args[i]);
-            } catch (NumberFormatException e){
+            } catch (NumberFormatException e) {
                 return values;
             }
         }
@@ -332,7 +332,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         matrix4f.get(model_matrix);
 
         // not good, is going to deter performance.
-        if(shader!=null){
+        if (shader != null) {
             int shader_pointer = shader.getProgram();
             glUniform4fv(glGetUniformLocation(shader_pointer, "modelMatrix"), model_matrix);
         }
@@ -351,9 +351,8 @@ public class Mesh implements Loadable, Drawable, Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close(){
         map.clear();
         material.close();
-
     }
 }

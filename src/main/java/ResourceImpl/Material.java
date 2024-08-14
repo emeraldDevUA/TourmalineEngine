@@ -1,21 +1,42 @@
 package ResourceImpl;
 
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 
 
 import java.io.Closeable;
+import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL15.*;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
+
 public class Material implements Closeable {
+    public static final String ALBEDO_MAP    = "Albedo";
+    public static final String NORMAL_MAP    = "Normal";
+    public static final String ROUGHNESS_MAP = "Roughness";
+
     private Map<String, Double> physicalProperties;
     private Map<String, Texture> pbrMaps;
     private Map<String, Vector3f> colors;
+    private boolean bufferUpdated;
+    private int buffer;
+    ByteBuffer materialBuffer = BufferUtils.createByteBuffer(64);
 
     public  Material(){
         pbrMaps = new ConcurrentHashMap<>();
         physicalProperties = new ConcurrentHashMap<>();
         colors = new ConcurrentHashMap<>();
+        bufferUpdated = false;
+
+        buffer = glGenBuffers();
+        glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+        glBufferData(GL_UNIFORM_BUFFER, 80, GL_STATIC_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
     }
 
     public void addProperty(String name, Double value){
@@ -39,5 +60,64 @@ public class Material implements Closeable {
     }
 
     public void use() {
+        if(!bufferUpdated)
+            updateBuffer();
+        
+        pbrMaps.keySet().forEach(map->{
+
+            boolean isPresent = true;
+            int binding = 0;
+            switch (map) {
+                case ALBEDO_MAP:
+                    binding = GL_TEXTURE0 + Shader.ALBEDO_MAP_BINDING;
+                    break;
+                case NORMAL_MAP:
+                    binding = GL_TEXTURE0 + Shader.NORMAL_MAP_BINDING;
+                    break;
+                case ROUGHNESS_MAP:
+                    binding = GL_TEXTURE0 + Shader.ROUGHNESS_MAP_BINDING;
+                    break;
+
+                default:
+                    isPresent = false;
+                    break;
+
+            }
+            if (isPresent) {
+                glActiveTexture(binding);
+                pbrMaps.get(map).use();
+            }
+
+        });
+
+    }
+
+    private void updateBuffer() {
+
+        {
+            materialBuffer.clear();
+
+//            materialBuffer.putFloat(0, albedo.x());
+//            materialBuffer.putFloat(4, albedo.y());
+//            materialBuffer.putFloat(8, albedo.z());
+//            materialBuffer.putFloat(12, albedo.w());
+//            materialBuffer.putInt(16, albedoMap == null ? 0 : 1);
+//            materialBuffer.putInt(20, normalMap == null ? 0 : 1);
+//            materialBuffer.putFloat(24, metalness);
+//            materialBuffer.putInt(28, metalnessMap == null ? 0 : 1);
+//            materialBuffer.putFloat(32, roughness);
+//            materialBuffer.putInt(36, roughnessMap == null ? 0 : 1);
+//            materialBuffer.putInt(40, ambientOcclusionMap == null ? 0 : 1);
+//            materialBuffer.putInt(46, emissionMap == null ? 0 : 1);
+//            materialBuffer.putFloat(52, emission.x());
+//            materialBuffer.putFloat(56, emission.y());
+//            materialBuffer.putFloat(60, emission.z());
+
+            glBindBuffer(GL_UNIFORM_BUFFER, buffer);
+            glBufferData(GL_UNIFORM_BUFFER, materialBuffer, GL_STATIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            bufferUpdated = true;
+        }
     }
 }
