@@ -41,10 +41,10 @@ public class AutoLoader {
 
 
     TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
+
         final String models_formats = ".obj .fbx .glb .stl";
         final String texture_formats = ".png .jpg";
-        final ArrayList<String> maps = new ArrayList<>();
-        maps.add("normal");
+
         File[] files = dir.listFiles();
         assert files != null;
 
@@ -63,11 +63,23 @@ public class AutoLoader {
                     Texture texture = new Texture();
                     resourceLoadScheduler.addResource(texture, f.getPath());
 
+                    if(f.getName().toUpperCase().contains("ALBEDO")){
+                        material.addMap(Material.ALBEDO_MAP, texture);
+                    }
+                    if(f.getName().toUpperCase().contains("NORMAL")){
+                        material.addMap(Material.NORMAL_MAP, texture);
+                    }
+                    if(f.getName().toUpperCase().contains("ROUGHNESS")){
+                        material.addMap(Material.ROUGHNESS_MAP, texture);
+                    }
+
                     // add them to the material
                 }
             }
             resourceLoadScheduler.loadResources();
-            while(resourceLoadScheduler.getReadiness() < 1);
+            while(resourceLoadScheduler.getReadiness() < 1){
+                Thread.onSpinWait();
+            }
 
             if (mesh != null) {
                 material.getPbrMaps().values().forEach(Texture::assemble);

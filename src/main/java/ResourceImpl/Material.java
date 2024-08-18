@@ -25,6 +25,9 @@ public class Material implements Closeable {
     private static final String AO_MAP = "AmbientOcclusion";
 
 
+    private static final String OPACITY = "Opacity";
+    private static final String METALNESS = "Metalness";
+    private static final String ROUGHNESS = "Roughness";
     private final Map<String, Double> physicalProperties;
     @Getter
     private final Map<String, Texture> pbrMaps;
@@ -45,6 +48,15 @@ public class Material implements Closeable {
         glBindBuffer(GL_UNIFORM_BUFFER, buffer);
         glBufferData(GL_UNIFORM_BUFFER, 80, GL_STATIC_DRAW);
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+
+        addColor(ALBEDO_MAP, new Vector3f(1,1,1));
+        addColor(EMISSION_MAP, new Vector3f(1,1,1));
+
+        addProperty(OPACITY, 1.0);
+        addProperty(METALNESS, 0.5);
+        addProperty(ROUGHNESS,0.5);
+
     }
 
     public void addProperty(String name, Double value){
@@ -111,12 +123,12 @@ public class Material implements Closeable {
             materialBuffer.putFloat(0, albedo.x());
             materialBuffer.putFloat(4, albedo.y());
             materialBuffer.putFloat(8, albedo.z());
-            materialBuffer.putFloat(12, physicalProperties.get("Opacity").floatValue());
+            materialBuffer.putFloat(12, physicalProperties.get(OPACITY).floatValue());
             materialBuffer.putInt(16, pbrMaps.get(ALBEDO_MAP) == null ? 0 : 1);
             materialBuffer.putInt(20, pbrMaps.get(NORMAL_MAP)  == null ? 0 : 1);
-            materialBuffer.putFloat(24, physicalProperties.get("Metalness").floatValue());
+            materialBuffer.putFloat(24, physicalProperties.get(METALNESS).floatValue());
             materialBuffer.putInt(28, pbrMaps.get(METALNESS_MAP) == null ? 0 : 1);
-            materialBuffer.putFloat(32, physicalProperties.get("Roughness").floatValue());
+            materialBuffer.putFloat(32, physicalProperties.get(ROUGHNESS).floatValue());
             materialBuffer.putInt(36, pbrMaps.get(ROUGHNESS_MAP) == null ? 0 : 1);
             materialBuffer.putInt(40, pbrMaps.get(AO_MAP) == null ? 0 : 1);
             materialBuffer.putInt(46, pbrMaps.get(EMISSION_MAP)  == null ? 0 : 1);
