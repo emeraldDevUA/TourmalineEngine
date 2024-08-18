@@ -143,4 +143,8 @@ public class Material implements Closeable {
             bufferUpdated = true;
         }
     }
+
+    public void loadMatLib(EnhancedMTL mtl){
+
+    }
 }
