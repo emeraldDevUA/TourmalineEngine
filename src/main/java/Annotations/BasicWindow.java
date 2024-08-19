@@ -2,9 +2,11 @@ package Annotations;
 
 
 import Interfaces.Drawable;
+import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Vector2i;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
@@ -22,13 +24,45 @@ import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 @Getter
+@SuppressWarnings("unused")
 public abstract class BasicWindow implements Closeable {
+
+    // for time measurement
+    private long t1 = System.currentTimeMillis(), t2 = t1;
 
     protected static final long NULL = 0L;
     public static long window_handle = 0L;
-    private static String window_name;
 
+
+    protected static String window_name;
     protected List<Drawable> drawList;
+
+
+    protected static int renderQuadArray;
+    protected static int verticesBuffer;
+    protected static int uvsBuffer;
+
+    // Deferred pass data
+    protected static int deferredframeBuffer;
+    protected static int deferredPositionBuffer;
+    protected static int deferredAlbedoMetalnessBuffer;
+    protected static int deferredNormalRoughnessBuffer;
+    protected static int deferredEnvironmentEmissionBuffer;
+
+    // Forward/Postprocessing pass data
+    protected static int frameBuffer;
+    protected static int colorBuffer;
+
+    // Depth buffer is shared between different framebuffers
+    protected static int sharedDepthbuffer;
+
+    protected static Shader deferredShader;
+    protected static Shader combineShader;
+    protected static Shader postprocessingShader;
+    protected static Shader skyboxShader;
+    protected static Texture BRDFLookUp;
+
+
     protected static void init(@NotNull Class<?> className) {
 
 
@@ -91,14 +125,14 @@ public abstract class BasicWindow implements Closeable {
         try {
 
             Texture icon =
-            new Texture("src/main/resources/miscellaneous/default_icon.png", 4);
+                    new Texture("src/main/resources/miscellaneous/secondary_icon.png", 4);
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
 
             image
-                    .set(icon.getTextureWidth() .get(0),
-                    icon.getTextureHeight().get(0),
-                    icon.getTextureData());
+                    .set(icon.getTextureWidth().get(0),
+                            icon.getTextureHeight().get(0),
+                            icon.getTextureData());
 
             imagebf.put(0, image);
             glfwSetWindowIcon(window_handle, imagebf);
@@ -109,6 +143,23 @@ public abstract class BasicWindow implements Closeable {
     }
 
     protected abstract void drawElements();
+
+    protected Vector2i getMousePosition() {
+        return new Vector2i(0, 0);
+    }
+
+    protected float getCurrentFPS() {
+
+        return 1.0f / (t2 - t1);
+    }
+
+    protected void measureTime() {
+
+        if (t2 != t1) {
+            t1 = t2;
+        }
+        t2 = System.currentTimeMillis();
+    }
 
 
 }
