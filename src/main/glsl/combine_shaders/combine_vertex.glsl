@@ -3,11 +3,15 @@
 layout (location = 0) in vec2 position;
 layout (location = 3) in vec2 uv;
 
-layout (std140, binding = 1) uniform camera_block
-{
-    mat4 view_matrix;
-    mat4 projection_matrix;
-};
+//layout (std140, binding = 1) uniform camera_block
+//{
+//    mat4 view_matrix;
+//    mat4 projection_matrix;
+//};
+
+uniform mat4 view_matrix;
+uniform mat4 projection_matrix;
+
 
 out vec2 uv_frag;
 out vec3 camera_position;

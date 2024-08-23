@@ -15,4 +15,18 @@ public class MeshTree extends TreeNode<Mesh> {
     }
 
 
+    public void draw() {
+        MeshTree node = this;
+        List<TreeNode<Mesh>> list = node.getChildNodes();
+        if(node.getNodeValue()!=null) {
+            node.getNodeValue().draw();
+            if(list!=null){
+                for(TreeNode<Mesh> meshTreeNode: list){
+                    ((MeshTree)(meshTreeNode)).draw();
+                }
+            }
+        }
+
+
+    }
 }

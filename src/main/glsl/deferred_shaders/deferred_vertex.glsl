@@ -5,16 +5,22 @@ layout (location = 1) in vec3 normal;
 //layout (location = 2) in vec3 bitangent;
 layout (location = 3) in vec2 uv;
 
-layout (std140, binding = 0) uniform model_block
-{
-    mat4 model_matrix;
-};
 
-layout (std140, binding = 1) uniform camera_block
-{
-    mat4 view_matrix;
-    mat4 projection_matrix;
-};
+
+//layout (std140, binding = 0) uniform model_block
+//{
+//    mat4 model_matrix;
+//};
+//
+//layout (std140, binding = 1) uniform camera_block
+//{
+//    mat4 view_matrix;
+//    mat4 projection_matrix;
+//};
+
+uniform mat4 view_matrix;
+uniform mat4 projection_matrix;
+uniform mat4 model_matrix;
 
 out VS_OUT
 {
