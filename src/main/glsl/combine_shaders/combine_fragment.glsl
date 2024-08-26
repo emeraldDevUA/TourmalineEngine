@@ -105,4 +105,7 @@ void main()
     }
 
     fragment = vec4(Lo + environment_emission_value, 1.0);
+    if(position_value.z==0){
+
+    }
 }

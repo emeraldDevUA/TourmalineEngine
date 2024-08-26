@@ -1,7 +1,7 @@
 #version 460 core
 
 layout (location = 0) in vec2 position;
-layout (location = 3) in vec2 uv;
+layout (location = 2) in vec2 uv;
 
 //layout (std140, binding = 1) uniform camera_block
 //{

@@ -14,4 +14,6 @@ void main()
     float exposure = 1.0;
 
     fragment = vec4(pow(texture(color, uv_frag).rgb * exposure, vec3(1.0 / gamma)), 1.0);
+
+
 }

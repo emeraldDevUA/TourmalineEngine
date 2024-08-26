@@ -7,8 +7,7 @@ import lombok.Setter;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import static org.lwjgl.opengl.GL20.glGetUniformLocation;
-import static org.lwjgl.opengl.GL20.glUniform4fv;
+import static org.lwjgl.opengl.GL20.*;
 
 @SuppressWarnings("unused")
 public class Camera {
@@ -29,21 +28,22 @@ public class Camera {
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
         projectionMatrix = projectionMatrix.perspective(fov,aspect, near, far);
+      //projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
 
   public void loadViewMatrix(){
-        viewMatrix = viewMatrix.lookAt(position, focus, new Vector3f(1,0,0));
+        viewMatrix = viewMatrix.lookAt(position, focus, new Vector3f(0,1,0));
 
   }
   public void setMVP(Shader shader){
-
+      shader.use();
       float[] array = new float[16];
       int shader_pointer = shader.getProgram();
       array = projectionMatrix.get(array);
-      glUniform4fv(glGetUniformLocation(shader_pointer, "projectionMatrix"), array);
+      glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"), false,array);
       array = viewMatrix.get(array);
-      glUniform4fv(glGetUniformLocation(shader_pointer, "viewMatrix"), array);
-
+      glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "view_matrix"), false,array);
+      shader.unbind();
   }
 
 }

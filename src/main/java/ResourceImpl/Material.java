@@ -119,7 +119,7 @@ public class Material implements Closeable {
         {
             materialBuffer.clear();
             Vector3f albedo = colors.get(ALBEDO_MAP);
-            Vector3f emission = colors.get("Emission");
+            Vector3f emission = colors.get(EMISSION_MAP);
             materialBuffer.putFloat(0, albedo.x());
             materialBuffer.putFloat(4, albedo.y());
             materialBuffer.putFloat(8, albedo.z());

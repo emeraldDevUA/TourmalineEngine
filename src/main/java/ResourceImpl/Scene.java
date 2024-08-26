@@ -2,7 +2,7 @@ package ResourceImpl;
 
 import Interfaces.DrawableContainer;
 import Rendering.SkyBox;
-import ResourceImpl.MeshTree;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +26,7 @@ public class Scene implements DrawableContainer<MeshTree> {
 
     @Override
     public void clear() {
+
         drawables.clear();
     }
 
@@ -46,4 +47,7 @@ public class Scene implements DrawableContainer<MeshTree> {
         return drawables.remove(item);
     }
 
+    public void setActiveProgram(Shader shader) {
+        drawables.getFirst().getNodeValue().setShader(shader);
+    }
 }

@@ -27,7 +27,7 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
 
-@SuppressWarnings("unused")
+
 class VBO implements Drawable, Closeable {
 
     // size constants
@@ -36,10 +36,8 @@ class VBO implements Drawable, Closeable {
     private static final int normal_size = vertex_size;
     private static final int color_size = vertex_size;
 
-
-    private ByteBuffer modelBuffer;
     private FloatBuffer vertices, normals, uv;
-    private int vbo, vao, ubo;
+    private int vao, ubo;
 
     private int verticesBuffer, normalsBuffer, uvsBuffer;
 
@@ -60,7 +58,6 @@ class VBO implements Drawable, Closeable {
             this.vertices.put(vertices.get(i).y);
             this.vertices.put(vertices.get(i).z);
 
-
             this.normals.put(normals.get(i).x);
             this.normals.put(normals.get(i).y);
             this.normals.put(normals.get(i).z);
@@ -74,24 +71,13 @@ class VBO implements Drawable, Closeable {
         numNormals = normals.size();
         numUvs = textureCoordinates.size();
 
-        allocate(vertices.size() * (vertex_size + tex_size + normal_size));
 
     }
 
 
     @Override
     public void draw() {
-//        if (!matrixUpdated) {
-//            matrixBuffer.clear();
-//            getModelMatrix().get(matrixBuffer);
-//            glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
-//            glBufferData(GL31.GL_UNIFORM_BUFFER, matrixBuffer, GL_STATIC_DRAW);
-//            glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0);
-//
-//            matrixUpdated = true;
-//        }
-//
-//        material.use();
+
 
         GL30.glBindBufferBase(GL31.GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
         GL30.glBindVertexArray(vao);
@@ -102,13 +88,7 @@ class VBO implements Drawable, Closeable {
 
     @Override
     public void compile() {
-        modelBuffer.order(ByteOrder.nativeOrder());
-
-        for (int i = 0; i < numVertices; i++) {
-            modelBuffer.putInt(i);
-        }
-
-
+//        System.err.println(STR."v:\{this.numVertices}\nn:\{this.numNormals}\nuv:\{this.numUvs}");
         ubo = glGenBuffers();
         glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
         glBufferData(GL31.GL_UNIFORM_BUFFER, 64, GL_STATIC_DRAW);
@@ -135,6 +115,9 @@ class VBO implements Drawable, Closeable {
         if (numNormals > 0) {
             this.normals.rewind();
             normalsBuffer = glGenBuffers();
+            glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
+            glBufferData(GL_ARRAY_BUFFER, normals, GL_STATIC_DRAW);
+
             glEnableVertexAttribArray(Shader.NORMAL_LOCATION);
             glVertexAttribPointer(Shader.NORMAL_LOCATION, 3, GL_FLOAT, false, 0, 0);
         }
@@ -156,10 +139,6 @@ class VBO implements Drawable, Closeable {
 
     }
 
-    private void allocate(int size) {
-        modelBuffer = ByteBuffer.allocateDirect(size);
-        modelBuffer.order(ByteOrder.nativeOrder());
-    }
 
     @Override
     public void close() {
@@ -326,6 +305,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
     @Override
     public void draw() {
+
         Matrix4f matrix4f = new Matrix4f();
         matrix4f.translate(position).rotate(rotQuaternion);
         float[] model_matrix = new float[16];
@@ -334,7 +314,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         // not good, is going to deter performance.
         if (shader != null) {
             int shader_pointer = shader.getProgram();
-            glUniform4fv(glGetUniformLocation(shader_pointer, "modelMatrix"), model_matrix);
+            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "model_matrix"),false, model_matrix);
         }
         material.use();
         for (VBO vbo : map.values()) {

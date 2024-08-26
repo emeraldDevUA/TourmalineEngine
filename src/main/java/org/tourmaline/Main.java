@@ -1,18 +1,25 @@
 package org.tourmaline;
 
 import Annotations.BasicWindow;
-import ResourceImpl.Mesh;
-import ResourceImpl.Shader;
-import ResourceImpl.Texture;
+import Interfaces.TreeNode;
+import Rendering.Camera;
+import ResourceImpl.*;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
+import org.joml.Vector3f;
 
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080})
@@ -21,25 +28,31 @@ public class Main extends BasicWindow {
     public static void main(String[] args){
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
-
+        scene = new Scene();
         init(Main.class);
 
-        Shader shader = new Shader("src/main/glsl/vertex_test.vert",
-                "src/main/glsl/fragment_test.frag");
+        deferredShader = new Shader("src/main/glsl/deferred_shaders/deferred_vertex.glsl",
+                "src/main/glsl/deferred_shaders/deferred_fragment.glsl");
 
+        postprocessingShader = new Shader("src/main/glsl/postprocessing_shaders/postprocessing_vertex.glsl",
+                "src/main/glsl/postprocessing_shaders/postprocessing_fragment.glsl");
+
+        combineShader = new Shader("src/main/glsl/combine_shaders/combine_vertex.glsl",
+                "src/main/glsl/combine_shaders/combine_fragment.glsl");
         Texture albedo = new Texture();
         Texture normal = new Texture();
         Texture roughness_g = new Texture();
         Texture roughness_b = new Texture();
-
         Mesh mesh = new Mesh();
+        Material material = new Material();
 
-        resourceLoadScheduler.addResource(albedo,"src/main/resources/F16/F16_albedo.png");
-        resourceLoadScheduler.addResource(normal,"src/main/resources/F16_normal.png");
-        resourceLoadScheduler.addResource(roughness_g,"src/main/resources/F16/F16_roughness_G.png");
-        resourceLoadScheduler.addResource(roughness_b,"src/main/resources/F16/F16_roughness_B.png");
 
-        resourceLoadScheduler.addResource(mesh,"src/main/resources/F16/F16.obj");
+        resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
+        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/F16_normal.png");
+        resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
+        resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
+
+        resourceLoadScheduler.addResource(mesh,"src/main/resources/3D_Models/F16/F16.obj");
 
 
         t1 = System.currentTimeMillis();
@@ -56,32 +69,77 @@ public class Main extends BasicWindow {
         normal.assemble();
         roughness_g.assemble();
         roughness_b.assemble();
+        mesh.compile();
         t3 = System.currentTimeMillis();
         resourceLoadScheduler.reset();
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
+        mesh.setShader(deferredShader);
+        Camera camera = new Camera(new Vector3f(-10,10,10), new Vector3f(0,0,0));
+        camera.loadViewMatrix();
+        camera.loadPerspectiveProjection(1f,1.8f, 1000,0.1f);
+
+        camera.setMVP(deferredShader);
+        camera.setMVP(combineShader);
+        mesh.setShader(deferredShader);
+
+        material.addMap(Material.ALBEDO_MAP, albedo);
+        material.addMap(Material.NORMAL_MAP, normal);
+        material.addMap(Material.ROUGHNESS_MAP, roughness_g);
+
+        mesh.setMaterial(material);
+        List<TreeNode<Mesh>> arrayList = new ArrayList<>();
+        MeshTree F16 = new MeshTree(arrayList, mesh,"F16");
+        scene.addDrawItem(F16);
+        glDisable(GL_CULL_FACE);
+        glDepthFunc(GL_GREATER);
+
 
         while (!glfwWindowShouldClose(window_handle)){
 
-            glBegin(GL_TRIANGLES);
-                glColor3d(1,0,0);
-                glVertex2d(0,1-0.1);
-                glColor3d(0,1,0);
-                glVertex2d(1-0.1,-1+0.1);
-                glColor3d(0,0,1);
-                glVertex2d(-1+0.1,-1+0.1);
-            glEnd();
+//            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//            deferredPass();
+//            postprocessingPass();
+
+//            material.use();
+            F16.draw();
+
+//           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+//            glBegin(GL_TRIANGLES);
+//                glColor3d(1,0,0);
+//                glVertex2d(0,1-0.1);
+//                glColor3d(0,1,0);
+//                glVertex2d(1-0.1,-1+0.1);
+//                glColor3d(0,0,1);
+//                glVertex2d(-1+0.1,-1+0.1);
+//            glEnd();
+
+//
+//
+//            deferredPass();
+//            postprocessingPass();
+
+//            if(Scene.getSkybox() != null)
+//                skyboxPass();
+
+
+
+
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
+
         }
 
     }
 
 
-    @Override
-    protected void drawElements() {
 
+
+    @Override
+    public void close() {
+        glfwDestroyWindow(window_handle);
     }
 }
 
