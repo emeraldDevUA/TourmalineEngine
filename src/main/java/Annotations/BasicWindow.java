@@ -42,7 +42,7 @@ public abstract class BasicWindow implements Closeable {
 
     private static int windowWidth, windowHeight;
     // for time measurement
-    private long t1, t2;
+    private static long t1, t2;
 
     protected static final long NULL = 0L;
     public static long window_handle = 0L;
@@ -185,7 +185,7 @@ public abstract class BasicWindow implements Closeable {
         return 1.0f / (t2 - t1);
     }
 
-    protected void measureTime() {
+    protected static void measureTime() {
 
         if (t2 != t1) {
             t1 = t2;

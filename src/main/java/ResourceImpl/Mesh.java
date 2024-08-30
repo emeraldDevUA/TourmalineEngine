@@ -78,11 +78,10 @@ class VBO implements Drawable, Closeable {
     @Override
     public void draw() {
 
-
-        GL30.glBindBufferBase(GL31.GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
         GL30.glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, numFaces, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, numVertices, GL_UNSIGNED_INT, 0);
         GL30.glBindVertexArray(0);
+
     }
 
 
@@ -110,6 +109,7 @@ class VBO implements Drawable, Closeable {
 
             glEnableVertexAttribArray(Shader.POSITION_LOCATION);
             glVertexAttribPointer(Shader.POSITION_LOCATION, 3, GL_FLOAT, false, 0, 0);
+
         }
 
         if (numNormals > 0) {
@@ -130,7 +130,7 @@ class VBO implements Drawable, Closeable {
             glEnableVertexAttribArray(Shader.UVS_LOCATION);
             glVertexAttribPointer(Shader.UVS_LOCATION, 2, GL_FLOAT, false, 0, 0);
         }
-        indices.rewind();
+        indices.flip();
         int elementsBuffer = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
@@ -335,4 +335,6 @@ public class Mesh implements Loadable, Drawable, Closeable {
         map.clear();
         material.close();
     }
+
+
 }
