@@ -76,14 +76,10 @@ public class AutoLoader {
                     // add them to the material
                 }
             }
-            resourceLoadScheduler.loadResources();
-            while(resourceLoadScheduler.getReadiness() < 1){
-                Thread.onSpinWait();
-            }
+
 
             if (mesh != null) {
-                material.getPbrMaps().values().forEach(Texture::assemble);
-                mesh.compile();
+
                 mesh.setMaterial(material);
                 TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, f.getName());
                 if(meshTree == null){
@@ -93,9 +89,15 @@ public class AutoLoader {
                     meshTree.addNode(node);
                 }
             }
-            resourceLoadScheduler.reset();
         }
 
+        resourceLoadScheduler.loadResources();
+        while(resourceLoadScheduler.getReadiness() < 1){
+            Thread.onSpinWait();
+        }
+
+
+        //resourceLoadScheduler.getResources();
         return meshTree;
     }
 }

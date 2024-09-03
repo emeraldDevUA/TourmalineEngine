@@ -45,7 +45,11 @@
             <artifactId>lwjgl-stb</artifactId>
             <version>3.3.3</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.lwjgl</groupId>
+            <artifactId>lwjgl-assimp</artifactId>
+            <version>3.3.3</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -62,6 +66,7 @@
             <artifactId>lwjgl-nuklear</artifactId>
             <version>3.3.1</version>
         </dependency>
+
 
 
     </dependencies>
@@ -113,6 +118,19 @@
                     <version>3.3.3</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-assimp</artifactId>
+                    <version>3.3.3</version>
+                    <classifier>natives-windows</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-nuklear</artifactId>
+                    <version>3.3.1</version>
+                    <classifier>natives-windows</classifier>
+                </dependency>
+
             </dependencies>
         </profile>
         <profile>
@@ -148,6 +166,18 @@
                     <version>3.3.3</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-assimp</artifactId>
+                    <version>3.3.3</version>
+                    <classifier>natives-linux</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-nuklear</artifactId>
+                    <version>3.3.1</version>
+                    <classifier>natives-linux</classifier>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -163,7 +193,7 @@
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl</artifactId>
                     <version>3.3.3</version>
-                    <classifier>natives-linux</classifier>
+                    <classifier>natives-macos</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
@@ -181,6 +211,19 @@
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-stb</artifactId>
                     <version>3.3.3</version>
+                    <classifier>natives-macos</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-assimp</artifactId>
+                    <version>3.3.3</version>
+                    <classifier>natives-macos</classifier>
+                </dependency>
+
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-nuklear</artifactId>
+                    <version>3.3.1</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
             </dependencies>

@@ -22,12 +22,12 @@ public class Camera {
   public Camera(Vector3f pos, Vector3f focus){
     this.position = pos;
     this.focus = focus;
-    this.viewMatrix = new Matrix4f();
-    this.projectionMatrix = new Matrix4f();
+    this.viewMatrix = new Matrix4f().identity();
+    this.projectionMatrix = new Matrix4f().identity();
   }
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
-        projectionMatrix = projectionMatrix.perspective(fov,aspect, near, far);
+        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
       //projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
 

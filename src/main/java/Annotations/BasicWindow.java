@@ -11,15 +11,19 @@ import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
+import org.lwjgl.nuklear.NkContext;
+import org.lwjgl.nuklear.NkUserFont;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-
+import org.lwjgl.nuklear.*;
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 
+import static org.lwjgl.nuklear.Nuklear.nk_init;
+import static org.lwjgl.nuklear.Nuklear.nk_input_key;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -35,10 +39,14 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.GL_RGBA8_SNORM;
 import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryUtil.nmemAllocChecked;
+import static org.lwjgl.system.MemoryUtil.nmemFree;
 
 @Getter
-
+@SuppressWarnings("unused")
 public abstract class BasicWindow implements Closeable {
+
+    private static NkContext ctx;
 
     private static int windowWidth, windowHeight;
     // for time measurement
@@ -75,7 +83,7 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader combineShader;
     protected static Shader postprocessingShader;
 //    protected static Shader skyboxShader;
-//    protected static Texture BRDFLookUp;
+    protected static Texture BRDFLookUp;
 
 
     protected BasicWindow(){
@@ -117,17 +125,16 @@ public abstract class BasicWindow implements Closeable {
 
             IntBuffer pWidth = stack.mallocInt(1); // int*
             IntBuffer pHeight = stack.mallocInt(1); // int*
-
-            // Get the window size passed to glfwCreateWindow
             glfwGetWindowSize(window_handle, pWidth, pHeight);
+
             // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            GLFWVidMode videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             // Center the window
-            assert vidmode != null;
+            assert videoMode != null;
             glfwSetWindowPos(
                     window_handle,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
+                    (videoMode.width() - pWidth.get(0)) / 2,
+                    (videoMode.height() - pHeight.get(0)) / 2
             );
         }
         glfwMakeContextCurrent(window_handle);
@@ -160,18 +167,37 @@ public abstract class BasicWindow implements Closeable {
             imagebf.put(0, image);
             glfwSetWindowIcon(window_handle, imagebf);
 
+
+
         } catch (NullPointerException e) {
             System.err.println(e.getMessage());
         }
+
+
+        BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png",4);
         generateDepthBuffer();
         generateDeferredFramebuffer();
         generateFrameBuffer();
         generateRenderQuad();
 
+        try {
+            ctx = NkContext.malloc();
+
+            NkUserFont default_font = NkUserFont.create();
+            NkAllocator allocator = NkAllocator.create();
+            allocator.alloc((handle, old, size) -> nmemAllocChecked(size));
+            allocator.mfree((handle, ptr) -> nmemFree(ptr));
+
+            nk_init(ctx, allocator, default_font);
+            glfwSetKeyCallback(window_handle, (window, key, scancode, action, mods) -> nk_input_key(ctx, key, action == GLFW_PRESS));
+
+        } catch (NoSuchMethodError error) {
+            System.err.println(error.getMessage());
+        }
     }
 
     protected static void drawElements(){
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             deferredPass();
             postprocessingPass();
     }
@@ -383,7 +409,7 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE11);
         //Scene.getSkyboxIrradiance().use();
         glActiveTexture(GL_TEXTURE12);
-        //BRDFLookUp.use()
+        BRDFLookUp.use();
         //;
 
         scene.drawItems();

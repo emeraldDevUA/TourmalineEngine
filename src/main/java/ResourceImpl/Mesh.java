@@ -24,8 +24,8 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.glBindVertexArray;
-import static org.lwjgl.opengl.GL30.glDeleteVertexArrays;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 
 class VBO implements Drawable, Closeable {
@@ -42,7 +42,7 @@ class VBO implements Drawable, Closeable {
     private int verticesBuffer, normalsBuffer, uvsBuffer;
 
     private int numVertices, numNormals, numUvs;
-    private int numFaces;
+
 
     public VBO() {
 
@@ -65,7 +65,7 @@ class VBO implements Drawable, Closeable {
             this.uv.put(textureCoordinates.get(i).x);
             this.uv.put(textureCoordinates.get(i).y);
         }
-        numFaces = vertices.size() / 3;
+
 
         numVertices = vertices.size();
         numNormals = normals.size();
@@ -77,21 +77,22 @@ class VBO implements Drawable, Closeable {
 
     @Override
     public void draw() {
-
+        glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
         GL30.glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, numVertices, GL_UNSIGNED_INT, 0);
         GL30.glBindVertexArray(0);
-
     }
 
 
     @Override
     public void compile() {
 //        System.err.println(STR."v:\{this.numVertices}\nn:\{this.numNormals}\nuv:\{this.numUvs}");
-        ubo = glGenBuffers();
-        glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
-        glBufferData(GL31.GL_UNIFORM_BUFFER, 64, GL_STATIC_DRAW);
-        glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0);
+//        ubo = glGenBuffers();
+//        glBindBuffer(GL31.GL_UNIFORM_BUFFER, ubo);
+//        glBufferData(GL31.GL_UNIFORM_BUFFER, 64, GL_STATIC_DRAW);
+//        glBindBuffer(GL31.GL_UNIFORM_BUFFER, 0);
+        vao = GL30.glGenVertexArrays();
+        GL30.glBindVertexArray(vao);
 
         IntBuffer indices = BufferUtils.createIntBuffer(numVertices);
 
@@ -100,8 +101,7 @@ class VBO implements Drawable, Closeable {
         }
 
         if (numVertices > 0) {
-            vao = GL30.glGenVertexArrays();
-            GL30.glBindVertexArray(vao);
+
             this.vertices.rewind();
             verticesBuffer = glGenBuffers();
             glBindBuffer(GL_ARRAY_BUFFER, verticesBuffer);
@@ -306,11 +306,10 @@ public class Mesh implements Loadable, Drawable, Closeable {
     @Override
     public void draw() {
 
-        Matrix4f matrix4f = new Matrix4f();
+        Matrix4f matrix4f = new Matrix4f().identity();
         matrix4f.translate(position).rotate(rotQuaternion);
         float[] model_matrix = new float[16];
-        matrix4f.get(model_matrix);
-
+        model_matrix = matrix4f.get(model_matrix);
         // not good, is going to deter performance.
         if (shader != null) {
             int shader_pointer = shader.getProgram();
