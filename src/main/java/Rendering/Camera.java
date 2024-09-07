@@ -7,6 +7,7 @@ import lombok.Setter;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import static org.lwjgl.opengl.GL11.glMultMatrixf;
 import static org.lwjgl.opengl.GL20.*;
 
 @SuppressWarnings("unused")
@@ -43,6 +44,7 @@ public class Camera {
       glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"), false,array);
       array = viewMatrix.get(array);
       glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "view_matrix"), false,array);
+
       shader.unbind();
   }
 

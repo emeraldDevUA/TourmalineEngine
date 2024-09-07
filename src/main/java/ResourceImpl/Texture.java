@@ -120,6 +120,7 @@ public class Texture implements EnhancedLoadable {
         glDeleteTextures(texture);
     }
 
+
     @Override
     public void load(String path) throws FileNotFoundException {
         this.path = path;
