@@ -145,6 +145,8 @@ public class Material implements Closeable {
     }
 
     public void loadMatLib(EnhancedMTL mtl){
-
+        addProperty(ROUGHNESS, (double) mtl.roughness);
+        addProperty(METALNESS, (double) mtl.metallic);
+        addProperty(OPACITY,   (double) mtl.opacity);
     }
 }

@@ -43,7 +43,8 @@ import static org.lwjgl.system.MemoryUtil.nmemAllocChecked;
 import static org.lwjgl.system.MemoryUtil.nmemFree;
 
 @Getter
-@SuppressWarnings("unused")
+@SuppressWarnings({"unused", "Duplicates"})
+
 public abstract class BasicWindow implements Closeable {
 
     private static NkContext ctx;
@@ -147,7 +148,6 @@ public abstract class BasicWindow implements Closeable {
         glfwSetWindowSizeCallback(window_handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long l, int width, int height) {
-
                 glViewport(0,0, width,height);
                 //glfwSetWindowSize(window_handle,width,height);
             }
@@ -166,8 +166,6 @@ public abstract class BasicWindow implements Closeable {
 
             imagebf.put(0, image);
             glfwSetWindowIcon(window_handle, imagebf);
-
-
 
         } catch (NullPointerException e) {
             System.err.println(e.getMessage());

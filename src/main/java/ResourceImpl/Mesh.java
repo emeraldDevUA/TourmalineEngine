@@ -8,12 +8,11 @@ import lombok.Setter;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
-import org.lwjgl.opengl.GL31;
+
 
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.*;
@@ -50,8 +49,8 @@ class VBO implements Drawable, Closeable {
 
     public VBO(List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
         this.vertices = BufferUtils.createFloatBuffer(vertices.size() * 3);
-        this.normals = BufferUtils.createFloatBuffer(vertices.size() * 3);
-        this.uv = BufferUtils.createFloatBuffer(vertices.size() * 2);
+        this.normals = BufferUtils.createFloatBuffer(normals.size() * 3);
+        this.uv = BufferUtils.createFloatBuffer(textureCoordinates.size() * 2);
 
         for (int i = 0; i < vertices.size(); i++) {
             this.vertices.put(vertices.get(i).x);
@@ -161,7 +160,6 @@ class VBO implements Drawable, Closeable {
 public class Mesh implements Loadable, Drawable, Closeable {
     @Getter
     private final Map<String, VBO> map;
-    //private final Map<VBO, Material> materialMap;
     private final Vector3f position;
     private final Quaternionf rotQuaternion;
     @Setter

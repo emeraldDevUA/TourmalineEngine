@@ -1,13 +1,17 @@
 package ResourceImpl;
 
 import Interfaces.EnhancedLoadable;
+import lombok.AllArgsConstructor;
 import lombok.Setter;
 import org.lwjgl.BufferUtils;
 
+import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL11.glBindTexture;
@@ -19,11 +23,11 @@ import static org.lwjgl.opengl.GL30.GL_RGB16F;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 import static org.lwjgl.stb.STBImage.stbi_image_free;
 import static org.lwjgl.stb.STBImage.stbi_loadf;
-
+@SuppressWarnings("SpellCheckingInspection")
 public class CubeMap implements EnhancedLoadable{
     private static final String[] faceIndices = {"_posx", "_negx", "_posy", "_negy", "_posz", "_negz"};
     private int texture;
-
+    private Map<String, hdrFace> faces;
 
     @Setter
     private boolean custom_mipmaps;
@@ -92,10 +96,45 @@ public class CubeMap implements EnhancedLoadable{
 
 
     @Override
-    public void assemble() {}
+    public void assemble() {
+
+        glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+        glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+
+    }
 
     @Override
-    public void load(String path) throws FileNotFoundException, IOException {}
+    public void load(String path) throws FileNotFoundException, IOException {
+        IntBuffer width = BufferUtils.createIntBuffer(1);
+        IntBuffer height = BufferUtils.createIntBuffer(1);
+        IntBuffer channels = BufferUtils.createIntBuffer(1);
+        FloatBuffer textureData = null;
+        faces = new HashMap<>();
+
+        for (int i = 0; i < 6; i++) {
+            width.clear();
+            height.clear();
+            channels.clear();
+
+            textureData = stbi_loadf(path + faceIndices[i] + extension,
+                    width, height, channels, 3);
+            if (textureData == null)
+                System.err.println(STR."Cubemap \{path}\{faceIndices[i]}\{extension} is not found");
+            else {
+                    faces.put(faceIndices[i], new hdrFace(width, height, textureData, channels));
+            }
+
+     }
+
+
+    }
 
     public void use() {
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
@@ -103,5 +142,15 @@ public class CubeMap implements EnhancedLoadable{
 
     }
 
-
+    @AllArgsConstructor
+    static class hdrFace implements Closeable {
+        public IntBuffer width, height;
+        public FloatBuffer texData;
+        public  IntBuffer channels;
+        @Override
+        public void close() throws IOException {
+            width.clear(); height.clear();
+            stbi_image_free(texData);
+        }
+    }
 }
