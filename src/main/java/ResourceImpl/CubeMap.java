@@ -98,6 +98,20 @@ public class CubeMap implements EnhancedLoadable{
     @Override
     public void assemble() {
 
+        Object[] array = faces.values().toArray();
+        for(int i = 0; i < array.length; i++) {
+            try {
+                hdrFace face = (hdrFace) array[i];
+                glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                    0, GL_RGB16F, face.width.get(0), face.height.get(0), 0, GL_RGB, GL_FLOAT, face.texData);
+                face.close();
+            } catch (IOException|ClassCastException|NullPointerException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
         glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -112,13 +126,15 @@ public class CubeMap implements EnhancedLoadable{
 
     @Override
     public void load(String path) throws FileNotFoundException, IOException {
-        IntBuffer width = BufferUtils.createIntBuffer(1);
-        IntBuffer height = BufferUtils.createIntBuffer(1);
-        IntBuffer channels = BufferUtils.createIntBuffer(1);
+
         FloatBuffer textureData = null;
         faces = new HashMap<>();
 
         for (int i = 0; i < 6; i++) {
+            IntBuffer width = BufferUtils.createIntBuffer(1);
+            IntBuffer height = BufferUtils.createIntBuffer(1);
+            IntBuffer channels = BufferUtils.createIntBuffer(1);
+
             width.clear();
             height.clear();
             channels.clear();
@@ -149,7 +165,10 @@ public class CubeMap implements EnhancedLoadable{
         public  IntBuffer channels;
         @Override
         public void close() throws IOException {
-            width.clear(); height.clear();
+            width.clear();
+            height.clear();
+            channels.clear();
+            texData.clear();
             stbi_image_free(texData);
         }
     }

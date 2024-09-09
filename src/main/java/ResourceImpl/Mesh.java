@@ -76,7 +76,7 @@ class VBO implements Drawable, Closeable {
 
     @Override
     public void draw() {
-        glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
+        //glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
         GL30.glBindVertexArray(vao);
         glDrawElements(GL_TRIANGLES, numVertices, GL_UNSIGNED_INT, 0);
         GL30.glBindVertexArray(0);

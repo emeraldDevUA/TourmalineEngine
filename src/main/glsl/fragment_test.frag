@@ -1,14 +1,11 @@
-#version 460
+#version 460 core
 
-in vec4 finalPos;
-in vec2 textureCoords;
-uniform sampler2D albedoMap;
 
-out vec4 fragmentColor;
-
+uniform sampler2D tex;
+out vec4 fragment;
 
 void main() {
-    vec4 temp = texture(albedoMap, textureCoords);
 
 
+    fragment = vec4(1,1,1,1);
 }

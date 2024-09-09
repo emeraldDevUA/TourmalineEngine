@@ -3,11 +3,16 @@ package org.tourmaline;
 import Annotations.BasicWindow;
 import Interfaces.TreeNode;
 import Rendering.Camera;
+import Rendering.SkyBox;
 import ResourceImpl.*;
+import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
 import org.joml.Vector3f;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.nuklear.NkRect;
+import org.lwjgl.system.MemoryStack;
 
 
 import java.io.IOException;
@@ -17,9 +22,12 @@ import java.util.List;
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 
+import static org.lwjgl.nuklear.Nuklear.*;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080})
@@ -43,7 +51,9 @@ public class Main extends BasicWindow {
         Texture normal = new Texture();
         Texture roughness_g = new Texture();
         Texture roughness_b = new Texture();
-        Mesh mesh = new Mesh();
+        Mesh fightingFalcon = new Mesh();
+        Mesh euroFighter = new Mesh();
+        Mesh mig29 = new Mesh();
         Material material = new Material();
 
 
@@ -52,9 +62,9 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
         resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
 
-        resourceLoadScheduler.addResource(mesh,"src/main/resources/3D_Models/F16/F16.obj");
-
-
+        resourceLoadScheduler.addResource(fightingFalcon,"src/main/resources/3D_Models/F16/F16.obj");
+        resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
+        resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
         t1 = System.currentTimeMillis();
         resourceLoadScheduler.loadResources();
         double load = 0;
@@ -69,62 +79,67 @@ public class Main extends BasicWindow {
         normal.assemble();
         roughness_g.assemble();
         roughness_b.assemble();
-        mesh.compile();
+        fightingFalcon.compile();
+        euroFighter.compile();
+        mig29.compile();
         t3 = System.currentTimeMillis();
         resourceLoadScheduler.reset();
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
-        mesh.setShader(deferredShader);
-        Camera camera = new Camera(new Vector3f(-10,10,10), new Vector3f(0,0,0));
-        camera.loadViewMatrix();
-        camera.loadPerspectiveProjection(1f,1.8f, 1000,0.1f);
 
-        camera.setMVP(deferredShader);
-        camera.setMVP(combineShader);
-        mesh.setShader(deferredShader);
+        Camera camera = new Camera(new Vector3f(5,10,1), new Vector3f(0,0,0));
+        camera.loadViewMatrix();
+        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,-5f);
+
+//        camera.setMVP(deferredShader);
+//        camera.setMVP(combineShader);
+        fightingFalcon.setShader(deferredShader);
 
         material.addMap(Material.ALBEDO_MAP, albedo);
         material.addMap(Material.NORMAL_MAP, normal);
         material.addMap(Material.ROUGHNESS_MAP, roughness_g);
 
-        mesh.setMaterial(material);
+        fightingFalcon.setMaterial(material);
         List<TreeNode<Mesh>> arrayList = new ArrayList<>();
-        MeshTree F16 = new MeshTree(arrayList, mesh,"F16");
+
+
+        Shader test_shader = new Shader("src/main/glsl/vertex_test.vert", "src/main/glsl/fragment_test.frag");
+        test_shader.use();
+        camera.setMVP(test_shader);
+        fightingFalcon.setShader(test_shader);
+        MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
         scene.addDrawItem(F16);
-        glDisable(GL_CULL_FACE);
-        glDepthFunc(GL_GREATER);
+
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+
+        glfwSwapInterval(5);
+
+        SkyBox skyBox = new SkyBox();
+        CubeMap cm = new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
+
+        skyBox.setCubeMap(cm);
+        Shader skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
+                "src/main/glsl/skybox_shaders/skybox_frag.glsl");
+
+        camera.setMVP(skyBoxShader);
+        skyBox.compile();
+        glScaled(0.3,0.4,0.3);
 
 
         while (!glfwWindowShouldClose(window_handle)){
-
-//            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-//            deferredPass();
-//            postprocessingPass();
-
-//            material.use();
+//           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
+            test_shader.use();
             F16.draw();
-
-//           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-//            glBegin(GL_TRIANGLES);
-//                glColor3d(1,0,0);
-//                glVertex2d(0,1-0.1);
-//                glColor3d(0,1,0);
-//                glVertex2d(1-0.1,-1+0.1);
-//                glColor3d(0,0,1);
-//                glVertex2d(-1+0.1,-1+0.1);
-//            glEnd();
-
-//
-//
-//            deferredPass();
-//            postprocessingPass();
-
-//            if(Scene.getSkybox() != null)
-//                skyboxPass();
-
-
-
+            test_shader.unbind();
+            glRotated(0.1,0,1,0);
+            skyBoxShader.use();
+                glActiveTexture(GL_TEXTURE10);
+                skyBox.draw();
+            skyBoxShader.unbind();
 
 
             glfwPollEvents();
@@ -139,6 +154,7 @@ public class Main extends BasicWindow {
 
     @Override
     public void close() {
+
         glfwDestroyWindow(window_handle);
     }
 }

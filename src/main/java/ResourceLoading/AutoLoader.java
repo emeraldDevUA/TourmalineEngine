@@ -25,8 +25,6 @@ public class AutoLoader {
 
         File folder = new File(rootFolder);
 
-
-
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
             if (fileEntry.isDirectory()) {
                 drawables.add((MeshTree) loadMesh(fileEntry, null));
