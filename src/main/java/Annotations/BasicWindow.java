@@ -22,8 +22,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 
-import static org.lwjgl.nuklear.Nuklear.nk_init;
-import static org.lwjgl.nuklear.Nuklear.nk_input_key;
+import static org.lwjgl.nuklear.Nuklear.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -158,7 +157,7 @@ public abstract class BasicWindow implements Closeable {
                     new Texture("src/main/resources/miscellaneous/secondary_icon.png", 4);
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
-
+            // ddffdf
             image
                     .set(icon.getTextureWidth().get(0),
                             icon.getTextureHeight().get(0),
@@ -178,19 +177,20 @@ public abstract class BasicWindow implements Closeable {
         generateFrameBuffer();
         generateRenderQuad();
 
-        try {
-            ctx = NkContext.malloc();
+         NkContext ctx = NkContext.create();
+        try(MemoryStack stack = stackPush()){
+            NkRect rect = NkRect.mallocStack(stack);
+            rect.x(50).y(50).w(300).h(200);
+            // Begin the window
+            if(nk_begin(ctx, "Window Name", rect, NK_WINDOW_TITLE|NK_WINDOW_BORDER|NK_WINDOW_MINIMIZABLE)) {
+                // Add rows here
+                float rowHeight = 50;
+                int itemsPerRow = 1;
+                nk_layout_row_dynamic(ctx, rowHeight, itemsPerRow);
+            }
+            // End the window
+            nk_end(ctx);
 
-            NkUserFont default_font = NkUserFont.create();
-            NkAllocator allocator = NkAllocator.create();
-            allocator.alloc((handle, old, size) -> nmemAllocChecked(size));
-            allocator.mfree((handle, ptr) -> nmemFree(ptr));
-
-            nk_init(ctx, allocator, default_font);
-            glfwSetKeyCallback(window_handle, (window, key, scancode, action, mods) -> nk_input_key(ctx, key, action == GLFW_PRESS));
-
-        } catch (NoSuchMethodError error) {
-            System.err.println(error.getMessage());
         }
     }
 
