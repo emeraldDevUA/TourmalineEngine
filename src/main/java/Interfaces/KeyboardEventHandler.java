@@ -2,6 +2,6 @@ package Interfaces;
 
 public interface KeyboardEventHandler {
 
-    void processKey(int key);
+    void processKey(Integer key, Integer state);
 
 }

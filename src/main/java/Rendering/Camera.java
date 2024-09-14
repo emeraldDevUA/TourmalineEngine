@@ -7,10 +7,9 @@ import lombok.Setter;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import static org.lwjgl.opengl.GL11.glMultMatrixf;
+
 import static org.lwjgl.opengl.GL20.*;
 
-@SuppressWarnings("unused")
 public class Camera {
   @Setter
   private Vector3f position;
@@ -23,13 +22,13 @@ public class Camera {
   public Camera(Vector3f pos, Vector3f focus){
     this.position = pos;
     this.focus = focus;
-    this.viewMatrix = new Matrix4f().identity();
-    this.projectionMatrix = new Matrix4f().identity();
+    this.viewMatrix = new Matrix4f();
+    this.projectionMatrix = new Matrix4f();
   }
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
-        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
-      //projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
+       projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
+      // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
 
   public void loadViewMatrix(){
@@ -37,15 +36,17 @@ public class Camera {
 
   }
   public void setMVP(Shader shader){
-      shader.use();
-      float[] array = new float[16];
-      int shader_pointer = shader.getProgram();
-      array = projectionMatrix.get(array);
-      glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"), false,array);
-      array = viewMatrix.get(array);
-      glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "view_matrix"), false,array);
 
-      shader.unbind();
+      if(shader != null){
+          shader.use();
+          int shader_pointer = shader.getProgram();
+          float[] view_matrix = new float[16];
+          float[] projection_matrix = new float[16];
+          viewMatrix.get(view_matrix);
+          glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "view_matrix"),false, view_matrix);
+          projectionMatrix.get(projection_matrix);
+          glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"),false, projection_matrix);
+      }
   }
 
 }

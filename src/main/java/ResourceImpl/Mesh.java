@@ -24,7 +24,7 @@ import static org.lwjgl.opengl.GL15.glBindBuffer;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
+
 
 
 class VBO implements Drawable, Closeable {
@@ -36,7 +36,7 @@ class VBO implements Drawable, Closeable {
     private static final int color_size = vertex_size;
 
     private FloatBuffer vertices, normals, uv;
-    private int vao, ubo;
+    private int vao;
 
     private int verticesBuffer, normalsBuffer, uvsBuffer;
 
@@ -78,7 +78,7 @@ class VBO implements Drawable, Closeable {
     public void draw() {
         //glBindBufferBase(GL_UNIFORM_BUFFER, Shader.MODEL_BLOCK, ubo);
         GL30.glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, numVertices, GL_UNSIGNED_INT, 0);
+        GL30.glDrawElements(GL_TRIANGLES, numVertices, GL_UNSIGNED_INT, 0);
         GL30.glBindVertexArray(0);
     }
 
@@ -131,8 +131,8 @@ class VBO implements Drawable, Closeable {
         }
         indices.flip();
         int elementsBuffer = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+        glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, elementsBuffer);
+        glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, indices, GL30.GL_STATIC_DRAW);
 
         glBindVertexArray(0);
 
@@ -141,7 +141,7 @@ class VBO implements Drawable, Closeable {
 
     @Override
     public void close() {
-        glDeleteBuffers(ubo);
+//        glDeleteBuffers(ubo);
 //        loadedInstances.put(mapName, loadedInstances.get(mapName) - 1);
 //
 //        if (loadedInstances.get(mapName) != 0)

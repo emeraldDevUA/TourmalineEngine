@@ -30,7 +30,8 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 
-@OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080})
+@OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
+        windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE})
 
 public class Main extends BasicWindow {
     public static void main(String[] args){
@@ -87,13 +88,13 @@ public class Main extends BasicWindow {
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        Camera camera = new Camera(new Vector3f(5,10,1), new Vector3f(0,0,0));
+        Camera camera = new Camera(new Vector3f(1,2,2), new Vector3f(0,0,0));
         camera.loadViewMatrix();
-        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,-5f);
+        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 100,0.1f);
 
 //        camera.setMVP(deferredShader);
 //        camera.setMVP(combineShader);
-        fightingFalcon.setShader(deferredShader);
+  //      fightingFalcon.setShader(deferredShader);
 
         material.addMap(Material.ALBEDO_MAP, albedo);
         material.addMap(Material.NORMAL_MAP, normal);
@@ -114,7 +115,7 @@ public class Main extends BasicWindow {
         glDepthFunc(GL_LESS);
         glEnable(GL_CULL_FACE);
 
-        glfwSwapInterval(5);
+
 
         SkyBox skyBox = new SkyBox();
         CubeMap cm = new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
@@ -127,21 +128,22 @@ public class Main extends BasicWindow {
         skyBox.compile();
         glScaled(0.3,0.4,0.3);
 
+//        AutoLoader autoLoader = new AutoLoader("src/main/resources/3D_Models", new ArrayList<>(), new ResourceLoadScheduler());
+//        autoLoader.loadTrees();
 
         while (!glfwWindowShouldClose(window_handle)){
 //           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
+            camera.setMVP(test_shader);
             test_shader.use();
-            F16.draw();
+                F16.draw();
             test_shader.unbind();
             glRotated(0.1,0,1,0);
             skyBoxShader.use();
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
             skyBoxShader.unbind();
-
-
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
 
