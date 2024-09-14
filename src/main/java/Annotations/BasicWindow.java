@@ -18,6 +18,7 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.nuklear.*;
 import java.io.Closeable;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
@@ -83,6 +84,7 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader combineShader;
     protected static Shader postprocessingShader;
 //    protected static Shader skyboxShader;
+    protected static Shader shadowMappingShader;
     protected static Texture BRDFLookUp;
 
 
@@ -92,7 +94,8 @@ public abstract class BasicWindow implements Closeable {
     }
     protected static void init(@NotNull Class<?> className) {
 
-
+        int[] windowHints = new int[0];
+        int[] windowHintsValues = new int[0];
         int[] dims = new int[2];
         if (className.isAnnotationPresent(OpenGLWindow.class)) {
 
@@ -101,6 +104,9 @@ public abstract class BasicWindow implements Closeable {
             dims = annotation.defaultDimensions();
             windowWidth =  dims[0];
             windowHeight = dims[1];
+            windowHintsValues = annotation.windowHintsValues();
+            windowHints = annotation.windowHints();
+
         } else {
             System.err.println("Your annotation is faulty");
             System.exit(1);
@@ -115,6 +121,11 @@ public abstract class BasicWindow implements Closeable {
 
         //glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_SAMPLES, 4);
+        int cnt = 0;
+        for(int hint:windowHints){
+            glfwWindowHint(hint, windowHintsValues[cnt]);
+            cnt++;
+        }
         window_handle = glfwCreateWindow(dims[0], dims[1], window_name, NULL, NULL);
 
         if (window_handle == NULL) {
@@ -192,6 +203,9 @@ public abstract class BasicWindow implements Closeable {
             nk_end(ctx);
 
         }
+
+
+
     }
 
     protected static void drawElements(){

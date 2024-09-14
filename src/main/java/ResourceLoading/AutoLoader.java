@@ -93,7 +93,7 @@ public class AutoLoader {
         while(resourceLoadScheduler.getReadiness() < 1){
             Thread.onSpinWait();
         }
-
+        resourceLoadScheduler.reset();
 
         //resourceLoadScheduler.getResources();
         return meshTree;
