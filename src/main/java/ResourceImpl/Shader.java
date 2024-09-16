@@ -14,7 +14,7 @@ import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
 public class Shader implements Closeable {
     public static final int  POSITION_LOCATION = 0;
     public static final int    NORMAL_LOCATION = 1;
-    public static final int       UVS_LOCATION = 3;
+    public static final int       UVS_LOCATION = 2;
     public static final int MODEL_BLOCK = 0;
     public static final int CAMERA_BLOCK = 1;
     public static final int MATERIAL_BLOCK = 2;

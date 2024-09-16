@@ -14,9 +14,7 @@ import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_load;
-
+import static org.lwjgl.stb.STBImage.*;
 
 
 @NoArgsConstructor
@@ -120,7 +118,9 @@ public class Texture implements EnhancedLoadable {
         glDeleteTextures(texture);
     }
 
-
+    public static void setVerticalFlip(boolean flip){
+        stbi_set_flip_vertically_on_load(flip);
+    }
     @Override
     public void load(String path) throws FileNotFoundException {
         this.path = path;
@@ -132,13 +132,12 @@ public class Texture implements EnhancedLoadable {
             return;
         }
 
-        IntBuffer textureWidth = BufferUtils.createIntBuffer(1);
-        IntBuffer textureHeight = BufferUtils.createIntBuffer(1);
-        IntBuffer textureChannels = BufferUtils.createIntBuffer(1);
-
-
+         textureWidth = BufferUtils.createIntBuffer(1);
+         textureHeight = BufferUtils.createIntBuffer(1);
+         IntBuffer textureChannels = BufferUtils.createIntBuffer(1);
 
         textureData = stbi_load(path, textureWidth, textureHeight, textureChannels, channels);
+        textureChannels.clear();
     }
     @Override
     public void assemble(){

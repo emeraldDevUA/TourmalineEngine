@@ -67,6 +67,8 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
         t1 = System.currentTimeMillis();
+
+        Texture.setVerticalFlip(true);
         resourceLoadScheduler.loadResources();
         double load = 0;
         while (resourceLoadScheduler.getReadiness() < 1.0){
@@ -126,7 +128,7 @@ public class Main extends BasicWindow {
 
         camera.setMVP(skyBoxShader);
         skyBox.compile();
-        glScaled(0.3,0.4,0.3);
+
 
 //        AutoLoader autoLoader = new AutoLoader("src/main/resources/3D_Models", new ArrayList<>(), new ResourceLoadScheduler());
 //        autoLoader.loadTrees();
@@ -135,11 +137,14 @@ public class Main extends BasicWindow {
 //           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
+//            deferredPass();
+//            postprocessingPass();
             camera.setMVP(test_shader);
+
             test_shader.use();
                 F16.draw();
             test_shader.unbind();
-            glRotated(0.1,0,1,0);
+
             skyBoxShader.use();
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();

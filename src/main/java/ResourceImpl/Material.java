@@ -112,6 +112,7 @@ public class Material implements Closeable {
 
         });
 
+
     }
 
     private void updateBuffer() {
