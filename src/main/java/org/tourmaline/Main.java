@@ -59,7 +59,7 @@ public class Main extends BasicWindow {
 
 
         resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
-        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/F16_normal.png");
+        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/F16/F16_normal.png");
         resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
         resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
 

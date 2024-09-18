@@ -1,11 +1,14 @@
 #version 460 core
 
 
-uniform sampler2D tex;
+layout (binding = 4) uniform sampler2D albedo_map;
+layout (binding = 7) uniform sampler2D normal_map;
+
+in vec2 textureCoords;
 out vec4 fragment;
 
 void main() {
 
 
-    fragment = vec4(1,0,0,1);
+    fragment = texture(albedo_map, textureCoords);
 }

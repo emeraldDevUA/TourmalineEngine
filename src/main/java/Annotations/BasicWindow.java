@@ -168,7 +168,6 @@ public abstract class BasicWindow implements Closeable {
                     new Texture("src/main/resources/miscellaneous/secondary_icon.png", 4);
             GLFWImage image = GLFWImage.malloc();
             GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
-            // ddffdf
             image
                     .set(icon.getTextureWidth().get(0),
                             icon.getTextureHeight().get(0),
