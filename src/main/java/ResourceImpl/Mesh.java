@@ -160,7 +160,9 @@ class VBO implements Drawable, Closeable {
 public class Mesh implements Loadable, Drawable, Closeable {
     @Getter
     private final Map<String, VBO> map;
+    @Getter
     private final Vector3f position;
+    @Getter
     private final Quaternionf rotQuaternion;
     @Setter
     private Material material;

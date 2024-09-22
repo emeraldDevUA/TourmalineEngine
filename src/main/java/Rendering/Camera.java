@@ -19,23 +19,25 @@ public class Camera {
   private Matrix4f projectionMatrix;
   private Matrix4f viewMatrix;
 
+  private final Vector3f positionDifference;
+
   public Camera(Vector3f pos, Vector3f focus){
     this.position = pos;
     this.focus = focus;
     this.viewMatrix = new Matrix4f();
     this.projectionMatrix = new Matrix4f();
+    this.positionDifference = pos.sub(focus);
   }
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
       // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
-
   public void loadViewMatrix(){
         viewMatrix = viewMatrix.lookAt(position, focus, new Vector3f(0,1,0));
 
   }
-  public void setMVP(Shader shader){
+  public void setViewProjectionMatrix(Shader shader){
 
       if(shader != null){
           shader.use();
@@ -47,6 +49,10 @@ public class Camera {
           projectionMatrix.get(projection_matrix);
           glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"),false, projection_matrix);
       }
+  }
+  public void update(){
+      position = focus.add(positionDifference);
+      loadViewMatrix();
   }
 
 }

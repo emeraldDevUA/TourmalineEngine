@@ -19,7 +19,7 @@ public class Mouse {
     public double[] X, Y;
     private Stack<key_state> actions;
     @Setter
-    private int window_pointer = -1;
+    private long window_pointer = -1;
     private Set<Integer> keys;
 
 

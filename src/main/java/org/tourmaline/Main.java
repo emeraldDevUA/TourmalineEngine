@@ -1,33 +1,28 @@
 package org.tourmaline;
 
 import Annotations.BasicWindow;
+import Controls.Keyboard;
+import Controls.Mouse;
+import Interfaces.KeyboardEventHandler;
+import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
 import Rendering.Camera;
 import Rendering.SkyBox;
 import ResourceImpl.*;
-import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
 import org.joml.Vector3f;
-import org.lwjgl.assimp.AIMesh;
-import org.lwjgl.nuklear.NkRect;
-import org.lwjgl.system.MemoryStack;
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 
-import static org.lwjgl.nuklear.Nuklear.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
@@ -90,7 +85,7 @@ public class Main extends BasicWindow {
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        Camera camera = new Camera(new Vector3f(1,2,2), new Vector3f(0,0,0));
+        Camera camera = new Camera(new Vector3f(-3,1,0), new Vector3f(0,0,0));
         camera.loadViewMatrix();
         camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 100,0.1f);
 
@@ -108,7 +103,7 @@ public class Main extends BasicWindow {
 
         Shader test_shader = new Shader("src/main/glsl/vertex_test.vert", "src/main/glsl/fragment_test.frag");
         test_shader.use();
-        camera.setMVP(test_shader);
+        camera.setViewProjectionMatrix(test_shader);
         fightingFalcon.setShader(test_shader);
         MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
         scene.addDrawItem(F16);
@@ -126,21 +121,56 @@ public class Main extends BasicWindow {
         Shader skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
-        camera.setMVP(skyBoxShader);
+        camera.setViewProjectionMatrix(skyBoxShader);
         skyBox.compile();
 
 
 //        AutoLoader autoLoader = new AutoLoader("src/main/resources/3D_Models", new ArrayList<>(), new ResourceLoadScheduler());
 //        autoLoader.loadTrees();
 
+        Keyboard keyboard = new Keyboard();
+        keyboard.setWindow_pointer(window_handle);
+        keyboard.init();
+
+        Mouse mouse = new Mouse();
+        mouse.setWindow_pointer(window_handle);
+        mouse.init();
+
+        KeyboardEventHandler keyboard_handler = (key, state) -> {
+            if(state == GLFW_PRESS){
+                if(key == GLFW_KEY_W){
+                    System.out.println("W");
+                    fightingFalcon.getRotQuaternion().rotateLocalY(0.05f).normalize();
+                }
+                else if(key == GLFW_KEY_S){
+                    System.out.println("S");
+                    fightingFalcon.getRotQuaternion().rotateLocalY(-0.05f).normalize();
+                }
+            }
+        };
+
+        MouseEventHandler mouse_handler = new MouseEventHandler() {
+            @Override
+            public void processMouseEvent(int key, int action) {
+
+            }
+
+            @Override
+            public void processMouseMovement(double X, double Y) {
+
+            }
+        };
+
+
         while (!glfwWindowShouldClose(window_handle)){
 //           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
-//            deferredPass();
-//            postprocessingPass();
-            camera.setMVP(test_shader);
 
+            keyboard.processEvents(keyboard_handler);
+
+
+            camera.setViewProjectionMatrix(test_shader);
             test_shader.use();
                 F16.draw();
             test_shader.unbind();
@@ -151,6 +181,7 @@ public class Main extends BasicWindow {
             skyBoxShader.unbind();
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
+
 
         }
 

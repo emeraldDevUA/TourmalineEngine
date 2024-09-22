@@ -14,15 +14,20 @@ import static org.lwjgl.glfw.GLFW.*;
 
 @NoArgsConstructor
 public class Keyboard {
+    private static final long coolDown = 10; // in ms
+    private long currentTime;
     // Do I really have to do that?
     private static HashMap<String, Integer> keys;
 
     private Stack<key_state> actions;
 
     @Setter
-    private int window_pointer = -1;
+    private long window_pointer = -1;
 
-    private void processEvents(KeyboardEventHandler handler){
+    public void processEvents(KeyboardEventHandler handler){
+        if(System.currentTimeMillis()- currentTime < coolDown){
+            return;
+        }
         keys.values().forEach(
                 l->{
                    if( glfwGetKey(window_pointer, l) == GLFW_PRESS ) {
@@ -47,7 +52,7 @@ public class Keyboard {
             handler.processKey(actions.peek().key, actions.peek().state);
             actions.pop();
         }
-
+        currentTime = System.currentTimeMillis();
 
     }
 
@@ -73,7 +78,7 @@ public class Keyboard {
         keys.put("TAB", GLFW_KEY_TAB);
         keys.put("BACKSPACE", GLFW_KEY_BACKSPACE);
 
-
+        currentTime = System.currentTimeMillis();
     }
 
     @AllArgsConstructor
