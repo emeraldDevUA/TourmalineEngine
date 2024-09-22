@@ -1,0 +1,6 @@
+This topic is the most difficult math-wise.
+
+I want to create a system that would be efficient enough and not too difficult to maintain.
+
+RigidBody Physics
+    I took this code as a reference https://www.jakobmaier.at/posts/flight-simulation/#introduction

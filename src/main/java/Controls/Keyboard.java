@@ -14,6 +14,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 @NoArgsConstructor
 public class Keyboard {
+    // Do I really have to do that?
     private static HashMap<String, Integer> keys;
 
     private Stack<key_state> actions;
