@@ -99,7 +99,7 @@ public class Texture implements EnhancedLoadable {
     }
 
     /**
-     * Bind this texture to currently active texture slot
+     * Binds this texture to currently active texture slot
      */
     public void use()
     {

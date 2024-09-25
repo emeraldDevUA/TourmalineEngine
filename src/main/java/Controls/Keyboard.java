@@ -18,12 +18,11 @@ public class Keyboard {
     private long currentTime;
     // Do I really have to do that?
     private static HashMap<String, Integer> keys;
-
     private Stack<key_state> actions;
-
     @Setter
     private long window_pointer = -1;
 
+    //private StringBuffer stringBuffer;
     public void processEvents(KeyboardEventHandler handler){
         if(System.currentTimeMillis()- currentTime < coolDown){
             return;
@@ -59,6 +58,7 @@ public class Keyboard {
     public void init(){
         keys = new HashMap<>();
         actions = new Stack<>();
+        //stringBuffer = new StringBuffer();
 
         keys.put("W", GLFW_KEY_W);
         keys.put("A", GLFW_KEY_A);

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.lwjgl.glfw.GLFWMouseButtonCallback;
 
 
 import java.util.HashSet;
@@ -27,26 +28,6 @@ public class Mouse {
 
         glfwGetCursorPos(window_pointer, X,Y);
 
-        keys.forEach(
-                l->{
-                    if( glfwGetKey(window_pointer, l) == GLFW_PRESS ) {
-                        actions.push(new key_state(l, GLFW_PRESS));
-                    }
-
-                    if( glfwGetKey(window_pointer, l) == GLFW_REPEAT) {
-                        actions.push(new key_state(l, GLFW_REPEAT));
-                    }
-
-                    if( glfwGetKey(window_pointer, l) == GLFW_RELEASE ) {
-                        actions.push(new key_state(l, GLFW_RELEASE));
-                    }
-
-                    if( glfwGetKey(window_pointer, l) == GLFW_KEY_UNKNOWN ) {
-                        actions.push(new key_state(l, GLFW_KEY_UNKNOWN));
-                    }
-
-                }
-        );
 
         while(!actions.empty()) {
             handler.processMouseEvent(actions.peek().key, actions.peek().state);
@@ -59,16 +40,38 @@ public class Mouse {
     public void init(){
         actions = new Stack<>();
         keys = new HashSet<>();
-
-        keys.add(GLFW_MOUSE_BUTTON_1);
-        keys.add(GLFW_MOUSE_BUTTON_2);
+        keys.add(GLFW_MOUSE_BUTTON_LEFT);
+        keys.add(GLFW_MOUSE_BUTTON_RIGHT);
         keys.add(GLFW_MOUSE_BUTTON_3);
         keys.add(GLFW_MOUSE_BUTTON_4);
         keys.add(GLFW_MOUSE_BUTTON_5);
 
-
         X = new double[1];
         Y = new double[1];
+        glfwSetMouseButtonCallback(window_pointer, new GLFWMouseButtonCallback() {
+            @Override
+            public void invoke(long window,  int button, int action, int mods) {
+                keys.forEach(
+                        l->{
+                            if( action == GLFW_PRESS && l == button) {
+                                actions.push(new key_state(l, GLFW_PRESS));
+                            }
+                            if( action == GLFW_REPEAT && l == button) {
+                                actions.push(new key_state(l, GLFW_REPEAT));
+                            }
+                            if( action == GLFW_RELEASE && l == button) {
+                                actions.push(new key_state(l, GLFW_RELEASE));
+                            }
+                            if( action == GLFW_KEY_UNKNOWN && l == button) {
+                                actions.push(new key_state(l, GLFW_KEY_UNKNOWN));
+                            }
+
+                        }
+                );
+
+            }
+        });
+
     }
 
     @AllArgsConstructor
