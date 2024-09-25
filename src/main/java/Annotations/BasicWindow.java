@@ -1,6 +1,7 @@
 package Annotations;
 
 
+import Rendering.Camera;
 import ResourceImpl.Scene;
 import ResourceImpl.Shader;
 import ResourceImpl.Texture;
@@ -87,7 +88,7 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader shadowMappingShader;
     protected static Texture BRDFLookUp;
 
-
+    protected static Camera camera;
     protected BasicWindow(){
         t1 = System.currentTimeMillis();
         t2 = t1;
@@ -411,6 +412,7 @@ public abstract class BasicWindow implements Closeable {
 
     protected static void deferredPass()
     {
+        camera.setViewProjectionMatrix(deferredShader);
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
         deferredShader.use();
@@ -421,10 +423,13 @@ public abstract class BasicWindow implements Closeable {
         //Scene.getSkyboxIrradiance().use();
         glActiveTexture(GL_TEXTURE12);
         BRDFLookUp.use();
-        //;
-
         scene.drawItems();
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        scene.setActiveProgram(combineShader);
+        camera.setViewProjectionMatrix(combineShader);
+
         combineShader.use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);

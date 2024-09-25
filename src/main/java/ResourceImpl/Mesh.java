@@ -73,6 +73,32 @@ class VBO implements Drawable, Closeable {
 
     }
 
+    /*public VBO(List<Integer> indices, List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
+        this.vertices = BufferUtils.createFloatBuffer(vertices.size() * 3);
+        this.normals = BufferUtils.createFloatBuffer(normals.size() * 3);
+        this.uv = BufferUtils.createFloatBuffer(textureCoordinates.size() * 2);
+
+        for (int i = 0; i < vertices.size(); i++) {
+            this.vertices.put(vertices.get(i).x);
+            this.vertices.put(vertices.get(i).y);
+            this.vertices.put(vertices.get(i).z);
+
+            this.normals.put(normals.get(i).x);
+            this.normals.put(normals.get(i).y);
+            this.normals.put(normals.get(i).z);
+
+            this.uv.put(textureCoordinates.get(i).x);
+            this.uv.put(textureCoordinates.get(i).y);
+        }
+
+
+        numVertices = vertices.size();
+        numNormals = normals.size();
+        numUvs = textureCoordinates.size();
+
+
+    }
+*/
 
     @Override
     public void draw() {
@@ -169,6 +195,8 @@ public class Mesh implements Loadable, Drawable, Closeable {
     @Setter
     private Shader shader;
 
+
+
     public Mesh() {
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0, 0, 0);
@@ -178,6 +206,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
     @Override
     public void load(String path) throws IOException {
+
         File file = new File(path);
         FileInputStream fis = new FileInputStream(file);
         BufferedInputStream bis = new BufferedInputStream(fis);
@@ -189,6 +218,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         ArrayList<Vector3f> vertices = new ArrayList<>();
         ArrayList<Vector3f> vectors = new ArrayList<>();
         ArrayList<Vector2f> textureCoords = new ArrayList<>();
+        ArrayList<Integer> indices = new ArrayList<>();
         Float[] vals;
 
         mainLoop:
@@ -200,11 +230,16 @@ public class Mesh implements Loadable, Drawable, Closeable {
             if (line.isBlank()) {
                 continue;
             }
-            if (line.charAt(0) == '#' && line.length() <= 2) {
+            if (( line.charAt(0) == '#' && line.length() <= 2 ) || line.contains("mtlib")) {
                 continue;
             }
             if (line.contains("object") || line.contains("o")) {
                 name = line.split(" ")[1];
+                VBO retrievedVBO = map.get(name);
+
+                if(retrievedVBO != null){
+                    map.put(STR."_\{name}", retrievedVBO);
+                }
             }
             if (line.substring(0, 2).compareTo("v ") == 0) {
                 vals = getFloatValues(line);
@@ -234,7 +269,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
                             finalVertices.add(vertices.get(array[0] - 1));
                             finalUVs.add(textureCoords.get((array[1] - 1)));
                             finalNormals.add(vectors.get((array[2] - 1)));
-
+                            indices.add(array[0] - 1);
                         } catch (NullPointerException e) {
                             System.err.println(STR."\{vertices.size()}\n\{vectors.size()}\n\{textureCoords.size()}");
                             break;
@@ -259,6 +294,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         vertices.clear();
         vectors.clear();
         textureCoords.clear();
+        indices.clear();
 
         fis.close();
         bis.close();
@@ -293,7 +329,6 @@ public class Mesh implements Loadable, Drawable, Closeable {
         values = new Float[3];
         int cnt = 0;
         for (int i = 1; i < args.length; i++) {
-
             try {
                 values[cnt++] = Float.parseFloat(args[i]);
             } catch (NumberFormatException e) {

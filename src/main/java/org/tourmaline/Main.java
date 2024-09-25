@@ -25,10 +25,12 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 
 
+
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE})
 
 public class Main extends BasicWindow {
+
     public static void main(String[] args){
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
@@ -85,7 +87,7 @@ public class Main extends BasicWindow {
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        Camera camera = new Camera(new Vector3f(-3,1,0), new Vector3f(0,0,0));
+        camera = new Camera(new Vector3f(-3,1,0), new Vector3f(0,0,0));
         camera.loadViewMatrix();
         camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 100,0.1f);
 
@@ -138,43 +140,60 @@ public class Main extends BasicWindow {
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             if(state == GLFW_PRESS){
-                if(key == GLFW_KEY_W){
+                if(key == GLFW_KEY_A){
+                    System.out.println("A");
+                    fightingFalcon.getRotQuaternion().rotateLocalY(0.01f).normalize();
+                }
+                else if(key == GLFW_KEY_D){
+                    System.out.println("D");
+                    fightingFalcon.getRotQuaternion().rotateLocalY(-0.01f).normalize();
+                } else if(key == GLFW_KEY_W){
                     System.out.println("W");
-                    fightingFalcon.getRotQuaternion().rotateLocalY(0.05f).normalize();
-                }
-                else if(key == GLFW_KEY_S){
+                    fightingFalcon.getRotQuaternion().rotateLocalX(-0.01f).normalize();
+                } else if(key == GLFW_KEY_S){
                     System.out.println("S");
-                    fightingFalcon.getRotQuaternion().rotateLocalY(-0.05f).normalize();
+                    fightingFalcon.getRotQuaternion().rotateLocalX(0.01f).normalize();
                 }
+
+
+
             }
         };
 
         MouseEventHandler mouse_handler = new MouseEventHandler() {
             @Override
             public void processMouseEvent(int key, int action) {
+                if(action == GLFW_PRESS){
+                    if(key == GLFW_MOUSE_BUTTON_LEFT){
+                        fightingFalcon.getRotQuaternion().x = 0;
+                        fightingFalcon.getRotQuaternion().y = 0;
+                        fightingFalcon.getRotQuaternion().z = 0;
+                        fightingFalcon.getRotQuaternion().w = 1;
 
+                    }
+                }
             }
-
             @Override
             public void processMouseMovement(double X, double Y) {
-
+                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
             }
         };
 
-
+//
         while (!glfwWindowShouldClose(window_handle)){
-//           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        //    drawElements();
+         //   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
 
             keyboard.processEvents(keyboard_handler);
-
+            mouse.processEvents(mouse_handler);
 
             camera.setViewProjectionMatrix(test_shader);
             test_shader.use();
                 F16.draw();
             test_shader.unbind();
-
+           // glBindFramebuffer(GL_FRAMEBUFFER, 0);
             skyBoxShader.use();
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
