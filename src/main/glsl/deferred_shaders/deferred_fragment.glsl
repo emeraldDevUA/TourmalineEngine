@@ -85,8 +85,10 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float rough)
 void main()
 {
     // "Hard" blending (like tree leaves) still can be used
-    if(material_albedo.a == 0 || material_has_albedo_map && texture(albedo_map, vs_in.uv).a == 0)
-    discard;
+    if(material_albedo.a == 0 || material_has_albedo_map && texture(albedo_map, vs_in.uv).a == 0){
+        discard;
+    }
+
 
     position = vs_in.position;
 

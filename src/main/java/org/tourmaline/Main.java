@@ -13,6 +13,8 @@ import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
 import org.joml.Vector3f;
+import org.lwjgl.nuklear.NkRect;
+import org.lwjgl.system.MemoryStack;
 
 
 import java.util.ArrayList;
@@ -21,9 +23,11 @@ import java.util.List;
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 
+import static org.lwjgl.nuklear.Nuklear.*;
+import static org.lwjgl.nuklear.Nuklear.nk_end;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-
+import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
@@ -45,6 +49,7 @@ public class Main extends BasicWindow {
 
         combineShader = new Shader("src/main/glsl/combine_shaders/combine_vertex.glsl",
                 "src/main/glsl/combine_shaders/combine_fragment.glsl");
+
         Texture albedo = new Texture();
         Texture normal = new Texture();
         Texture roughness_g = new Texture();
@@ -154,9 +159,6 @@ public class Main extends BasicWindow {
                     System.out.println("S");
                     fightingFalcon.getRotQuaternion().rotateLocalX(0.01f).normalize();
                 }
-
-
-
             }
         };
 
@@ -169,7 +171,6 @@ public class Main extends BasicWindow {
                         fightingFalcon.getRotQuaternion().y = 0;
                         fightingFalcon.getRotQuaternion().z = 0;
                         fightingFalcon.getRotQuaternion().w = 1;
-
                     }
                 }
             }
@@ -179,9 +180,10 @@ public class Main extends BasicWindow {
             }
         };
 
+        scene.setSkyBox(skyBox);
 //
         while (!glfwWindowShouldClose(window_handle)){
-        //    drawElements();
+//            drawElements();
          //   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glClear(GL_DEPTH_BUFFER_BIT);
@@ -198,6 +200,7 @@ public class Main extends BasicWindow {
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
             skyBoxShader.unbind();
+
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
 

@@ -2,6 +2,7 @@ package ResourceImpl;
 
 import Interfaces.DrawableContainer;
 import Rendering.SkyBox;
+import lombok.Setter;
 
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 
 public class Scene implements DrawableContainer<MeshTree> {
     private List<MeshTree> drawables;
+    @Setter
     private SkyBox skyBox;
 
     public Scene(){
@@ -48,6 +50,8 @@ public class Scene implements DrawableContainer<MeshTree> {
     }
 
     public void setActiveProgram(Shader shader) {
-        drawables.getFirst().getNodeValue().setShader(shader);
+        for(MeshTree tree: drawables){
+            tree.getNodeValue().setShader(shader);
+        }
     }
 }

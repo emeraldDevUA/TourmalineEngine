@@ -4,6 +4,12 @@ in vec3 uv_frag;
 
 layout (binding = 10) uniform samplerCube skybox;
 
+
+//layout (binding = N) uniform samplerCube dayTime;
+//layout (binding = M) uniform samplerCube nightTime;
+
+//uniform float time;
+
 out vec4 fragment;
 
 void main()

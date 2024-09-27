@@ -7,19 +7,19 @@ import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import org.joml.Vector2i;
+
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWImage;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.glfw.GLFWWindowSizeCallback;
 import org.lwjgl.nuklear.NkContext;
-import org.lwjgl.nuklear.NkUserFont;
+
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.nuklear.*;
 import java.io.Closeable;
 import java.nio.IntBuffer;
-import java.util.Arrays;
+
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
@@ -40,15 +40,14 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.GL_RGBA8_SNORM;
 import static org.lwjgl.system.MemoryStack.stackPush;
-import static org.lwjgl.system.MemoryUtil.nmemAllocChecked;
-import static org.lwjgl.system.MemoryUtil.nmemFree;
+
 
 @Getter
 @SuppressWarnings({"unused", "Duplicates"})
 
 public abstract class BasicWindow implements Closeable {
 
-    private static NkContext ctx;
+    protected static NkContext ctx;
 
     private static int windowWidth, windowHeight;
     // for time measurement
@@ -183,13 +182,16 @@ public abstract class BasicWindow implements Closeable {
 
 
         BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png",4);
+
         generateDepthBuffer();
         generateDeferredFramebuffer();
         generateFrameBuffer();
         generateRenderQuad();
 
-         NkContext ctx = NkContext.create();
+         ctx = NkContext.create();
+
         try(MemoryStack stack = stackPush()){
+
             NkRect rect = NkRect.mallocStack(stack);
             rect.x(50).y(50).w(300).h(200);
             // Begin the window
@@ -199,11 +201,9 @@ public abstract class BasicWindow implements Closeable {
                 int itemsPerRow = 1;
                 nk_layout_row_dynamic(ctx, rowHeight, itemsPerRow);
             }
-            // End the window
             nk_end(ctx);
 
         }
-
 
 
     }
@@ -214,9 +214,6 @@ public abstract class BasicWindow implements Closeable {
             postprocessingPass();
     }
 
-    protected Vector2i getMousePosition() {
-        return new Vector2i(0, 0);
-    }
 
     protected float getCurrentFPS() {
 
@@ -425,11 +422,9 @@ public abstract class BasicWindow implements Closeable {
         BRDFLookUp.use();
         scene.drawItems();
 
-
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         scene.setActiveProgram(combineShader);
         camera.setViewProjectionMatrix(combineShader);
-
         combineShader.use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);
@@ -440,7 +435,7 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer);
         glActiveTexture(GL_TEXTURE9);
-       // BRDFLookUp.use();
+        BRDFLookUp.use();
 
         glDepthMask(false);
         drawRenderQuad();

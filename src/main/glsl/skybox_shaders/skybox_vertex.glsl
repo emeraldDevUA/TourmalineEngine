@@ -2,11 +2,12 @@
 
 layout (location = 0) in vec3 position;
 
-
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
 out vec3 uv_frag;
+
+
 
 void main()
 {
