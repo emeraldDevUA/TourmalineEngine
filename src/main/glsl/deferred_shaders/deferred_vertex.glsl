@@ -19,11 +19,16 @@ out VS_OUT
 
 void main()
 {
+    vec3 bitangent = vec3(0,0,0);
+    // restored a a perpendicular vector.
+    bitangent.r =  normal.r;
+    bitangent.g = -normal.r;
+    bitangent.b =  normal.g;
+
     vs_out.position = ( model_matrix* vec4(position, 1.0)).xyz;
     vs_out.normal = (model_matrix * vec4(normal, 0.0)).xyz;
-    vs_out.bitangent = (model_matrix * vec4(normal, 0.0)).xyz;
     vs_out.uv = uv;
-
+    vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
     mat4 camera_direction = inverse(view_matrix);
     vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
 

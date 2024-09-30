@@ -10,6 +10,7 @@ import lombok.Getter;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -18,7 +19,7 @@ public class AutoLoader {
     private String rootFolder;
     @Getter
     private List<MeshTree> drawables;
-    ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
+    private ResourceLoadScheduler resourceLoadScheduler;
     public void loadTrees() {
 
         drawables = new ArrayList<>();
@@ -38,7 +39,7 @@ public class AutoLoader {
     }
 
 
-    TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
+    private TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
 
         final String models_formats = ".obj .fbx .glb .stl";
         final String texture_formats = ".png .jpg";
@@ -48,7 +49,7 @@ public class AutoLoader {
 
         Material material = new Material();
         Mesh mesh = null;
-
+        System.err.println(Arrays.toString(files));
         for (File f : files) {
             if (f.isDirectory()) {
                 loadMesh(f, meshTree);
@@ -89,13 +90,23 @@ public class AutoLoader {
             }
         }
 
-        resourceLoadScheduler.loadResources();
-        while(resourceLoadScheduler.getReadiness() < 1){
-            Thread.onSpinWait();
-        }
-        resourceLoadScheduler.reset();
 
         //resourceLoadScheduler.getResources();
         return meshTree;
     }
+
+
+    public void asyncLoad(){
+        resourceLoadScheduler.loadResources();
+        while(resourceLoadScheduler.getReadiness() < 1){
+            System.out.println(STR."\{resourceLoadScheduler.getReadiness() * 100}%");
+            Thread.onSpinWait();
+        }
+        resourceLoadScheduler.reset();
+
+    }
+    public float getReadiness(){
+       return resourceLoadScheduler.getReadiness();
+    }
+
 }

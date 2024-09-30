@@ -5,6 +5,10 @@
 in vec2 uv_frag;
 in vec3 camera_position;
 
+in vec3  light_sources[50];
+in vec3  light_colors[10];
+in float light_intensity[10];
+
 layout (binding = 0) uniform sampler2D position;
 layout (binding = 1) uniform sampler2D albedo_metalness;
 layout (binding = 2) uniform sampler2D normal_roughness;
@@ -105,7 +109,5 @@ void main()
     }
 
     fragment = vec4(Lo + environment_emission_value, 1.0);
-    if(position_value.z==0){
 
-    }
 }
