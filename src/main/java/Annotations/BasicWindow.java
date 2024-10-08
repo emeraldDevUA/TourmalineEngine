@@ -237,9 +237,7 @@ public abstract class BasicWindow implements Closeable {
         postprocessingShader.use();
 
         glActiveTexture(GL_TEXTURE0);
-
         glBindTexture(GL_TEXTURE_2D, colorBuffer);
-
         drawRenderQuad();
     }
 

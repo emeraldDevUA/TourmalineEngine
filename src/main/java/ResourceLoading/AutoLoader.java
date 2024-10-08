@@ -99,7 +99,6 @@ public class AutoLoader {
     public void asyncLoad(){
         resourceLoadScheduler.loadResources();
         while(resourceLoadScheduler.getReadiness() < 1){
-            System.out.println(STR."\{resourceLoadScheduler.getReadiness() * 100}%");
             Thread.onSpinWait();
         }
         resourceLoadScheduler.reset();

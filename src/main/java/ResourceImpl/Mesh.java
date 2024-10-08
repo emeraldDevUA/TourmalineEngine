@@ -167,19 +167,10 @@ class VBO implements Drawable, Closeable {
 
     @Override
     public void close() {
-//        glDeleteBuffers(ubo);
-//        loadedInstances.put(mapName, loadedInstances.get(mapName) - 1);
-//
-//        if (loadedInstances.get(mapName) != 0)
-//            return;
-
         glDeleteVertexArrays(vao);
         glDeleteBuffers(verticesBuffer);
         glDeleteBuffers(normalsBuffer);
         glDeleteBuffers(uvsBuffer);
-//
-//        loadedMeshes.remove(mapName);
-//        loadedInstances.remove(mapName);
     }
 }
 
@@ -207,6 +198,10 @@ public class Mesh implements Loadable, Drawable, Closeable {
     @Override
     public void load(String path) throws IOException {
 
+        if(!path.contains(".obj")){
+
+            return;
+        }
         File file = new File(path);
         FileInputStream fis = new FileInputStream(file);
         BufferedInputStream bis = new BufferedInputStream(fis);
@@ -313,7 +308,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
             try {
                 result[i++] = Integer.parseInt(str);
             } catch (NumberFormatException e) {
-                System.err.println("Could read a vertex");
+                System.err.println("Couldn't read a vertex");
 
             }
         }
@@ -331,7 +326,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         for (int i = 1; i < args.length; i++) {
             try {
                 values[cnt++] = Float.parseFloat(args[i]);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException|ArrayIndexOutOfBoundsException e) {
                 return values;
             }
         }
@@ -370,5 +365,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         material.close();
     }
 
+    private void lib_load(String path){
 
+    }
 }

@@ -15,8 +15,10 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.GLFW_DECORATED;
 import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
 
+
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE})
+@RunWith(JUnit4.class)
 public class AutoloaderTest extends BasicWindow {
     public static final String rootPath = "src/main/resources/3D_Models";
     public static AutoLoader loader;
@@ -29,7 +31,9 @@ public class AutoloaderTest extends BasicWindow {
         loader.loadTrees();
         loader.asyncLoad();
 
-        while (loader.getReadiness() < 1);
+        while (loader.getReadiness() < 1){
+            System.out.println();
+        }
 
         long t2 = System.currentTimeMillis();
 
