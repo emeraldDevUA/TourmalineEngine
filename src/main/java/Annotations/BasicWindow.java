@@ -2,21 +2,24 @@ package Annotations;
 
 
 import Rendering.Camera;
+import ResourceImpl.CubeMap;
 import ResourceImpl.Scene;
 import ResourceImpl.Shader;
 import ResourceImpl.Texture;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWImage;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowSizeCallback;
-import org.lwjgl.nuklear.NkContext;
+import org.lwjgl.glfw.*;
+
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import org.lwjgl.nuklear.*;
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
@@ -24,7 +27,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 
-import static org.lwjgl.nuklear.Nuklear.*;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -46,8 +49,9 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 @SuppressWarnings({"unused", "Duplicates"})
 
 public abstract class BasicWindow implements Closeable {
-
-    protected static NkContext ctx;
+    protected static ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
+    protected static ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    private static String glslVersion = null;
 
     private static int windowWidth, windowHeight;
     // for time measurement
@@ -188,25 +192,39 @@ public abstract class BasicWindow implements Closeable {
         generateFrameBuffer();
         generateRenderQuad();
 
-         ctx = NkContext.create();
+        glslVersion = "#version 460 core";
 
-        try(MemoryStack stack = stackPush()){
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
+        GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6);
+        GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+        ImGui.createContext();
 
-            NkRect rect = NkRect.mallocStack(stack);
-            rect.x(50).y(50).w(300).h(200);
-            // Begin the window
-            if(nk_begin(ctx, "Window Name", rect, NK_WINDOW_TITLE|NK_WINDOW_BORDER|NK_WINDOW_MINIMIZABLE)) {
-                // Add rows here
-                float rowHeight = 50;
-                int itemsPerRow = 1;
-                nk_layout_row_dynamic(ctx, rowHeight, itemsPerRow);
-            }
-            nk_end(ctx);
+        imGuiGlfw.init(window_handle, true);
+        imGuiGl3.init(glslVersion);
+        ImGuiIO io = ImGui.getIO();
+        io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
+    }
+    public static void render() {
 
+        imGuiGl3.newFrame();
+        imGuiGlfw.newFrame();
+        ImGui.newFrame();
+
+        ImGui.begin("Demo Window");
+        ImGui.text("Hello, ImGui with LWJGL!");
+        ImGui.end();
+
+        ImGui.render();
+        imGuiGl3.renderDrawData(ImGui.getDrawData());
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final long backupCurrentContext = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backupCurrentContext);
         }
 
-
     }
+
 
     protected static void drawElements(){
             glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -251,12 +269,13 @@ public abstract class BasicWindow implements Closeable {
 
     private static void wipeDepthBuffer()
     {
-
         glDeleteRenderbuffers(sharedDepthBuffer);
     }
 
     private static void generateDeferredFramebuffer()
     {
+
+
         deferredframeBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
 
@@ -414,14 +433,26 @@ public abstract class BasicWindow implements Closeable {
         deferredShader.use();
         scene.setActiveProgram(deferredShader);
         glActiveTexture(GL_TEXTURE10);
-        //Scene.getSkyboxRadiance().use();
+        CubeMap radiance = scene.getSkyBox().getRadiance();
+
+        if(radiance!=null){
+            radiance.use();
+        }
+
         glActiveTexture(GL_TEXTURE11);
-        //Scene.getSkyboxIrradiance().use();
+
+        CubeMap irradiance = scene.getSkyBox().getIrradiance();
+
+        if(irradiance!=null){
+            irradiance.use();
+        }
+
         glActiveTexture(GL_TEXTURE12);
         BRDFLookUp.use();
         scene.drawItems();
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
         scene.setActiveProgram(combineShader);
         camera.setViewProjectionMatrix(combineShader);
         combineShader.use();

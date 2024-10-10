@@ -14,7 +14,7 @@ import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
 import org.joml.Vector3f;
-import org.lwjgl.nuklear.NkRect;
+
 import org.lwjgl.system.MemoryStack;
 
 
@@ -24,10 +24,11 @@ import java.util.List;
 import static org.joml.Math.abs;
 import static org.lwjgl.glfw.GLFW.*;
 
-import static org.lwjgl.nuklear.Nuklear.*;
-import static org.lwjgl.nuklear.Nuklear.nk_end;
+
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 
@@ -200,12 +201,20 @@ public class Main extends BasicWindow {
         };
 
         scene.setSkyBox(skyBox);
-//
+
+//        camera.setViewProjectionMatrix(deferredShader);
+//        camera.setViewProjectionMatrix(combineShader);
+
+        scene.setActiveProgram(test_shader);
+
         while (!glfwWindowShouldClose(window_handle)){
-//            drawElements();
-         //   glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glClear(GL_DEPTH_BUFFER_BIT);
+
+   //         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+  //          drawElements();
+//            deferredPass();
+//            postprocessingPass();
 
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
@@ -219,7 +228,7 @@ public class Main extends BasicWindow {
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
             skyBoxShader.unbind();
-
+            render();
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
 

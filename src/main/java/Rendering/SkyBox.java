@@ -4,6 +4,7 @@ import Interfaces.Drawable;
 import Interfaces.EnhancedLoadable;
 import ResourceImpl.CubeMap;
 import ResourceImpl.Shader;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -70,6 +71,10 @@ public class SkyBox implements Drawable, EnhancedLoadable {
 
     @Setter
     private CubeMap cubeMap;
+    @Getter
+    @Setter
+    private CubeMap radiance, irradiance;
+
 
     @Override
     public void draw() {

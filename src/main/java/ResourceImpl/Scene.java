@@ -1,7 +1,9 @@
 package ResourceImpl;
 
+import Interfaces.Drawable;
 import Interfaces.DrawableContainer;
 import Rendering.SkyBox;
+import lombok.Getter;
 import lombok.Setter;
 
 
@@ -11,6 +13,7 @@ import java.util.List;
 public class Scene implements DrawableContainer<MeshTree> {
     private List<MeshTree> drawables;
     @Setter
+    @Getter
     private SkyBox skyBox;
 
     public Scene(){
@@ -23,12 +26,13 @@ public class Scene implements DrawableContainer<MeshTree> {
 
     @Override
     public void drawItems() {
-        drawables.forEach(MeshTree::draw);
+        for(MeshTree drawable: drawables){
+            drawable.getNodeValue().draw();
+        }
     }
 
     @Override
     public void clear() {
-
         drawables.clear();
     }
 
@@ -54,4 +58,6 @@ public class Scene implements DrawableContainer<MeshTree> {
             tree.getNodeValue().setShader(shader);
         }
     }
+
+
 }

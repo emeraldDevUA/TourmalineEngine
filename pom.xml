@@ -12,6 +12,11 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <lwjgl-version>3.3.3</lwjgl-version>
+        <joml-version>1.10.6</joml-version>
+        <imgui-version>1.87.0</imgui-version>
+
     </properties>
 
     <dependencies>
@@ -62,12 +67,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.lwjgl</groupId>
-            <artifactId>lwjgl-nuklear</artifactId>
-            <version>3.3.3</version>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-binding</artifactId>
+            <version>1.87.0</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>io.github.spair</groupId>
+            <artifactId>imgui-java-lwjgl3</artifactId>
+            <version>1.87.0</version>
+        </dependency>
 
     </dependencies>
     <build>
@@ -124,11 +132,11 @@
                     <version>3.3.3</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
+
                 <dependency>
-                    <groupId>org.lwjgl</groupId>
-                    <artifactId>lwjgl-nuklear</artifactId>
-                    <version>3.3.3</version>
-                    <classifier>natives-windows</classifier>
+                    <groupId>io.github.spair</groupId>
+                    <artifactId>imgui-java-natives-windows</artifactId>
+                    <version>1.87.0</version>
                 </dependency>
 
             </dependencies>
@@ -172,12 +180,13 @@
                     <version>3.3.3</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
-                <dependency>
-                    <groupId>org.lwjgl</groupId>
-                    <artifactId>lwjgl-nuklear</artifactId>
-                    <version>3.3.3</version>
-                    <classifier>natives-linux</classifier>
-                </dependency>
+<!--                <dependency>-->
+<!--                    <groupId>io.github.spair</groupId>-->
+<!--                    <artifactId>imgui-java-natives-linux</artifactId>-->
+<!--                    <version>1.87.0</version>-->
+<!--                </dependency>-->
+
+
             </dependencies>
         </profile>
         <profile>
@@ -219,13 +228,13 @@
                     <version>3.3.3</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
+<!--                <dependency>-->
+<!--                    <groupId>io.github.spair</groupId>-->
+<!--                    <artifactId>imgui-java-natives-macos</artifactId>-->
+<!--                    <version>1.87.0</version>-->
+<!--                </dependency>-->
 
-                <dependency>
-                    <groupId>org.lwjgl</groupId>
-                    <artifactId>lwjgl-nuklear</artifactId>
-                    <version>3.3.3</version>
-                    <classifier>natives-macos</classifier>
-                </dependency>
+
             </dependencies>
         </profile>
     </profiles>
