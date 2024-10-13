@@ -1,6 +1,7 @@
 package Annotations;
 
 
+import Interfaces.InterfaceRenderer;
 import Rendering.Camera;
 import ResourceImpl.CubeMap;
 import ResourceImpl.Scene;
@@ -8,7 +9,8 @@ import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import imgui.ImGui;
 import imgui.ImGuiIO;
-import imgui.flag.ImGuiCond;
+
+import imgui.ImVec2;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -20,6 +22,7 @@ import org.lwjgl.glfw.*;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
@@ -49,8 +52,8 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 @SuppressWarnings({"unused", "Duplicates"})
 
 public abstract class BasicWindow implements Closeable {
-    protected static ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
-    protected static ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
+    protected static ImGuiImplGlfw imGuiGlfw;
+    protected static ImGuiImplGl3 imGuiGl3;
     private static String glslVersion = null;
 
     private static int windowWidth, windowHeight;
@@ -87,15 +90,18 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader deferredShader;
     protected static Shader combineShader;
     protected static Shader postprocessingShader;
-//    protected static Shader skyboxShader;
+    //    protected static Shader skyboxShader;
     protected static Shader shadowMappingShader;
     protected static Texture BRDFLookUp;
 
     protected static Camera camera;
-    protected BasicWindow(){
+
+    protected BasicWindow() {
         t1 = System.currentTimeMillis();
         t2 = t1;
+
     }
+
     protected static void init(@NotNull Class<?> className) {
 
         int[] windowHints = new int[0];
@@ -106,7 +112,7 @@ public abstract class BasicWindow implements Closeable {
             OpenGLWindow annotation = className.getAnnotation(OpenGLWindow.class);
             window_name = annotation.windowName();
             dims = annotation.defaultDimensions();
-            windowWidth =  dims[0];
+            windowWidth = dims[0];
             windowHeight = dims[1];
             windowHintsValues = annotation.windowHintsValues();
             windowHints = annotation.windowHints();
@@ -126,7 +132,7 @@ public abstract class BasicWindow implements Closeable {
         //glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_SAMPLES, 4);
         int cnt = 0;
-        for(int hint:windowHints){
+        for (int hint : windowHints) {
             glfwWindowHint(hint, windowHintsValues[cnt]);
             cnt++;
         }
@@ -162,7 +168,7 @@ public abstract class BasicWindow implements Closeable {
         glfwSetWindowSizeCallback(window_handle, new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long l, int width, int height) {
-                glViewport(0,0, width,height);
+                glViewport(0, 0, width, height);
                 //glfwSetWindowSize(window_handle,width,height);
             }
         });
@@ -185,7 +191,7 @@ public abstract class BasicWindow implements Closeable {
         }
 
 
-        BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png",4);
+        BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png", 4);
 
         generateDepthBuffer();
         generateDeferredFramebuffer();
@@ -193,6 +199,9 @@ public abstract class BasicWindow implements Closeable {
         generateRenderQuad();
 
         glslVersion = "#version 460 core";
+
+        imGuiGlfw = new ImGuiImplGlfw();
+        imGuiGl3 = new ImGuiImplGl3();
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -202,34 +211,52 @@ public abstract class BasicWindow implements Closeable {
         imGuiGlfw.init(window_handle, true);
         imGuiGl3.init(glslVersion);
         ImGuiIO io = ImGui.getIO();
+
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
+        glfwSetMouseButtonCallback(window_handle, (window, button, action, mods) -> {
+            System.out.println(STR."Mouse button pressed: \{button} action: \{action}");
+            if (action == GLFW_PRESS) {
+                io.setMouseDown(button, true);
+            } else if (action == GLFW_RELEASE) {
+                io.setMouseDown(button, false);
+            }
+        });
     }
-    public static void render() {
+
+    public static void renderUI(InterfaceRenderer interfaceRenderer) {
 
         imGuiGl3.newFrame();
         imGuiGlfw.newFrame();
         ImGui.newFrame();
+        ImGui.setNextWindowSize(new ImVec2(200, 100));
 
-        ImGui.begin("Demo Window");
-        ImGui.text("Hello, ImGui with LWJGL!");
-        ImGui.end();
+        if (ImGui.begin("Demo Window")) {
 
-        ImGui.render();
-        imGuiGl3.renderDrawData(ImGui.getDrawData());
-        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-            final long backupCurrentContext = glfwGetCurrentContext();
-            ImGui.updatePlatformWindows();
-            ImGui.renderPlatformWindowsDefault();
-            glfwMakeContextCurrent(backupCurrentContext);
+            ImGui.text("Hello, ImGui with LWJGL!");
+            ImGui.pushID(1);
+            if (ImGui.button("Text", new ImVec2(200, 50))) {
+                System.out.println("TEXT");
+            }
+            ImGui.popID();
+
+            ImGui.end();
+
+            ImGui.render();
+            imGuiGl3.renderDrawData(ImGui.getDrawData());
+            if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+                final long backupCurrentContext = glfwGetCurrentContext();
+                ImGui .updatePlatformWindows();
+                ImGui.renderPlatformWindowsDefault();
+                glfwMakeContextCurrent(backupCurrentContext);
+            }
         }
-
     }
 
 
-    protected static void drawElements(){
-            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-            deferredPass();
-            postprocessingPass();
+    protected static void drawElements() {
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+        deferredPass();
+        postprocessingPass();
     }
 
 
@@ -246,8 +273,7 @@ public abstract class BasicWindow implements Closeable {
         t2 = System.currentTimeMillis();
     }
 
-    protected static void postprocessingPass()
-    {
+    protected static void postprocessingPass() {
         glDisable(GL_DEPTH_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -259,21 +285,18 @@ public abstract class BasicWindow implements Closeable {
         drawRenderQuad();
     }
 
-    private static void generateDepthBuffer()
-    {
+    private static void generateDepthBuffer() {
         sharedDepthBuffer = glGenRenderbuffers();
         glBindRenderbuffer(GL_RENDERBUFFER, sharedDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
 
-    private static void wipeDepthBuffer()
-    {
+    private static void wipeDepthBuffer() {
         glDeleteRenderbuffers(sharedDepthBuffer);
     }
 
-    private static void generateDeferredFramebuffer()
-    {
+    private static void generateDeferredFramebuffer() {
 
 
         deferredframeBuffer = glGenFramebuffers();
@@ -333,8 +356,7 @@ public abstract class BasicWindow implements Closeable {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    private static void wipeDeferredFrameBuffer()
-    {
+    private static void wipeDeferredFrameBuffer() {
         glDeleteFramebuffers(deferredframeBuffer);
         glDeleteTextures(deferredPositionBuffer);
         glDeleteTextures(deferredAlbedoMetalnessBuffer);
@@ -342,8 +364,7 @@ public abstract class BasicWindow implements Closeable {
         glDeleteTextures(deferredEnvironmentEmissionBuffer);
     }
 
-    private static void generateFrameBuffer()
-    {
+    private static void generateFrameBuffer() {
         frameBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
@@ -365,14 +386,12 @@ public abstract class BasicWindow implements Closeable {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
 
-    private static void cleanupFramebuffer()
-    {
+    private static void cleanupFramebuffer() {
         glDeleteFramebuffers(frameBuffer);
         glDeleteTextures(colorBuffer);
     }
 
-    private static void generateRenderQuad()
-    {
+    private static void generateRenderQuad() {
         float[] vertices = {
                 -1.0f, 1.0f,
                 -1.0f, -1.0f,
@@ -411,22 +430,19 @@ public abstract class BasicWindow implements Closeable {
         glBindVertexArray(0);
     }
 
-    protected static void drawRenderQuad()
-    {
+    protected static void drawRenderQuad() {
         glBindVertexArray(renderQuadArray);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
     }
 
-    private static void wipeRenderQuad()
-    {
+    private static void wipeRenderQuad() {
         glDeleteVertexArrays(renderQuadArray);
         glDeleteBuffers(verticesBuffer);
         glDeleteBuffers(uvsBuffer);
     }
 
-    protected static void deferredPass()
-    {
+    protected static void deferredPass() {
         camera.setViewProjectionMatrix(deferredShader);
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
         glClear(GL_COLOR_BUFFER_BIT);
@@ -435,7 +451,7 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE10);
         CubeMap radiance = scene.getSkyBox().getRadiance();
 
-        if(radiance!=null){
+        if (radiance != null) {
             radiance.use();
         }
 
@@ -443,7 +459,7 @@ public abstract class BasicWindow implements Closeable {
 
         CubeMap irradiance = scene.getSkyBox().getIrradiance();
 
-        if(irradiance!=null){
+        if (irradiance != null) {
             irradiance.use();
         }
 

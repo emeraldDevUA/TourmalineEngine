@@ -185,14 +185,17 @@ public class Mesh implements Loadable, Drawable, Closeable {
     private Material material;
     @Setter
     private Shader shader;
-
-
+    @Setter
+    @Getter
+    private boolean updated;
 
     public Mesh() {
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0, 0, 0);
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
         material = new Material();
+        updated = true;
+
     }
 
     @Override
@@ -335,15 +338,18 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
     @Override
     public void draw() {
+        if(updated) {
+            Matrix4f matrix4f = new Matrix4f().identity();
+            matrix4f.translate(position).rotate(rotQuaternion);
+            float[] model_matrix = new float[16];
+            model_matrix = matrix4f.get(model_matrix);
+            // not good, is going to deter performance.
 
-        Matrix4f matrix4f = new Matrix4f().identity();
-        matrix4f.translate(position).rotate(rotQuaternion);
-        float[] model_matrix = new float[16];
-        model_matrix = matrix4f.get(model_matrix);
-        // not good, is going to deter performance.
-        if (shader != null) {
-            int shader_pointer = shader.getProgram();
-            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "model_matrix"),false, model_matrix);
+            if (shader != null) {
+                int shader_pointer = shader.getProgram();
+                glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "model_matrix"), false, model_matrix);
+            }
+            updated = false;
         }
         material.use();
         for (VBO vbo : map.values()) {

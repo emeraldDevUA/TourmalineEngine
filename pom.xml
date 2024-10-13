@@ -185,8 +185,6 @@
 <!--                    <artifactId>imgui-java-natives-linux</artifactId>-->
 <!--                    <version>1.87.0</version>-->
 <!--                </dependency>-->
-
-
             </dependencies>
         </profile>
         <profile>
