@@ -3,19 +3,22 @@ package org.tourmaline;
 import Annotations.BasicWindow;
 import Controls.Keyboard;
 import Controls.Mouse;
+import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
 import Rendering.Camera;
 import Rendering.SkyBox;
 import ResourceImpl.*;
-import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImVec2;
 import org.joml.Vector3f;
-
-import org.lwjgl.system.MemoryStack;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 
 
 import java.util.ArrayList;
@@ -27,9 +30,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
@@ -60,15 +60,15 @@ public class Main extends BasicWindow {
         Texture normal = new Texture();
         Texture roughness_g = new Texture();
         Texture roughness_b = new Texture();
-        //Texture land_alb = new Texture();
+        Texture land_alb = new Texture();
         Mesh fightingFalcon = new Mesh();
         Mesh euroFighter = new Mesh();
         Mesh mig29 = new Mesh();
 
-        //Mesh land = new Mesh();
+      //  Mesh land = new Mesh();
 
         Material material = new Material();
-        Material land_mat = new Material();
+       // Material land_mat = new Material();
 
 
         resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
@@ -80,7 +80,7 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
 
-        //resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_1.obj");
+      // resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_1.obj");
         //resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
 
 
@@ -103,8 +103,8 @@ public class Main extends BasicWindow {
         fightingFalcon.compile();
         euroFighter.compile();
         mig29.compile();
-        //land.compile();
-        //land_alb.assemble();
+       // land.compile();
+       // land_alb.assemble();
 
         t3 = System.currentTimeMillis();
         resourceLoadScheduler.reset();
@@ -122,7 +122,7 @@ public class Main extends BasicWindow {
         material.addMap(Material.ALBEDO_MAP, albedo);
         material.addMap(Material.NORMAL_MAP, normal);
         material.addMap(Material.ROUGHNESS_MAP, roughness_g);
-        //land_mat.addMap(Material.ALBEDO_MAP, land_alb);
+       // land_mat.addMap(Material.ALBEDO_MAP, land_alb);
 
         fightingFalcon.setMaterial(material);
         //land.setMaterial(land_mat);
@@ -133,7 +133,8 @@ public class Main extends BasicWindow {
         Shader test_shader = new Shader("src/main/glsl/vertex_test.vert", "src/main/glsl/fragment_test.frag");
         test_shader.use();
         camera.setViewProjectionMatrix(test_shader);
-        fightingFalcon.setShader(test_shader); //land.setShader(test_shader);
+        fightingFalcon.setShader(test_shader);
+        //land.setShader(test_shader);
         MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
         scene.addDrawItem(F16);
 
@@ -179,6 +180,7 @@ public class Main extends BasicWindow {
                     System.out.println("S");
                     fightingFalcon.getRotQuaternion().rotateLocalX(0.01f).normalize();
                 }
+                fightingFalcon.setUpdated(true);
             }
         };
 
@@ -191,12 +193,41 @@ public class Main extends BasicWindow {
                         fightingFalcon.getRotQuaternion().y = 0;
                         fightingFalcon.getRotQuaternion().z = 0;
                         fightingFalcon.getRotQuaternion().w = 1;
+                        fightingFalcon.setUpdated(true);
                     }
                 }
             }
             @Override
             public void processMouseMovement(double X, double Y) {
 //                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
+                ImGuiIO io = ImGui.getIO();
+                io.setMousePos((float) X, (float) Y);
+            }
+        };
+
+
+        String os = System.getProperty("os.name");
+        SystemInfo systemInfo = new SystemInfo();
+        CentralProcessor processor = systemInfo.getHardware().getProcessor();
+
+        long mb = systemInfo.getHardware().getMemory().getTotal();
+        int processors = Runtime.getRuntime().availableProcessors();
+
+        String name = processor.getProcessorIdentifier().getName();
+
+        InterfaceRenderer ioRenderer = () -> {
+            ImGui.setNextWindowSize(new ImVec2(215, 160));
+            if (ImGui.begin("System Info")) {
+                ImGui.text(os);
+                ImGui.text(STR."\{mb} MB");
+                ImGui.text(STR."\{processors} Cores");
+                ImGui.text(STR."\{name}");
+                ImGui.pushID(1);
+                if (ImGui.button("Text", new ImVec2(200, 50))) {
+                    System.out.println("TEXT");
+                }
+                ImGui.popID();
+                ImGui.end();
             }
         };
 
@@ -216,19 +247,21 @@ public class Main extends BasicWindow {
 //            deferredPass();
 //            postprocessingPass();
 
-            keyboard.processEvents(keyboard_handler);
-            mouse.processEvents(mouse_handler);
 
             camera.setViewProjectionMatrix(test_shader);
             test_shader.use();
                 F16.draw();
+                //land.draw();
             test_shader.unbind();
            // glBindFramebuffer(GL_FRAMEBUFFER, 0);
             skyBoxShader.use();
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
             skyBoxShader.unbind();
-            render();
+            renderUI(ioRenderer);
+
+            keyboard.processEvents(keyboard_handler);
+            mouse.processEvents(mouse_handler);
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
 

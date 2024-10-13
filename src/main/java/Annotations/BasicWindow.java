@@ -22,6 +22,8 @@ import org.lwjgl.glfw.*;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import oshi.SystemInfo;
+import oshi.hardware.CentralProcessor;
 
 import java.io.Closeable;
 import java.nio.IntBuffer;
@@ -213,43 +215,27 @@ public abstract class BasicWindow implements Closeable {
         ImGuiIO io = ImGui.getIO();
 
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
-        glfwSetMouseButtonCallback(window_handle, (window, button, action, mods) -> {
-            System.out.println(STR."Mouse button pressed: \{button} action: \{action}");
-            if (action == GLFW_PRESS) {
-                io.setMouseDown(button, true);
-            } else if (action == GLFW_RELEASE) {
-                io.setMouseDown(button, false);
-            }
-        });
+
     }
 
-    public static void renderUI(InterfaceRenderer interfaceRenderer) {
+    public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
 
         imGuiGl3.newFrame();
         imGuiGlfw.newFrame();
         ImGui.newFrame();
-        ImGui.setNextWindowSize(new ImVec2(200, 100));
 
-        if (ImGui.begin("Demo Window")) {
 
-            ImGui.text("Hello, ImGui with LWJGL!");
-            ImGui.pushID(1);
-            if (ImGui.button("Text", new ImVec2(200, 50))) {
-                System.out.println("TEXT");
-            }
-            ImGui.popID();
+        interfaceRenderer.renderInterface();
 
-            ImGui.end();
-
-            ImGui.render();
-            imGuiGl3.renderDrawData(ImGui.getDrawData());
-            if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-                final long backupCurrentContext = glfwGetCurrentContext();
-                ImGui .updatePlatformWindows();
-                ImGui.renderPlatformWindowsDefault();
-                glfwMakeContextCurrent(backupCurrentContext);
-            }
+        ImGui.render();
+        imGuiGl3.renderDrawData(ImGui.getDrawData());
+        if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+            final long backupCurrentContext = glfwGetCurrentContext();
+            ImGui.updatePlatformWindows();
+            ImGui.renderPlatformWindowsDefault();
+            glfwMakeContextCurrent(backupCurrentContext);
         }
+
     }
 
 
