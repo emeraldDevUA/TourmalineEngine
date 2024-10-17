@@ -4,13 +4,12 @@ package Annotations;
 import Interfaces.InterfaceRenderer;
 import Rendering.Camera;
 import ResourceImpl.CubeMap;
-import ResourceImpl.Scene;
+import Rendering.Scene;
 import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 
-import imgui.ImVec2;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -22,13 +21,12 @@ import org.lwjgl.glfw.*;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import oshi.SystemInfo;
-import oshi.hardware.CentralProcessor;
 
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
 
+import static java.lang.StringTemplate.STR;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
 
@@ -51,7 +49,7 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @Getter
-@SuppressWarnings({"unused", "Duplicates"})
+@SuppressWarnings({ "Duplicates"})
 
 public abstract class BasicWindow implements Closeable {
     protected static ImGuiImplGlfw imGuiGlfw;
@@ -272,7 +270,9 @@ public abstract class BasicWindow implements Closeable {
     }
 
     private static void generateDepthBuffer() {
+
         sharedDepthBuffer = glGenRenderbuffers();
+
         glBindRenderbuffer(GL_RENDERBUFFER, sharedDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
@@ -290,6 +290,7 @@ public abstract class BasicWindow implements Closeable {
 
         deferredPositionBuffer = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
                 0, GL_RGB, GL_FLOAT, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -331,7 +332,7 @@ public abstract class BasicWindow implements Closeable {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            System.err.println(STR."Deferred framebuffer is not ready: \{glCheckFramebufferStatus(GL_FRAMEBUFFER)}");
+            System.err.println("Deferred framebuffer is not ready: " + glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
 
         int[] attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
@@ -370,6 +371,7 @@ public abstract class BasicWindow implements Closeable {
             System.err.println("Forward framebuffer is not ready");
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        System.out.println(STR."Color Buffer \{colorBuffer}\nShared Depth buffer \{shadowDepthBuffer}");
     }
 
     private static void cleanupFramebuffer() {
@@ -434,6 +436,7 @@ public abstract class BasicWindow implements Closeable {
         glClear(GL_COLOR_BUFFER_BIT);
         deferredShader.use();
         scene.setActiveProgram(deferredShader);
+        glEnable(GL_DEPTH_TEST);
         glActiveTexture(GL_TEXTURE10);
         CubeMap radiance = scene.getSkyBox().getRadiance();
 
@@ -455,8 +458,7 @@ public abstract class BasicWindow implements Closeable {
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
-        scene.setActiveProgram(combineShader);
-        camera.setViewProjectionMatrix(combineShader);
+
         combineShader.use();
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);
@@ -474,4 +476,7 @@ public abstract class BasicWindow implements Closeable {
         glDepthMask(true);
         combineShader.unbind();
     }
+
+
+
 }

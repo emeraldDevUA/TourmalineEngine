@@ -1,8 +1,10 @@
-package ResourceImpl;
+package Rendering;
 
 import Interfaces.Drawable;
 import Interfaces.DrawableContainer;
 import Rendering.SkyBox;
+import ResourceImpl.MeshTree;
+import ResourceImpl.Shader;
 import lombok.Getter;
 import lombok.Setter;
 

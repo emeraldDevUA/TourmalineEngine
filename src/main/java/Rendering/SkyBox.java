@@ -24,49 +24,49 @@ import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
 public class SkyBox implements Drawable, EnhancedLoadable {
 
-   private static final float[] skyboxVertices = {
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
+   private static final float[] skyboxVertices =  {
+           -1.0f, 1.0f, -1.0f,
+           -1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, 1.0f, -1.0f,
+           -1.0f, 1.0f, -1.0f,
 
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, -1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
+           -1.0f, -1.0f, 1.0f,
+           -1.0f, -1.0f, -1.0f,
+           -1.0f, 1.0f, -1.0f,
+           -1.0f, 1.0f, -1.0f,
+           -1.0f, 1.0f, 1.0f,
+           -1.0f, -1.0f, 1.0f,
 
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, 1.0f,
+           1.0f, 1.0f, 1.0f,
+           1.0f, 1.0f, 1.0f,
+           1.0f, 1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
 
-            -1.0f, -1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f,
-            -1.0f, -1.0f, 1.0f,
+           -1.0f, -1.0f, 1.0f,
+           -1.0f, 1.0f, 1.0f,
+           1.0f, 1.0f, 1.0f,
+           1.0f, 1.0f, 1.0f,
+           1.0f, -1.0f, 1.0f,
+           -1.0f, -1.0f, 1.0f,
 
-            -1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, -1.0f,
-            1.0f, 1.0f, 1.0f,
-            1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, 1.0f,
-            -1.0f, 1.0f, -1.0f,
+           -1.0f, 1.0f, -1.0f,
+           1.0f, 1.0f, -1.0f,
+           1.0f, 1.0f, 1.0f,
+           1.0f, 1.0f, 1.0f,
+           -1.0f, 1.0f, 1.0f,
+           -1.0f, 1.0f, -1.0f,
 
-            -1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, -1.0f,
-            1.0f, -1.0f, -1.0f,
-            -1.0f, -1.0f, 1.0f,
-            1.0f, -1.0f, 1.0f
-    };
+           -1.0f, -1.0f, -1.0f,
+           -1.0f, -1.0f, 1.0f,
+           1.0f, -1.0f, -1.0f,
+           1.0f, -1.0f, -1.0f,
+           -1.0f, -1.0f, 1.0f,
+           1.0f, -1.0f, 1.0f
+   };
     private int skyboxVerticesBuffer, skyboxCubeArray;
 
     @Setter
@@ -107,4 +107,6 @@ public class SkyBox implements Drawable, EnhancedLoadable {
     public void load(String path) throws FileNotFoundException, IOException {
 
     }
+
+
 }

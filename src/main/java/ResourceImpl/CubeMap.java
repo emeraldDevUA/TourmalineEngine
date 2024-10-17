@@ -21,11 +21,11 @@ import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
 import static org.lwjgl.opengl.GL30.GL_RGB16F;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
-import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_loadf;
+import static org.lwjgl.stb.STBImage.*;
+
 @SuppressWarnings("SpellCheckingInspection")
 public class CubeMap implements EnhancedLoadable{
-    private static final String[] faceIndices = {"_posx", "_negx", "_posy", "_negy", "_posz", "_negz"};
+    private static final String[] faceIndices = {"_posx", "_negx", "_negy", "_posy", "_posz", "_negz"};
     private int texture;
     private Map<String, hdrFace> faces;
 
@@ -39,7 +39,7 @@ public class CubeMap implements EnhancedLoadable{
         this.extension = ".hdr";
         texture = glGenTextures();
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-
+        setVerticalFlip(true);
         IntBuffer width = BufferUtils.createIntBuffer(1);
         IntBuffer height = BufferUtils.createIntBuffer(1);
         IntBuffer channels = BufferUtils.createIntBuffer(1);
@@ -171,5 +171,9 @@ public class CubeMap implements EnhancedLoadable{
             texData.clear();
             stbi_image_free(texData);
         }
+    }
+
+    public static void setVerticalFlip(boolean flip){
+        stbi_set_flip_vertically_on_load(flip);
     }
 }

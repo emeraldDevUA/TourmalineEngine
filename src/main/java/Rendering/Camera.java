@@ -4,7 +4,9 @@ import ResourceImpl.Shader;
 import lombok.Getter;
 
 import lombok.Setter;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 
@@ -12,6 +14,7 @@ import static org.lwjgl.opengl.GL20.*;
 
 public class Camera {
   @Setter
+  @Getter
   private Vector3f position;
   @Setter
   @Getter
@@ -19,6 +22,8 @@ public class Camera {
   private Matrix4f projectionMatrix;
   private Matrix4f viewMatrix;
 
+  @Getter
+  private Quaternionf quaternionf;
   private final Vector3f positionDifference;
 
   public Camera(Vector3f pos, Vector3f focus){
@@ -27,6 +32,7 @@ public class Camera {
     this.viewMatrix = new Matrix4f();
     this.projectionMatrix = new Matrix4f();
     this.positionDifference = pos.sub(focus);
+    this.quaternionf = new Quaternionf(0,0,0,1);
   }
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
@@ -34,9 +40,17 @@ public class Camera {
       // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
   public void loadViewMatrix(){
+        if(viewMatrix!=null){
+            viewMatrix.identity();
+        }
         viewMatrix = viewMatrix.lookAt(position, focus, new Vector3f(0,1,0));
-
   }
+
+  public void setPosition(final Quaternionf quaternion, final Vector3f position){
+
+      this.position = position.rotate(quaternion);
+  }
+
   public void setViewProjectionMatrix(Shader shader){
 
       if(shader != null){
