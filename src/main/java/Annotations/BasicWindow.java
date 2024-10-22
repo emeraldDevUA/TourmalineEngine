@@ -49,11 +49,13 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 
 @Getter
-@SuppressWarnings({ "Duplicates"})
+@SuppressWarnings({"Duplicates"})
 
 public abstract class BasicWindow implements Closeable {
+
     protected static ImGuiImplGlfw imGuiGlfw;
     protected static ImGuiImplGl3 imGuiGl3;
+
     private static String glslVersion = null;
 
     private static int windowWidth, windowHeight;
@@ -61,12 +63,11 @@ public abstract class BasicWindow implements Closeable {
     private static long t1, t2;
 
     protected static final long NULL = 0L;
-    public static long window_handle = 0L;
 
+    public static long window_handle = 0L;
 
     protected static String window_name;
     protected static Scene scene;
-
 
     protected static int renderQuadArray;
     protected static int verticesBuffer;
@@ -90,7 +91,7 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader deferredShader;
     protected static Shader combineShader;
     protected static Shader postprocessingShader;
-    //    protected static Shader skyboxShader;
+    protected static Shader skyBoxShader;
     protected static Shader shadowMappingShader;
     protected static Texture BRDFLookUp;
 
@@ -237,24 +238,12 @@ public abstract class BasicWindow implements Closeable {
     }
 
 
+
+
     protected static void drawElements() {
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
         deferredPass();
         postprocessingPass();
-    }
-
-
-    protected float getCurrentFPS() {
-
-        return 1.0f / (t2 - t1);
-    }
-
-    protected static void measureTime() {
-
-        if (t2 != t1) {
-            t1 = t2;
-        }
-        t2 = System.currentTimeMillis();
     }
 
     protected static void postprocessingPass() {
@@ -278,9 +267,6 @@ public abstract class BasicWindow implements Closeable {
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
     }
 
-    private static void wipeDepthBuffer() {
-        glDeleteRenderbuffers(sharedDepthBuffer);
-    }
 
     private static void generateDeferredFramebuffer() {
 
@@ -332,7 +318,7 @@ public abstract class BasicWindow implements Closeable {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            System.err.println("Deferred framebuffer is not ready: " + glCheckFramebufferStatus(GL_FRAMEBUFFER));
+            System.err.println(STR."Deferred framebuffer is not ready: \{glCheckFramebufferStatus(GL_FRAMEBUFFER)}");
 
 
         int[] attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
@@ -342,14 +328,55 @@ public abstract class BasicWindow implements Closeable {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
+    protected static void deferredPass() {
+        camera.setViewProjectionMatrix(deferredShader);
+        glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
 
-    private static void wipeDeferredFrameBuffer() {
-        glDeleteFramebuffers(deferredframeBuffer);
-        glDeleteTextures(deferredPositionBuffer);
-        glDeleteTextures(deferredAlbedoMetalnessBuffer);
-        glDeleteTextures(deferredNormalRoughnessBuffer);
-        glDeleteTextures(deferredEnvironmentEmissionBuffer);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        deferredShader.use();
+        scene.setActiveProgram(deferredShader);
+        glEnable(GL_DEPTH_TEST);
+        glActiveTexture(GL_TEXTURE10);
+        CubeMap radiance = scene.getSkyBox().getRadiance();
+
+        if (radiance != null) {
+            radiance.use();
+        }
+
+        glActiveTexture(GL_TEXTURE11);
+
+        CubeMap irradiance = scene.getSkyBox().getIrradiance();
+
+        if (irradiance != null) {
+            irradiance.use();
+        }
+
+        glActiveTexture(GL_TEXTURE12);
+        BRDFLookUp.use();
+        scene.drawItems();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
+
+        combineShader.use();
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, deferredAlbedoMetalnessBuffer);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, deferredNormalRoughnessBuffer);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer);
+        glActiveTexture(GL_TEXTURE9);
+        BRDFLookUp.use();
+
+        glDepthMask(false);
+        drawRenderQuad();
+        glDepthMask(true);
+        combineShader.unbind();
     }
+
 
     private static void generateFrameBuffer() {
         frameBuffer = glGenFramebuffers();
@@ -372,11 +399,6 @@ public abstract class BasicWindow implements Closeable {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         System.out.println(STR."Color Buffer \{colorBuffer}\nShared Depth buffer \{shadowDepthBuffer}");
-    }
-
-    private static void cleanupFramebuffer() {
-        glDeleteFramebuffers(frameBuffer);
-        glDeleteTextures(colorBuffer);
     }
 
     private static void generateRenderQuad() {
@@ -424,59 +446,45 @@ public abstract class BasicWindow implements Closeable {
 
     }
 
+
+    private static void wipeDepthBuffer() {
+
+        glDeleteRenderbuffers(sharedDepthBuffer);
+    }
+
     private static void wipeRenderQuad() {
         glDeleteVertexArrays(renderQuadArray);
         glDeleteBuffers(verticesBuffer);
         glDeleteBuffers(uvsBuffer);
     }
 
-    protected static void deferredPass() {
-        camera.setViewProjectionMatrix(deferredShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
-        glClear(GL_COLOR_BUFFER_BIT);
-        deferredShader.use();
-        scene.setActiveProgram(deferredShader);
-        glEnable(GL_DEPTH_TEST);
-        glActiveTexture(GL_TEXTURE10);
-        CubeMap radiance = scene.getSkyBox().getRadiance();
-
-        if (radiance != null) {
-            radiance.use();
-        }
-
-        glActiveTexture(GL_TEXTURE11);
-
-        CubeMap irradiance = scene.getSkyBox().getIrradiance();
-
-        if (irradiance != null) {
-            irradiance.use();
-        }
-
-        glActiveTexture(GL_TEXTURE12);
-        BRDFLookUp.use();
-        scene.drawItems();
-
-        glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-
-
-        combineShader.use();
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, deferredPositionBuffer);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, deferredAlbedoMetalnessBuffer);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, deferredNormalRoughnessBuffer);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer);
-        glActiveTexture(GL_TEXTURE9);
-        BRDFLookUp.use();
-
-        glDepthMask(false);
-        drawRenderQuad();
-        glDepthMask(true);
-        combineShader.unbind();
+    private static void wipeFramebuffer() {
+        glDeleteFramebuffers(frameBuffer);
+        glDeleteTextures(colorBuffer);
     }
 
+    private static void wipeDeferredFrameBuffer() {
+        glDeleteFramebuffers(deferredframeBuffer);
+        glDeleteTextures(deferredPositionBuffer);
+        glDeleteTextures(deferredAlbedoMetalnessBuffer);
+        glDeleteTextures(deferredNormalRoughnessBuffer);
+        glDeleteTextures(deferredEnvironmentEmissionBuffer);
+    }
+
+    protected float getCurrentFPS() {
+
+        return 1.0f / (t2 - t1);
+    }
+
+    protected static void measureTime() {
+
+        if (t2 != t1) {
+            t1 = t2;
+        }
+
+        t2 = System.currentTimeMillis();
+
+    }
 
 
 }

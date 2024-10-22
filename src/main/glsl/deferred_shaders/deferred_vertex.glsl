@@ -27,8 +27,8 @@ void main()
     bitangent.g = -normal.r;
     bitangent.b =  normal.g;
 
-    vs_out.position = ( model_matrix* vec4(position, 1.0)).xyz;
-    vs_out.normal = (model_matrix * vec4(normal, 0.0)).xyz;
+    vs_out.position = (model_matrix* vec4(position, 1.0)).xyz;
+    vs_out.normal   = (model_matrix * vec4(normal, 0.0)).xyz;
     vs_out.uv = uv;
     vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
 

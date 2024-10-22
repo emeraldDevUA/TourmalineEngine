@@ -15,7 +15,8 @@ out vec2 textureCoords;
 
 void main() {
     // WHY IS THIS NOT WORKING???
-    gl_Position = (projection_matrix*view_matrix*model_matrix*vec4(position,1)).xyzw;
+    gl_Position = (projection_matrix*view_matrix*model_matrix * vec4(position, 1));
+
     textureCoords = uv;
 
 }

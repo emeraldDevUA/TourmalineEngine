@@ -11,6 +11,7 @@ in VS_OUT
     vec3 camera_position;
 } vs_in;
 
+
 layout (binding = 4) uniform sampler2D albedo_map;
 layout (binding = 5) uniform sampler2D metalness_map;
 layout (binding = 6) uniform sampler2D roughness_map;
@@ -21,6 +22,7 @@ layout (binding = 9) uniform sampler2D ambient_occlusion_map;
 layout (binding = 10) uniform samplerCube radiance;
 layout (binding = 11) uniform samplerCube irradiance;
 layout (binding = 12) uniform sampler2D BRDFlookUp;
+
 
 layout (std140, binding = 2) uniform material_block
 {
@@ -35,6 +37,7 @@ layout (std140, binding = 2) uniform material_block
     bool  material_has_emission_map;
     vec3  material_emission;
 };
+
 
 layout (location = 0) out vec3 position;
 layout (location = 1) out vec4 albedo_metalness;

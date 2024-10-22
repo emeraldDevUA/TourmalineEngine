@@ -8,6 +8,7 @@ import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
 import Rendering.Camera;
+import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
 import ResourceLoading.ResourceLoadScheduler;
@@ -17,30 +18,36 @@ import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
 import org.joml.Vector3f;
+import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.joml.Math.abs;
+import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL15.glBindBuffer;
+import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
+import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 
-@OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1080},
+@OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE})
 
 public class Main extends BasicWindow {
 
     public static void main(String[] args){
-
-
-
 
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
@@ -65,10 +72,9 @@ public class Main extends BasicWindow {
         Mesh euroFighter = new Mesh();
         Mesh mig29 = new Mesh();
 
-      //  Mesh land = new Mesh();
-
+          Mesh land = new Mesh();
         Material material = new Material();
-       // Material land_mat = new Material();
+         Material land_mat = new Material();
 
 
         resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
@@ -80,8 +86,8 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
 
-      // resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_1.obj");
-        //resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
+       resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_2.obj");
+       resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
 
 
         t1 = System.currentTimeMillis();
@@ -103,8 +109,8 @@ public class Main extends BasicWindow {
         fightingFalcon.compile();
         euroFighter.compile();
         mig29.compile();
-       // land.compile();
-       // land_alb.assemble();
+        land.compile();
+        land_alb.assemble();
 
         t3 = System.currentTimeMillis();
         resourceLoadScheduler.reset();
@@ -113,19 +119,19 @@ public class Main extends BasicWindow {
 
         camera = new Camera(new Vector3f(-3,1,0), new Vector3f(0,0,0));
         camera.loadViewMatrix();
-        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 100,0.1f);
+        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,0.1f);
 
 //        camera.setMVP(deferredShader);
 //        camera.setMVP(combineShader);
-  //      fightingFalcon.setShader(deferredShader);
+//        fightingFalcon.setShader(deferredShader);
 
         material.addMap(Material.ALBEDO_MAP, albedo);
         material.addMap(Material.NORMAL_MAP, normal);
         material.addMap(Material.ROUGHNESS_MAP, roughness_g);
-       // land_mat.addMap(Material.ALBEDO_MAP, land_alb);
+        land_mat.addMap(Material.ALBEDO_MAP, land_alb);
 
         fightingFalcon.setMaterial(material);
-        //land.setMaterial(land_mat);
+        land.setMaterial(land_mat);
 
         List<TreeNode<Mesh>> arrayList = new ArrayList<>();
 
@@ -134,7 +140,7 @@ public class Main extends BasicWindow {
         test_shader.use();
         camera.setViewProjectionMatrix(test_shader);
         fightingFalcon.setShader(test_shader);
-        //land.setShader(test_shader);
+        land.setShader(test_shader);
         MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
         scene.addDrawItem(F16);
 
@@ -142,19 +148,15 @@ public class Main extends BasicWindow {
         glDepthFunc(GL_LESS);
         glEnable(GL_CULL_FACE);
 
-
-
         SkyBox skyBox = new SkyBox();
         CubeMap cm = new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
 
         skyBox.setCubeMap(cm);
-        Shader skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
+        skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
         camera.setViewProjectionMatrix(skyBoxShader);
         skyBox.compile();
-
-
 
         Keyboard keyboard = new Keyboard();
         keyboard.setWindow_pointer(window_handle);
@@ -165,22 +167,41 @@ public class Main extends BasicWindow {
         mouse.init();
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            if(state == GLFW_PRESS){
-                if(key == GLFW_KEY_A){
+            if (state == GLFW_PRESS) {
+                if (key == GLFW_KEY_A) {
                     System.out.println("A");
-                    fightingFalcon.getRotQuaternion().rotateLocalY(0.01f).normalize();
-                }
-                else if(key == GLFW_KEY_D){
+                    fightingFalcon.getRotQuaternion().rotateY(0.01f).normalize();
+                    camera.getQuaternionf().rotateY(0.01f).normalize();
+
+                } else if (key == GLFW_KEY_D) {
                     System.out.println("D");
-                    fightingFalcon.getRotQuaternion().rotateLocalY(-0.01f).normalize();
-                } else if(key == GLFW_KEY_W){
+                    fightingFalcon.getRotQuaternion().rotateY(-0.01f).normalize();
+                    camera.getQuaternionf().rotateY(-0.01f).normalize();
+
+                } else if (key == GLFW_KEY_W) {
                     System.out.println("W");
-                    fightingFalcon.getRotQuaternion().rotateLocalX(-0.01f).normalize();
-                } else if(key == GLFW_KEY_S){
+                    fightingFalcon.getRotQuaternion().rotateX(-0.01f).normalize();
+                    camera.getQuaternionf().rotateX(-0.01f).normalize();
+
+                } else if (key == GLFW_KEY_S) {
                     System.out.println("S");
-                    fightingFalcon.getRotQuaternion().rotateLocalX(0.01f).normalize();
+                    fightingFalcon.getRotQuaternion().rotateX(0.01f).normalize();
+                    camera.getQuaternionf().rotateX(0.01f).normalize();
+
+                } else if (key == GLFW_KEY_C) {
+                    fightingFalcon.getRotQuaternion().rotateZ(0.01f).normalize();
+                    camera.getQuaternionf().rotateZ(0.01f).normalize();
+
+                } else if (key == GLFW_KEY_V) {
+                    fightingFalcon.getRotQuaternion().rotateZ(-0.01f).normalize();
+                    camera.getQuaternionf().rotateZ(-0.01f).normalize();
+
                 }
                 fightingFalcon.setUpdated(true);
+                camera.setFocus(fightingFalcon.getPosition());
+                camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
+                camera.loadViewMatrix();
+                camera.setViewProjectionMatrix(skyBoxShader);
             }
         };
 
@@ -193,7 +214,15 @@ public class Main extends BasicWindow {
                         fightingFalcon.getRotQuaternion().y = 0;
                         fightingFalcon.getRotQuaternion().z = 0;
                         fightingFalcon.getRotQuaternion().w = 1;
-                        fightingFalcon.setUpdated(true);
+                        //fightingFalcon.setUpdated(true);
+
+                        camera.getQuaternionf().x = 0;
+                        camera.getQuaternionf().y = 0;
+                        camera.getQuaternionf().z = 0;
+                        camera.getQuaternionf().w = 1;
+
+                        camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
+                        camera.loadViewMatrix();
                     }
                 }
             }
@@ -233,50 +262,89 @@ public class Main extends BasicWindow {
 
         scene.setSkyBox(skyBox);
 
-//        camera.setViewProjectionMatrix(deferredShader);
-//        camera.setViewProjectionMatrix(combineShader);
+         camera.setViewProjectionMatrix(deferredShader);
+         camera.setViewProjectionMatrix(combineShader);
 
-        scene.setActiveProgram(test_shader);
+//       scene.setActiveProgram(test_shader);
+//       land.setShader(test_shader);
+
+
+
 
         while (!glfwWindowShouldClose(window_handle)){
-
-   //         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
             glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
-  //          drawElements();
-//            deferredPass();
-//            postprocessingPass();
 
+//            drawElements();
 
             camera.setViewProjectionMatrix(test_shader);
             test_shader.use();
                 F16.draw();
-                //land.draw();
+                land.draw();
             test_shader.unbind();
-           // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
             skyBoxShader.use();
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
             skyBoxShader.unbind();
-            renderUI(ioRenderer);
 
+
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            glDisable(GL_DEPTH_TEST);
+            postprocessingPass();
+            glEnable(GL_DEPTH_TEST);
+
+            renderUI(ioRenderer);
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
-
-
         }
 
     }
 
-
-
-
     @Override
     public void close() {
-
         glfwDestroyWindow(window_handle);
     }
+
+
+    public static void saveFramebufferAsImage(int width, int height, String filePath) {
+        // Allocate a buffer to store the pixel data (RGBA, 8-bit per channel)
+        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
+
+        // Read the pixels from the currently bound framebuffer
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        // Create a BufferedImage to store the pixel data
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // Flip Y-axis because OpenGL's origin is at the bottom-left
+                int index = (x + (height - y - 1) * width) * 4;
+                int r = buffer.get(index) & 0xFF;
+                int g = buffer.get(index + 1) & 0xFF;
+                int b = buffer.get(index + 2) & 0xFF;
+                int a = buffer.get(index + 3) & 0xFF;
+
+                // Create a pixel with ARGB format (Java uses ARGB)
+                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
+                image.setRGB(x, y, pixel);
+            }
+        }
+
+        // Save the BufferedImage as a PNG file
+        try {
+            ImageIO.write(image, "PNG", new File(filePath));
+            System.out.println("Image saved: " + filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
 

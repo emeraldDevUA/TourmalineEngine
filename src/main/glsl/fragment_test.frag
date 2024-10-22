@@ -8,7 +8,5 @@ in vec2 textureCoords;
 out vec4 fragment;
 
 void main() {
-
-
     fragment = texture(albedo_map, textureCoords);
 }
