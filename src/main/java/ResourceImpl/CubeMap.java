@@ -25,7 +25,7 @@ import static org.lwjgl.stb.STBImage.*;
 
 @SuppressWarnings("SpellCheckingInspection")
 public class CubeMap implements EnhancedLoadable{
-    private static final String[] faceIndices = {"_posx", "_negx", "_negy", "_posy", "_posz", "_negz"};
+    private static final String[] faceIndices = {"_posx", "_negx", "_posy", "_negy", "_posz", "_negz"};
     private int texture;
     private Map<String, hdrFace> faces;
 
@@ -43,7 +43,7 @@ public class CubeMap implements EnhancedLoadable{
         IntBuffer width = BufferUtils.createIntBuffer(1);
         IntBuffer height = BufferUtils.createIntBuffer(1);
         IntBuffer channels = BufferUtils.createIntBuffer(1);
-        FloatBuffer textureData = null;
+        FloatBuffer textureData;
 
         for (int i = 0; i < 6; i++) {
             width.clear();
@@ -154,15 +154,13 @@ public class CubeMap implements EnhancedLoadable{
 
     public void use() {
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-
-
     }
 
     @AllArgsConstructor
     static class hdrFace implements Closeable {
-        public IntBuffer width, height;
+        public IntBuffer   width, height;
         public FloatBuffer texData;
-        public  IntBuffer channels;
+        public IntBuffer   channels;
         @Override
         public void close() throws IOException {
             width.clear();
@@ -174,6 +172,7 @@ public class CubeMap implements EnhancedLoadable{
     }
 
     public static void setVerticalFlip(boolean flip){
+
         stbi_set_flip_vertically_on_load(flip);
     }
 }

@@ -1,8 +1,7 @@
 package Rendering;
 
-import Interfaces.Drawable;
+
 import Interfaces.DrawableContainer;
-import Rendering.SkyBox;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Scene implements DrawableContainer<MeshTree> {
-    private List<MeshTree> drawables;
+    private final List<MeshTree> drawables;
     @Setter
     @Getter
     private SkyBox skyBox;

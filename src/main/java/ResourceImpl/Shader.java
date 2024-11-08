@@ -1,10 +1,12 @@
 package ResourceImpl;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.lwjgl.opengl.GL20.*;
@@ -35,12 +37,22 @@ public class Shader implements Closeable {
         String fragmentSource = "";
 
         try {
-            vertexSource = new String(Files.readAllBytes(Paths.get(vertexPath)));
+            Path vPath = Paths.get(vertexPath);
+
+            vertexSource = new String(Files.readAllBytes(vPath));
             fragmentSource = new String(Files.readAllBytes(Paths.get(fragmentPath)));
+
+            Preprocessor preprocessor = new Preprocessor(vPath.getParent().toString());
+            fragmentSource = preprocessor.processIncludeFiles(fragmentSource);
+            vertexSource = preprocessor.processIncludeFiles(vertexSource);
+
+
         } catch (IOException e) {
             System.err.println("Shader reading failed");
             System.err.println(e.getMessage());
         }
+
+
 
         int vertexShader = glCreateShader(GL_VERTEX_SHADER);
         glShaderSource(vertexShader, vertexSource);
@@ -79,4 +91,58 @@ public class Shader implements Closeable {
 
         glDeleteShader(program);
     }
+
+
+    @RequiredArgsConstructor
+    private static class Preprocessor {
+        private final String currentPath;
+
+        // Loads the file specified in the #include statement
+        private String loadFile(final String includeStatement) {
+            String pathToHeaderFile = "";
+            String headerFileName = includeStatement.replace("#include", "")
+                    .replaceAll("[<>]", "")
+                    .trim();
+
+            // Define path based on brackets or quotes
+            if (includeStatement.contains("<")) {
+                pathToHeaderFile = STR."src/main/glsl/\{headerFileName}";
+            } else if (includeStatement.contains("\"")) {
+                pathToHeaderFile = currentPath + headerFileName;
+            }
+
+            // Read file content
+            try {
+                return new String(Files.readAllBytes(Paths.get(pathToHeaderFile)));
+            } catch (IOException e) {
+                System.err.println(STR."Error loading file: \{pathToHeaderFile}");
+                System.err.println(e.getMessage());
+                return "";  // Return empty string on failure to avoid null issues
+            }
+        }
+
+        // Replaces the #include statement with the loaded shader code
+        private String insertShaderCode(String source, String includeStatement) {
+            return source.replace(includeStatement, loadFile(includeStatement));
+        }
+
+        // Main processing method to replace all #include statements in the shader code
+        public String processIncludeFiles(String shaderCode) {
+            while (shaderCode.contains("#include")) {
+                int index1 = shaderCode.indexOf("#include");
+                int index2 = shaderCode.indexOf(">", index1);  // Find closing '>'
+
+                if (index2 == -1) {  // Invalid syntax; '>' not found
+                    System.err.println("Error: Invalid #include syntax.");
+                    break;
+                }
+
+                String includeStatement = shaderCode.substring(index1, index2 + 1);
+                shaderCode = insertShaderCode(shaderCode, includeStatement);
+            }
+
+            return shaderCode;
+        }
+    }
+
 }

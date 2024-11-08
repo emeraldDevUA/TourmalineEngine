@@ -24,36 +24,36 @@
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
-            <version>1.10.6</version>
+            <version>${joml-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl</artifactId>
-            <version>3.3.3</version>
+            <version>${lwjgl-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-opengl</artifactId>
-            <version>3.3.3</version>
+            <version>${lwjgl-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-glfw</artifactId>
-            <version>3.3.3</version>
+            <version>${lwjgl-version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-stb</artifactId>
-            <version>3.3.3</version>
+            <version>${lwjgl-version}</version>
         </dependency>
         <dependency>
             <groupId>org.lwjgl</groupId>
             <artifactId>lwjgl-assimp</artifactId>
-            <version>3.3.3</version>
+            <version>${lwjgl-version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -110,31 +110,31 @@
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-opengl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-glfw</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-stb</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-assimp</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-windows</classifier>
                 </dependency>
 
@@ -158,31 +158,31 @@
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-opengl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-glfw</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-stb</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-assimp</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
 <!--                <dependency>-->
@@ -204,31 +204,31 @@
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-opengl</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-glfw</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-stb</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
                 <dependency>
                     <groupId>org.lwjgl</groupId>
                     <artifactId>lwjgl-assimp</artifactId>
-                    <version>3.3.3</version>
+                    <version>${lwjgl-version}</version>
                     <classifier>natives-macos</classifier>
                 </dependency>
 <!--                <dependency>-->

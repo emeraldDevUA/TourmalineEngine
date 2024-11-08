@@ -22,6 +22,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
+
 import java.io.Closeable;
 import java.nio.IntBuffer;
 
@@ -330,16 +331,17 @@ public abstract class BasicWindow implements Closeable {
     }
     protected static void deferredPass() {
         camera.setViewProjectionMatrix(deferredShader);
-        glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
+        scene.setActiveProgram(deferredShader);
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         deferredShader.use();
-        scene.setActiveProgram(deferredShader);
-        glEnable(GL_DEPTH_TEST);
         glActiveTexture(GL_TEXTURE10);
-        CubeMap radiance = scene.getSkyBox().getRadiance();
 
+        CubeMap radiance = scene.getSkyBox().getRadiance();
         if (radiance != null) {
             radiance.use();
         }
@@ -347,17 +349,18 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE11);
 
         CubeMap irradiance = scene.getSkyBox().getIrradiance();
-
         if (irradiance != null) {
             irradiance.use();
         }
 
         glActiveTexture(GL_TEXTURE12);
         BRDFLookUp.use();
+
         scene.drawItems();
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
+        camera.setViewProjectionMatrix(combineShader);
 
         combineShader.use();
         glActiveTexture(GL_TEXTURE0);
@@ -368,6 +371,7 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, deferredNormalRoughnessBuffer);
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer);
+
         glActiveTexture(GL_TEXTURE9);
         BRDFLookUp.use();
 
@@ -375,6 +379,8 @@ public abstract class BasicWindow implements Closeable {
         drawRenderQuad();
         glDepthMask(true);
         combineShader.unbind();
+
+        // it's already lost here
     }
 
 

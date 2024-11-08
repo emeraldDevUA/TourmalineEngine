@@ -179,6 +179,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
     private final Map<String, VBO> map;
     @Getter
     private final Vector3f position;
+    private final Vector3f scale;
     @Getter
     private final Quaternionf rotQuaternion;
     @Setter
@@ -193,6 +194,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
     public Mesh() {
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0, 0, 0);
+        scale = new Vector3f(1,1,1);
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
         material = new Material();
         updated = true;
@@ -342,10 +344,10 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
         if(updated) {
             Matrix4f matrix4f = new Matrix4f().identity();
-            matrix4f.translate(position).rotate(rotQuaternion);
-
+            matrix4f.translate(position)
+                    .scale(scale)
+                    .rotate(rotQuaternion);
             model_matrix = matrix4f.get(model_matrix);
-            // not good, is going to deter performance.
         }
             if (shader != null) {
                 int shader_pointer = shader.getProgram();

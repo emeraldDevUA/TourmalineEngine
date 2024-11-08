@@ -31,7 +31,7 @@ public class Camera {
     this.focus = focus;
     this.viewMatrix = new Matrix4f();
     this.projectionMatrix = new Matrix4f();
-    this.positionDifference = pos.sub(focus);
+    this.positionDifference = pos.sub(focus, new Vector3f());
     this.quaternionf = new Quaternionf(0,0,0,1);
   }
 
@@ -39,16 +39,20 @@ public class Camera {
        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
       // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
-  public void loadViewMatrix(){
-        if(viewMatrix!=null){
+    public void loadViewMatrix() {
+        // Ensure viewMatrix is initialized before using it
+        if (viewMatrix == null) {
+            viewMatrix = new Matrix4f(); // Initialize viewMatrix if it’s null
+        } else {
             viewMatrix.identity();
         }
-        viewMatrix = viewMatrix.lookAt(position, focus, new Vector3f(0,1,0));
-  }
+
+        viewMatrix.lookAt(position, focus, new Vector3f(0, 1, 0));
+    }
 
   public void setPosition(final Quaternionf quaternion, final Vector3f position){
 
-      this.position = position.rotate(quaternion);
+      this.position = (position.rotate(quaternion));
   }
 
   public void setViewProjectionMatrix(Shader shader){
