@@ -449,7 +449,6 @@ public abstract class BasicWindow implements Closeable {
     protected static void drawRenderQuad() {
         glBindVertexArray(renderQuadArray);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
     }
 
 

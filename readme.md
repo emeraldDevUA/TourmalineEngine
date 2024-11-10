@@ -11,7 +11,7 @@ Possible usages include:
 My engine is strictly divided into the following modules:
 
 - ## Tourmaline Graphics
-1. It is based on the OpenGL API [46, GLSL 460]
+1. It is based on the OpenGL API [4.6, GLSL 460]
 2. PBR
 3. ShadowMapping
 4. ImGUI UI
@@ -22,9 +22,9 @@ My engine is strictly divided into the following modules:
 3. Collision [ Future ]
 
 - ## Tourmaline IO
-1. Supported as of now:
-2. Mouse 
-3. Keyboard
+**Supported as of now:**
+1. Mouse 
+2. Keyboard
 
 - ## Tourmaline Sound
 1. OpenAL

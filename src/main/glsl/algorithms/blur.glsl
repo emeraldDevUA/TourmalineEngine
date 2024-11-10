@@ -1,30 +1,7 @@
-#version 460 core
+#ifndef GAUSS_BLUR_GLSL_INCLUDED
+#define GAUSS_BLUR_GLSL_INCLUDED
 
-vec4 gaussian_blur(vec2 uvs);
-
-
-in vec2 uv_frag;
-layout (binding = 0) uniform sampler2D color;
-
-
-layout (location = 0) out vec4 fragment;
-
-
-void main()
-{
-    // Tweak gamma correction value as you wish
-    float gamma = 1.2;
-    // Exposure is something else rather then real exposure
-    float exposure = 1.0;
-
-    fragment = vec4(pow(texture(color, uv_frag).rgb * exposure, vec3(1.0 / gamma)), 1.0);
-    //fragment = gaussian_blur(uv_frag);
-
-}
-
-
-
-vec4 gaussian_blur(vec2 uvs){
+vec4 gaussian_blur(sampler2D color, vec2 uvs){
     // Kernel size and range
     int k = 1;
     vec3 blurredVertex = vec3(0, 0, 0);
@@ -52,3 +29,4 @@ vec4 gaussian_blur(vec2 uvs){
 
     return vec4(blurredVertex, 1.0);
 }
+#endif
