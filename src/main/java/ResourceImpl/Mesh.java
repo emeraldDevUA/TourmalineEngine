@@ -18,6 +18,8 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.lwjgl.opengl.ARBUniformBufferObject.glGetUniformBlockIndex;
+import static org.lwjgl.opengl.ARBUniformBufferObject.glUniformBlockBinding;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL15.glBindBuffer;
@@ -355,6 +357,9 @@ public class Mesh implements Loadable, Drawable, Closeable {
             }
 
         material.use();
+//            glUniformBlockBinding(shader.getProgram(),
+//                    glGetUniformBlockIndex(shader.getProgram(), "material_block"), material.getBuffer());
+
         for (VBO vbo : map.values()) {
             vbo.draw();
         }

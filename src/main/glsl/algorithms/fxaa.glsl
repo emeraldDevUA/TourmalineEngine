@@ -11,7 +11,7 @@
 #define FXAA_REDUCE_MUL   (1.0 / 8.0)
 #define FXAA_SPAN_MAX     8.0
 
-vec4 applyFXAA(vec2 fragCoord, sampler2D tex)
+vec4 applyFXAA(sampler2D tex, vec2 fragCoord, vec2 uViewportSize)
 {
     vec4 color;
     vec2 inverseVP = vec2(1.0 / uViewportSize.x, 1.0 / uViewportSize.y);

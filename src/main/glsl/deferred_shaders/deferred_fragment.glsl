@@ -89,49 +89,48 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float rough)
 void main()
 {
 
-
-
-
-    // "Hard" blending (like tree leaves) still can be used
-//    if(material_albedo.a == 0 || material_has_albedo_map && texture(albedo_map, vs_in.uv).a == 0){
-//        discard;
-//    }
-
-
     position = vs_in.position;
 
     albedo_metalness.rgb = material_albedo.rgb;
-    if(material_has_albedo_map)
-    albedo_metalness.rgb *= texture(albedo_map, vs_in.uv).rgb;
+
+    if(material_has_albedo_map) {
+        albedo_metalness = texture(albedo_map, vs_in.uv);
+    }
 
     if(material_has_normal_map)
     {
         mat3 texture_space_matrix = mat3(normalize(cross(vs_in.bitangent, vs_in.normal)), vs_in.bitangent, vs_in.normal);
         normal_roughness.rgb = texture_space_matrix * normalize(texture(normal_map, vs_in.uv).rgb * 2.0 - 1.0);
     }
-    else
-    normal_roughness.rgb = vs_in.normal.xyz;
+    else{
+        normal_roughness.rgb = vs_in.normal.xyz;
+    }
 
     albedo_metalness.a = material_metalness;
-    if(material_has_metalness_map)
-    albedo_metalness.a *= texture(metalness_map, vs_in.uv).r;
 
+    if(material_has_metalness_map) {
+        albedo_metalness.a *= texture(metalness_map, vs_in.uv).r;
+    }
     normal_roughness.a = material_roughness;
-    if(material_has_roughness_map)
-    normal_roughness.a *= texture(roughness_map, vs_in.uv).r;
 
+    if(material_has_roughness_map) {
+        normal_roughness.a *= texture(roughness_map, vs_in.uv).r;
+    }
     environment_emission = material_emission;
-    if(material_has_emission_map)
-    environment_emission *= texture(emission_map, vs_in.uv).rgb;
+    if(material_has_emission_map) {
+        environment_emission *= texture(emission_map, vs_in.uv).rgb;
+    }
 
     vec3 N = normalize(normal_roughness.rgb);
     vec3 V = normalize(vs_in.camera_position - position);
 
     vec3 F0 = vec3(0.04);
     F0 = mix(F0, albedo_metalness.rgb, albedo_metalness.a);
+
     vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, normal_roughness.a);
     vec3 kD = 1.0 - F;
     kD *= 1.0 - albedo_metalness.a;
+
     vec3 diffuse = texture(irradiance, N).rgb * albedo_metalness.rgb;
 
     vec3 R = reflect(-V, N);
@@ -143,12 +142,13 @@ void main()
 
     vec3 environment = kD * diffuse + specular;
 
-    if(material_has_ambient_occlusion_map)
-    environment *= texture(ambient_occlusion_map, vs_in.uv).r;
+    if(material_has_ambient_occlusion_map) {
+        environment *= texture(ambient_occlusion_map, vs_in.uv).r;
+    }
 
     environment_emission = environment;
-    if(material_has_emission_map)
-    environment_emission += texture(emission_map, vs_in.uv).rgb;
-
-
+    if(material_has_emission_map) {
+        environment_emission += texture(emission_map, vs_in.uv).rgb;
+    }
+    //albedo_metalness.rgb = texture(albedo_map, vs_in.uv).rgb;
 }

@@ -65,9 +65,15 @@ float DistributionGGX(vec3 N, vec3 H, float rough)
 
 void main()
 {
+//    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
+//    vec3( -5, -5,  5), vec3( 5, -5,  5), vec3( 5, 5, -5), vec3( -5, 5,  5)}
     // Real scene lights are not implemented yet so I am using these "built-it" for testing
-    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
-                               vec3( -5, -5,  5), vec3( 5, -5,  5), vec3( 5, 5, -5), vec3( -5, 5,  5)};
+    vec3 light_positions[] = {
+        vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
+        vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5)
+    };
+
+
     vec3 light_color = vec3(10.0, 10.0, 10.0);
 
     float metalness_value = texture(albedo_metalness, uv_frag).a;
@@ -88,7 +94,7 @@ void main()
         vec3 H = normalize(V + L);
 
         float distance = length(light_positions[i] - position_value);
-        float attenuation = 1.0 / (distance * distance);
+        float attenuation = 1.0 / ( pow(distance, 1.0/2.0));
         vec3 radiance = light_color * attenuation;
 
         vec3 F0 = vec3(0.04);
