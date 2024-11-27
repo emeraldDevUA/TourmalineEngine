@@ -16,7 +16,10 @@ layout (binding = 3) uniform sampler2D environment_emission;
 
 layout (binding = 9) uniform sampler2D BRDFlookUp;
 
+
+
 layout (location = 0) out vec4 fragment;
+layout (location = 1) out vec4 bloom;
 
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
@@ -115,5 +118,11 @@ void main()
     }
 
     fragment = vec4(Lo + environment_emission_value, 1.0);
+
+
+    if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1)
+        bloom = vec4(fragment.rgb, 1.0);
+    else
+        bloom = vec4(0.0, 0.0, 0.0, 1.0);
 
 }

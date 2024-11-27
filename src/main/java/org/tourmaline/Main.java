@@ -69,6 +69,8 @@ public class Main extends BasicWindow {
         Texture roughness_g = new Texture();
         Texture roughness_b = new Texture();
         Texture land_alb = new Texture();
+        Texture land_normal = new Texture();
+
         Texture metalness = new Texture();
         Mesh fightingFalcon = new Mesh();
         Mesh euroFighter = new Mesh();
@@ -92,6 +94,7 @@ public class Main extends BasicWindow {
 
         resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_2.obj");
         resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
+        resourceLoadScheduler.addResource(land_normal, "src/main/resources/3D_Models/Map/gltf_embedded_0_normal.jpg");
 
 
         t1 = System.currentTimeMillis();
@@ -115,6 +118,7 @@ public class Main extends BasicWindow {
         mig29.compile();
         land.compile();
         land_alb.assemble();
+        land_normal.assemble();
         metalness.assemble();
 
         t3 = System.currentTimeMillis();
@@ -145,6 +149,7 @@ public class Main extends BasicWindow {
         material.addProperty(Material.ROUGHNESS_MAP, 0.8);
 
         land_mat.addMap(Material.ALBEDO_MAP, land_alb);
+        land_mat.addMap(Material.NORMAL_MAP, land_normal);
 
         fightingFalcon.setMaterial(material);
         land.setMaterial(land_mat);

@@ -44,7 +44,7 @@ class VBO implements Drawable, Closeable {
 
     private int numVertices, numNormals, numUvs;
 
-
+    private IntBuffer indices;
     public VBO() {
 
     }
@@ -72,23 +72,29 @@ class VBO implements Drawable, Closeable {
         numNormals = normals.size();
         numUvs = textureCoordinates.size();
 
-
+        indices = BufferUtils.createIntBuffer(numVertices);
+        for (int i = 0; i < numVertices; i++) {
+            indices.put(i);
+        }
     }
 
-    /*public VBO(List<Integer> indices, List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
-        this.vertices = BufferUtils.createFloatBuffer(vertices.size() * 3);
-        this.normals = BufferUtils.createFloatBuffer(normals.size() * 3);
-        this.uv = BufferUtils.createFloatBuffer(textureCoordinates.size() * 2);
+    public VBO(List<Integer> indices, List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
+        this.vertices = BufferUtils.createFloatBuffer(indices.size() * 3);
+        this.normals = BufferUtils.createFloatBuffer(indices.size() * 3);
+        this.uv = BufferUtils.createFloatBuffer(indices.size() * 2);
 
         for (int i = 0; i < vertices.size(); i++) {
             this.vertices.put(vertices.get(i).x);
             this.vertices.put(vertices.get(i).y);
             this.vertices.put(vertices.get(i).z);
-
+        }
+        for(int i = 0; i < normals.size(); i ++) {
             this.normals.put(normals.get(i).x);
             this.normals.put(normals.get(i).y);
             this.normals.put(normals.get(i).z);
+        }
 
+        for(int i = 0 ; i < textureCoordinates.size(); i ++) {
             this.uv.put(textureCoordinates.get(i).x);
             this.uv.put(textureCoordinates.get(i).y);
         }
@@ -98,9 +104,11 @@ class VBO implements Drawable, Closeable {
         numNormals = normals.size();
         numUvs = textureCoordinates.size();
 
+        this.indices = BufferUtils.createIntBuffer(numVertices);
 
+        indices.forEach(index ->{this.indices.put(index);});
     }
-*/
+
 
     @Override
     public void draw() {
@@ -121,11 +129,9 @@ class VBO implements Drawable, Closeable {
         vao = GL30.glGenVertexArrays();
         GL30.glBindVertexArray(vao);
 
-        IntBuffer indices = BufferUtils.createIntBuffer(numVertices);
 
-        for (int i = 0; i < numVertices; i++) {
-            indices.put(i);
-        }
+
+
 
         if (numVertices > 0) {
 
@@ -289,7 +295,9 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
                 //setting bias values because of how OBJ format is structured
                 // [ every new vertex is enumerated sequentially, not from 1 to N for every separate object]
-                map.put(name, new VBO(finalVertices, finalNormals, finalUVs));
+                 map.put(name, new VBO(finalVertices, finalNormals, finalUVs));
+                // map.put(name, new VBO(indices, vertices, vectors, textureCoords));
+                // indices.clear();
             }
 
         }

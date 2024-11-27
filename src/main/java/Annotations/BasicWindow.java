@@ -84,6 +84,7 @@ public abstract class BasicWindow implements Closeable {
     // Forward/Postprocessing pass data
     protected static int frameBuffer;
     protected static int colorBuffer;
+    protected static int bloomBuffer;
 
     // Depth buffer is shared between different framebuffers
     protected static int sharedDepthBuffer;
@@ -256,6 +257,10 @@ public abstract class BasicWindow implements Closeable {
 
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, colorBuffer);
+
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, bloomBuffer);
+
         drawRenderQuad();
     }
 
@@ -396,15 +401,31 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
 
+        bloomBuffer = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, bloomBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight,
+                0, GL_RGBA, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bloomBuffer, 0);
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
+
+
+
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             System.err.println("Forward framebuffer is not ready");
 
+        int[] attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+
+        glDrawBuffers(attachments);
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        System.out.println(STR."Color Buffer \{colorBuffer}\nShared Depth buffer \{shadowDepthBuffer}");
+        System.out.println(STR."Color Buffer \{colorBuffer}\n Bloom Buffer \{bloomBuffer}\n Shared Depth buffer \{shadowDepthBuffer}");
     }
 
     private static void generateRenderQuad() {
