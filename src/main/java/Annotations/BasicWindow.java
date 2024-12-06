@@ -172,7 +172,7 @@ public abstract class BasicWindow implements Closeable {
             @Override
             public void invoke(long l, int width, int height) {
                 glViewport(0, 0, width, height);
-                //glfwSetWindowSize(window_handle,width,height);
+                resizeWindow(new int[]{width, height});
             }
         });
         try {
@@ -425,7 +425,7 @@ public abstract class BasicWindow implements Closeable {
         glDrawBuffers(attachments);
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        System.out.println(STR."Color Buffer \{colorBuffer}\n Bloom Buffer \{bloomBuffer}\n Shared Depth buffer \{shadowDepthBuffer}");
+        //System.out.println(STR."Color Buffer \{colorBuffer}\n Bloom Buffer \{bloomBuffer}\n Shared Depth buffer \{shadowDepthBuffer}");
     }
 
     private static void generateRenderQuad() {
@@ -512,5 +512,23 @@ public abstract class BasicWindow implements Closeable {
 
     }
 
+    /**
+     * @param dims
+     * dims[0] - width
+     * dims[1] - height
+     */
+    protected static void resizeWindow(int[] dims){
+        wipeDepthBuffer();
+        wipeFramebuffer();
+        wipeDeferredFrameBuffer();
+
+        windowWidth = dims[0];
+        windowHeight = dims[1];
+
+        generateDepthBuffer();
+        generateDeferredFramebuffer();
+        generateFrameBuffer();
+        // regenerate FBs
+    }
 
 }

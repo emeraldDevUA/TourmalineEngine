@@ -25,8 +25,6 @@ public class Material implements Closeable {
     public static final String METALNESS_MAP = "Metalness";
     public static final String EMISSION_MAP = "Emission";
     public static final String AO_MAP = "AmbientOcclusion";
-
-
     private static final String OPACITY = "Opacity";
     private static final String METALNESS = "Metalness";
     private static final String ROUGHNESS = "Roughness";
@@ -187,7 +185,7 @@ public class Material implements Closeable {
         }
         bufferUpdated = true;
 
-        System.out.println(materialBuffer.capacity());
+
     }
 
 
@@ -195,5 +193,8 @@ public class Material implements Closeable {
         addProperty(ROUGHNESS, (double) mtl.roughness);
         addProperty(METALNESS, (double) mtl.metallic);
         addProperty(OPACITY,   (double) mtl.opacity);
+        addProperty(ROUGHNESS,   (double) mtl.roughness);
+        addProperty(METALNESS,   (double) mtl.metallic);
+
     }
 }

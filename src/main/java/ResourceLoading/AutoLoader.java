@@ -7,28 +7,28 @@ import ResourceImpl.MeshTree;
 import ResourceImpl.Texture;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-@AllArgsConstructor
+@RequiredArgsConstructor
+
 public class AutoLoader {
-    private String rootFolder;
+    private final String rootFolder;
     @Getter
-    private List<MeshTree> drawables;
-    private ResourceLoadScheduler resourceLoadScheduler;
+    private Map<String,MeshTree> drawables;
+    private final ResourceLoadScheduler resourceLoadScheduler;
     public void loadTrees() {
 
-        drawables = new ArrayList<>();
+        drawables = new ConcurrentHashMap<String, MeshTree>();
 
         File folder = new File(rootFolder);
 
         for (final File fileEntry : Objects.requireNonNull(folder.listFiles())) {
             if (fileEntry.isDirectory()) {
-                drawables.add((MeshTree) loadMesh(fileEntry, null));
+                drawables.put( fileEntry.getName() ,(MeshTree) loadMesh(fileEntry, null));
             }
             else{
                 System.err.println(STR."Only folders are expected to be in the root dir.\n\{fileEntry.getName()}");
@@ -49,7 +49,7 @@ public class AutoLoader {
 
         Material material = new Material();
         Mesh mesh = null;
-        System.err.println(Arrays.toString(files));
+
         for (File f : files) {
             if (f.isDirectory()) {
                 loadMesh(f, meshTree);

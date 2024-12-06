@@ -172,8 +172,16 @@ public class Main extends BasicWindow {
 
         SkyBox skyBox = new SkyBox();
         CubeMap cm = new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
+        CubeMap radiance_cm =
+                new CubeMap("src/main/resources/skybox/radiance", ".hdr", false);
+
+        CubeMap irradiance_cm =
+                new CubeMap("src/main/resources/skybox/irradiance", ".hdr", false);
 
         skyBox.setCubeMap(cm);
+        skyBox.setRadiance(radiance_cm);
+        skyBox.setIrradiance(irradiance_cm);
+
         skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
@@ -237,23 +245,23 @@ public class Main extends BasicWindow {
         MouseEventHandler mouse_handler = new MouseEventHandler() {
             @Override
             public void processMouseEvent(int key, int action) {
-                if(action == GLFW_PRESS){
-                    if(key == GLFW_MOUSE_BUTTON_LEFT){
-                        fightingFalcon.getRotQuaternion().x = 0;
-                        fightingFalcon.getRotQuaternion().y = 0;
-                        fightingFalcon.getRotQuaternion().z = 0;
-                        fightingFalcon.getRotQuaternion().w = 1;
-                        //fightingFalcon.setUpdated(true);
-
-                        camera.getQuaternionf().x = 0;
-                        camera.getQuaternionf().y = 0;
-                        camera.getQuaternionf().z = 0;
-                        camera.getQuaternionf().w = 1;
-
-                        //camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
-                        camera.loadViewMatrix();
-                    }
-                }
+//                if(action == GLFW_PRESS){
+//                    if(key == GLFW_MOUSE_BUTTON_LEFT){
+//                        fightingFalcon.getRotQuaternion().x = 0;
+//                        fightingFalcon.getRotQuaternion().y = 0;
+//                        fightingFalcon.getRotQuaternion().z = 0;
+//                        fightingFalcon.getRotQuaternion().w = 1;
+//                        //fightingFalcon.setUpdated(true);
+//
+//                        camera.getQuaternionf().x = 0;
+//                        camera.getQuaternionf().y = 0;
+//                        camera.getQuaternionf().z = 0;
+//                        camera.getQuaternionf().w = 1;
+//
+//                        //camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
+//                        camera.loadViewMatrix();
+//                    }
+//                }
             }
             @Override
             public void processMouseMovement(double X, double Y) {
