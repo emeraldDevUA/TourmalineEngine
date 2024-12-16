@@ -10,15 +10,22 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public abstract class TreeNode<T> {
+
     private List<TreeNode<T>> childNodes;
     private T nodeValue;
     private String nodeName;
 
-    void addNode(TreeNode<T> treeNode){
+    public void addNode(TreeNode<T> treeNode){
+
         childNodes.add(treeNode);
     }
 
-    T findNode(String name){
+    public TreeNode<T> deleteNode(String name){
+
+        return null;
+    }
+
+    public T findNode(String name){
         TreeNode<T> node = this;
         if(node.getNodeName().compareTo(name) == 0){
             return  nodeValue;

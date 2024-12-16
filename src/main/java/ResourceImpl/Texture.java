@@ -1,6 +1,7 @@
 package ResourceImpl;
 
 import Interfaces.EnhancedLoadable;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.lwjgl.BufferUtils;
 
@@ -13,17 +14,18 @@ import java.util.Map;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.*;
-import static org.lwjgl.stb.STBImage.stbi_image_free;
-import static org.lwjgl.stb.STBImage.stbi_load;
-
+import static org.lwjgl.stb.STBImage.*;
 
 
 @NoArgsConstructor
 public class Texture implements EnhancedLoadable {
     private static final Map<String, Integer> loadedTextures = new HashMap<>();
     private static final Map<String, Integer> loadedInstances = new HashMap<>();
+    @Getter
     private ByteBuffer textureData;
+    @Getter
     private IntBuffer textureWidth = BufferUtils.createIntBuffer(1);
+    @Getter
     private IntBuffer textureHeight = BufferUtils.createIntBuffer(1);
     private int texture;
     private String path;
@@ -51,7 +53,7 @@ public class Texture implements EnhancedLoadable {
         try {
             textureData = stbi_load(path, textureWidth, textureHeight, textureChannels, channels);
         } catch (Exception e) {
-            System.err.println("Texture \"" + path + "\" loading failed");
+            System.err.println(STR."Texture \"\{path}\" loading failed");
         }
 
         texture = glGenTextures();
@@ -81,7 +83,7 @@ public class Texture implements EnhancedLoadable {
                 internal = GL_RGBA;
                 break;
             default:
-                throw new RuntimeException("Wrong texture channel count: " + channels);
+                throw new RuntimeException(STR."Wrong texture channel count: \{channels}");
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth.get(0), textureHeight.get(0), 0,
@@ -97,7 +99,7 @@ public class Texture implements EnhancedLoadable {
     }
 
     /**
-     * Bind this texture to currently active texture slot
+     * Binds this texture to currently active texture slot
      */
     public void use()
     {
@@ -116,6 +118,9 @@ public class Texture implements EnhancedLoadable {
         glDeleteTextures(texture);
     }
 
+    public static void setVerticalFlip(boolean flip){
+        stbi_set_flip_vertically_on_load(flip);
+    }
     @Override
     public void load(String path) throws FileNotFoundException {
         this.path = path;
@@ -127,13 +132,12 @@ public class Texture implements EnhancedLoadable {
             return;
         }
 
-        IntBuffer textureWidth = BufferUtils.createIntBuffer(1);
-        IntBuffer textureHeight = BufferUtils.createIntBuffer(1);
-        IntBuffer textureChannels = BufferUtils.createIntBuffer(1);
-
-
+         textureWidth = BufferUtils.createIntBuffer(1);
+         textureHeight = BufferUtils.createIntBuffer(1);
+         IntBuffer textureChannels = BufferUtils.createIntBuffer(1);
 
         textureData = stbi_load(path, textureWidth, textureHeight, textureChannels, channels);
+        textureChannels.clear();
     }
     @Override
     public void assemble(){

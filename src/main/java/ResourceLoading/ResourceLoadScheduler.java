@@ -50,7 +50,10 @@ public class ResourceLoadScheduler {
             workingThreads.add(i, new ResourceLoader(new ArrayList<>(), new ArrayList<>()));
         }
     }
-
+    /**
+     * Returns a float value that represents the amount of completed work.
+     * n = N(workingThreads)/N(allThreads)
+     */
     public float getReadiness(){
         int alive = 0;
         for(int i = 0; i < coreNumber; i ++){
