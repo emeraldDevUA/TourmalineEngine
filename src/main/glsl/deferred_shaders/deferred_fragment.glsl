@@ -45,7 +45,7 @@ layout (location = 1) out vec4 albedo_metalness;
 layout (location = 2) out vec4 normal_roughness;
 layout (location = 3) out vec3 environment_emission;
 
-//layout (location = 4) out vec3 shadow_position;
+layout (location = 4) out vec3 shadow_position;
 
 float DistributionGGX(vec3 N, vec3 H, float rough)
 {
@@ -91,6 +91,7 @@ void main()
 {
 
     position = vs_in.position;
+    shadow_position = vs_in.shadow_position;
 
     albedo_metalness.rgb = material_albedo.rgb;
 

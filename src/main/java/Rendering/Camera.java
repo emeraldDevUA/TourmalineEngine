@@ -39,6 +39,12 @@ public class Camera {
        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
       // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
+  public void loadOrthographicProjection(float left, float right, float bottom, float top, float zNear, float zFar){
+
+      projectionMatrix = projectionMatrix.setOrtho(left,right,bottom,top,zNear,zFar);
+  }
+
+
     public void loadViewMatrix() {
         // Ensure viewMatrix is initialized before using it
         if (viewMatrix == null) {
@@ -68,6 +74,24 @@ public class Camera {
           glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"),false, projection_matrix);
       }
   }
+
+
+
+
+    public void setShadowViewProjectionMatrix(Shader shader){
+
+        if(shader != null){
+            shader.use();
+            int shader_pointer = shader.getProgram();
+            float[] view_matrix = new float[16];
+            float[] projection_matrix = new float[16];
+            viewMatrix.get(view_matrix);
+            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "shadow_view_matrix"),false, view_matrix);
+            projectionMatrix.get(projection_matrix);
+            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "shadow_projection_matrix"),false, projection_matrix);
+        }
+    }
+
   public void update(){
       position = focus.add(positionDifference);
       loadViewMatrix();

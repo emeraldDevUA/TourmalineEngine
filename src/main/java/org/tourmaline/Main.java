@@ -44,7 +44,7 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
-        windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE})
+        windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
 public class Main extends BasicWindow {
 
@@ -64,6 +64,11 @@ public class Main extends BasicWindow {
         combineShader = new Shader("src/main/glsl/combine_shaders/combine_vertex.glsl",
                 "src/main/glsl/combine_shaders/combine_fragment.glsl");
 
+         shadowMappingShader =
+                new Shader("src/main/glsl/shadow_shaders/shadow_vertex.glsl",
+                        "src/main/glsl/shadow_shaders/shadow_fragment.glsl");
+
+         
         Texture albedo = new Texture();
         Texture normal = new Texture();
         Texture roughness_g = new Texture();
@@ -132,15 +137,20 @@ public class Main extends BasicWindow {
         camera = new Camera(
                 temp.add(new Vector3f(-3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
+//        shadowCamera = new Camera(
+//                new Vector3f(0, 1000, 0),
+//                new Vector3f(0,0,0)
+//        );
 
-        System.out.println(STR."\{camera.getPosition()}   \{camera.getFocus()}");
+        shadowCamera = new Camera(
+                temp.add(new Vector3f(-90,120,20), new Vector3f()),
+                temp.add(new Vector3f(0,0,0), new Vector3f()));
+//        System.out.println(STR."\{camera.getPosition()}   \{camera.getFocus()}");
 
         camera.loadViewMatrix();
+        shadowCamera.loadViewMatrix();
         camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,0.1f);
-
-//        camera.setMVP(deferredShader);
-//        camera.setMVP(combineShader);
-//        fightingFalcon.setShader(deferredShader);
+        shadowCamera.loadOrthographicProjection(-1500,1500, -1500, 1500, -800, 800);
 
         material.addMap(Material.ALBEDO_MAP, albedo);
         material.addMap(Material.NORMAL_MAP, normal);
@@ -161,8 +171,10 @@ public class Main extends BasicWindow {
         test_shader.use();
         camera.setViewProjectionMatrix(test_shader);
         fightingFalcon.setShader(test_shader);
+        fightingFalcon.setShadowScale(new Vector3f(4));
         land.setShader(test_shader);
         MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
+
         scene.addDrawItem(F16);
         scene.addDrawItem(new MeshTree(null, land, "land"));
 
@@ -210,9 +222,6 @@ public class Main extends BasicWindow {
 
                 } else if (key == GLFW_KEY_W) {
                     System.out.println("W");
-//                    fightingFalcon.getRotQuaternion().rotateX(-0.01f).normalize();
-//                    camera.getQuaternionf().rotateX(-0.01f).normalize();
-
                     fightingFalcon.getPosition().add(fightingFalcon.getRotQuaternion()
                             .transform(new Vector3f(1,0,0)));
                 } else if (key == GLFW_KEY_S) {
@@ -238,6 +247,11 @@ public class Main extends BasicWindow {
                                 .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
+//                shadowCamera.setFocus(fightingFalcon.getPosition());
+//                shadowCamera.setPosition(fightingFalcon.getPosition()
+//                        .add(new Vector3f(-30,40,30),new Vector3f()));
+//                shadowCamera.loadViewMatrix();
+//                shadowCamera.setShadowViewProjectionMatrix(deferredShader);
                 camera.setViewProjectionMatrix(skyBoxShader);
             }
         };
@@ -300,13 +314,11 @@ public class Main extends BasicWindow {
         scene.setSkyBox(skyBox);
 
 
-         camera.setViewProjectionMatrix(deferredShader);
-         camera.setViewProjectionMatrix(combineShader);
+        camera.setViewProjectionMatrix(deferredShader);
+        camera.setViewProjectionMatrix(combineShader);
 
-       scene.setActiveProgram(deferredShader);
-//       land.setShader(test_shader);
+        scene.setActiveProgram(deferredShader);
 
-//
 
         if(glGetUniformBlockIndex(deferredShader.getProgram(), "material_block") == GL_INVALID_INDEX){
             throw new RuntimeException("Fuck Life");
@@ -317,9 +329,11 @@ public class Main extends BasicWindow {
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
-            camera.setViewProjectionMatrix(deferredShader);
+                shadowPass();
 
-              deferredPass();
+           camera.setViewProjectionMatrix(deferredShader);
+
+                deferredPass();
 
 
             skyBoxShader.use();

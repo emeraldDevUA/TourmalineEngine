@@ -13,6 +13,8 @@ layout (location = 0) out vec4 fragment;
 
 #include <algorithms/blur.glsl>
 #include <algorithms/fxaa.glsl>
+#include <algorithms/color_spaces.glsl>
+#include <algorithms/gradient.glsl>
 
 void main()
 {
@@ -23,7 +25,7 @@ void main()
     float exposure = 1.0;
 
     vec4 bloomColor = gaussian_blur5(bloom, uv_frag);
-     uViewportSize = vec2(1, 1);
+    uViewportSize = vec2(1, 1);
     vec4 fxaa_color = applyFXAA(color, uv_frag, uViewportSize);
 
     fxaa_color += bloomColor;

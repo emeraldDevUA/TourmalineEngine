@@ -39,7 +39,7 @@ public class CubeMap implements EnhancedLoadable{
         this.extension = ".hdr";
         texture = glGenTextures();
         glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
-        setVerticalFlip(true);
+        setVerticalFlip(false);
         IntBuffer width = BufferUtils.createIntBuffer(1);
         IntBuffer height = BufferUtils.createIntBuffer(1);
         IntBuffer channels = BufferUtils.createIntBuffer(1);
@@ -127,7 +127,7 @@ public class CubeMap implements EnhancedLoadable{
     @Override
     public void load(String path) throws FileNotFoundException, IOException {
 
-        FloatBuffer textureData = null;
+        FloatBuffer textureData;
         faces = new HashMap<>();
 
         for (int i = 0; i < 6; i++) {

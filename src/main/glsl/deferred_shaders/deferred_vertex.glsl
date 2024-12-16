@@ -40,5 +40,8 @@ void main()
 
     vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
 
+    vec4 sp = shadow_projection_matrix * shadow_view_matrix * model_matrix * vec4(position, 1.0);
+    vs_out.shadow_position = sp.xyz/sp.w;
+
     gl_Position = projection_matrix * view_matrix * model_matrix * vec4(position, 1.0);
 }

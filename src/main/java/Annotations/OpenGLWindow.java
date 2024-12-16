@@ -20,4 +20,10 @@ public @interface OpenGLWindow {
      * Is used to pass values for GLFW parameters, address the official OGL documentation for further information.
      */
     int[] windowHintsValues() default { };
+
+
+    /**
+     * It is used to pass ShadowMap dimensions
+     */
+    int shadowMapResolution() default 512;
 }

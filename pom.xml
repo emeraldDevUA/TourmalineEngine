@@ -185,11 +185,15 @@
                     <version>${lwjgl-version}</version>
                     <classifier>natives-linux</classifier>
                 </dependency>
+
                 <dependency>
                     <groupId>io.github.spair</groupId>
-                    <artifactId>imgui-java-natives-windows</artifactId>
+                    <artifactId>imgui-java-natives-linux</artifactId>
                     <version>1.87.0</version>
+                    <scope>system</scope>
+                    <systemPath>${project.basedir}/imgui-java-natives-linux-1.87.0.jar</systemPath>
                 </dependency>
+
             </dependencies>
         </profile>
         <profile>
@@ -233,8 +237,10 @@
                 </dependency>
                 <dependency>
                     <groupId>io.github.spair</groupId>
-                    <artifactId>imgui-java-natives-windows</artifactId>
+                    <artifactId>imgui-java-natives-macos</artifactId>
                     <version>1.87.0</version>
+                    <scope>system</scope>
+                    <systemPath>${project.basedir}/imgui-java-natives-macos-1.87.0.jar</systemPath>
                 </dependency>
 
             </dependencies>

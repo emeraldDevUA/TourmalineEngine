@@ -21,6 +21,7 @@ import org.lwjgl.glfw.*;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
+import org.tourmaline.Main;
 
 
 import java.io.Closeable;
@@ -60,6 +61,7 @@ public abstract class BasicWindow implements Closeable {
     private static String glslVersion = null;
 
     private static int windowWidth, windowHeight;
+    private static int shadowMapSize;
     // for time measurement
     private static long t1, t2;
 
@@ -80,11 +82,15 @@ public abstract class BasicWindow implements Closeable {
     protected static int deferredAlbedoMetalnessBuffer;
     protected static int deferredNormalRoughnessBuffer;
     protected static int deferredEnvironmentEmissionBuffer;
+    protected static int deferredShadowPositionBuffer;
 
     // Forward/Postprocessing pass data
     protected static int frameBuffer;
     protected static int colorBuffer;
     protected static int bloomBuffer;
+
+
+    protected static int shadowMap;
 
     // Depth buffer is shared between different framebuffers
     protected static int sharedDepthBuffer;
@@ -98,6 +104,7 @@ public abstract class BasicWindow implements Closeable {
     protected static Texture BRDFLookUp;
 
     protected static Camera camera;
+    protected static Camera shadowCamera;
 
     protected BasicWindow() {
         t1 = System.currentTimeMillis();
@@ -117,6 +124,7 @@ public abstract class BasicWindow implements Closeable {
             dims = annotation.defaultDimensions();
             windowWidth = dims[0];
             windowHeight = dims[1];
+            shadowMapSize = annotation.shadowMapResolution();
             windowHintsValues = annotation.windowHintsValues();
             windowHints = annotation.windowHints();
 
@@ -200,6 +208,7 @@ public abstract class BasicWindow implements Closeable {
         generateDeferredFramebuffer();
         generateFrameBuffer();
         generateRenderQuad();
+        generateShadowBuffer();
 
         glslVersion = "#version 460 core";
 
@@ -271,11 +280,11 @@ public abstract class BasicWindow implements Closeable {
         glBindRenderbuffer(GL_RENDERBUFFER, sharedDepthBuffer);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowWidth, windowHeight);
         glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
     }
 
 
     private static void generateDeferredFramebuffer() {
-
 
         deferredframeBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
@@ -319,7 +328,18 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
 
+
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer, 0);
+
+        deferredShadowPositionBuffer = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, deferredShadowPositionBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
+                0, GL_RGB, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, deferredShadowPositionBuffer, 0);
+
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
@@ -336,9 +356,11 @@ public abstract class BasicWindow implements Closeable {
     }
     protected static void deferredPass() {
         camera.setViewProjectionMatrix(deferredShader);
+        shadowCamera.setShadowViewProjectionMatrix(deferredShader);
         scene.setActiveProgram(deferredShader);
 
         glEnable(GL_DEPTH_TEST);
+        glCullFace(GL_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -376,6 +398,10 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, deferredNormalRoughnessBuffer);
         glActiveTexture(GL_TEXTURE3);
         glBindTexture(GL_TEXTURE_2D, deferredEnvironmentEmissionBuffer);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, deferredShadowPositionBuffer);
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
 
         glActiveTexture(GL_TEXTURE9);
         BRDFLookUp.use();
@@ -387,7 +413,6 @@ public abstract class BasicWindow implements Closeable {
 
         // it's already lost here
     }
-
 
     private static void generateFrameBuffer() {
         frameBuffer = glGenFramebuffers();
@@ -415,8 +440,6 @@ public abstract class BasicWindow implements Closeable {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
 
-
-
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
             System.err.println("Forward framebuffer is not ready");
 
@@ -426,6 +449,98 @@ public abstract class BasicWindow implements Closeable {
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         //System.out.println(STR."Color Buffer \{colorBuffer}\n Bloom Buffer \{bloomBuffer}\n Shared Depth buffer \{shadowDepthBuffer}");
+    }
+
+
+    protected static void shadowPass(){
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
+
+
+        shadowCamera.setViewProjectionMatrix(shadowMappingShader);
+        scene.setActiveProgram(shadowMappingShader);
+        shadowMappingShader.use();
+
+        glEnable(GL_DEPTH_TEST);
+        glCullFace(GL_FRONT);
+        glDepthFunc(GL_LESS);
+
+        glActiveTexture(GL_TEXTURE5);
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
+        glViewport(0,0, shadowMapSize, shadowMapSize);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        scene.drawItems();
+        shadowMappingShader.unbind();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glViewport(0,0, windowWidth, windowHeight);
+        glCullFace(GL_BACK);
+    }
+    private static void generateShadowBuffer(){
+        /*
+        shadowDepthBuffer = glGenFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
+        shadowMap = glGenTextures();
+
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, shadowMapSize, shadowMapSize,
+                0, GL_RGBA, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        float[] borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowMap, 0);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            System.err.println("Forward framebuffer is not ready");
+
+        int[] attachments = {GL_COLOR_ATTACHMENT0};
+
+        glDrawBuffers(attachments);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+*/
+        shadowDepthBuffer = glGenFramebuffers();
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
+
+// Create a depth texture for the shadow map
+        shadowMap = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, shadowMap);
+
+// Configure the depth texture
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, shadowMapSize, shadowMapSize,
+                0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+// Set border color for the texture
+        float[] borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+// Attach the depth texture to the framebuffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+
+// Ensure no color buffer is attached (optional for shadow mapping)
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+// Check the framebuffer completeness
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            System.err.println("Shadow framebuffer is not complete!");
+        }
+
+// Unbind the framebuffer to prevent unintended rendering
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+
     }
 
     private static void generateRenderQuad() {
@@ -487,6 +602,10 @@ public abstract class BasicWindow implements Closeable {
     private static void wipeFramebuffer() {
         glDeleteFramebuffers(frameBuffer);
         glDeleteTextures(colorBuffer);
+    }
+    private static void wipeShadowFramebuffer() {
+        glDeleteFramebuffers(sharedDepthBuffer);
+        glDeleteTextures(shadowMap);
     }
 
     private static void wipeDeferredFrameBuffer() {

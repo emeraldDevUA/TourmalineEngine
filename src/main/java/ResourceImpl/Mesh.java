@@ -189,6 +189,9 @@ public class Mesh implements Loadable, Drawable, Closeable {
     private final Vector3f position;
     private final Vector3f scale;
     @Getter
+    @Setter
+    private Vector3f shadowScale;
+    @Getter
     private final Quaternionf rotQuaternion;
     @Setter
     private Material material;
@@ -203,6 +206,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0, 0, 0);
         scale = new Vector3f(1,1,1);
+        shadowScale = new Vector3f(1,1,1);
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
         material = new Material();
         updated = true;
@@ -361,7 +365,15 @@ public class Mesh implements Loadable, Drawable, Closeable {
         }
             if (shader != null) {
                 int shader_pointer = shader.getProgram();
-                glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "model_matrix"), false, model_matrix);
+                int scaleVectorLocation = glGetUniformLocation(shader_pointer, "scale_vector");
+                int modelMatrixLocation = glGetUniformLocation(shader_pointer, "model_matrix");
+
+                glUniformMatrix4fv(modelMatrixLocation, false, model_matrix);
+
+                glUniform3f(scaleVectorLocation,
+                        shadowScale.x,shadowScale.y, shadowScale.z);
+
+
             }
 
         material.use();
