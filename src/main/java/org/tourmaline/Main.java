@@ -137,15 +137,11 @@ public class Main extends BasicWindow {
         camera = new Camera(
                 temp.add(new Vector3f(-3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
-//        shadowCamera = new Camera(
-//                new Vector3f(0, 1000, 0),
-//                new Vector3f(0,0,0)
-//        );
+
 
         shadowCamera = new Camera(
                 temp.add(new Vector3f(-90,120,20), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
-//        System.out.println(STR."\{camera.getPosition()}   \{camera.getFocus()}");
 
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
@@ -316,18 +312,12 @@ public class Main extends BasicWindow {
 
         camera.setViewProjectionMatrix(deferredShader);
         camera.setViewProjectionMatrix(combineShader);
-
         scene.setActiveProgram(deferredShader);
-
-
-        if(glGetUniformBlockIndex(deferredShader.getProgram(), "material_block") == GL_INVALID_INDEX){
-            throw new RuntimeException("Fuck Life");
-        }
 
 
         while (!glfwWindowShouldClose(window_handle)){
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-           glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+           glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
                 shadowPass();
 
@@ -364,6 +354,7 @@ public class Main extends BasicWindow {
     public void close() {
         glfwDestroyWindow(window_handle);
     }
+
 
 
     public static void saveFramebufferAsImage(int width, int height, String filePath) {
