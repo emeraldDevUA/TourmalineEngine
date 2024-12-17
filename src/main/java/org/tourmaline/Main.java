@@ -14,9 +14,11 @@ import ResourceImpl.*;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
+import SecondPhysics.RigidBody;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
+import org.joml.Matrix3f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -323,9 +325,19 @@ public class Main extends BasicWindow {
         if(glGetUniformBlockIndex(deferredShader.getProgram(), "material_block") == GL_INVALID_INDEX){
             throw new RuntimeException("Fuck Life");
         }
+         Matrix3f inertia = new Matrix3f(
+                (float) (0.4*1*4), 0, 0,
+                0      ,  (float) 0.4*1*4,0,
+                0,       0, (float) 0.4*1*4
+        );
 
+        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),100);
 
+        rigidBody.setGravity(true);
+        measureTime();
         while (!glfwWindowShouldClose(window_handle)){
+
+            rigidBody.addForce(new Vector3f(0,10,0));
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
@@ -356,6 +368,21 @@ public class Main extends BasicWindow {
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
+
+            rigidBody.update((float)(t2-t1)/100000);
+            fightingFalcon.getRotQuaternion().x = rigidBody.getOrientation().x;
+            fightingFalcon.getRotQuaternion().y = rigidBody.getOrientation().y;
+            fightingFalcon.getRotQuaternion().z = rigidBody.getOrientation().z;
+            fightingFalcon.getRotQuaternion().w = rigidBody.getOrientation().w;
+            camera.setFocus(fightingFalcon.getPosition());
+            camera.setPosition(fightingFalcon.getPosition()
+                    .add(new Vector3f(-3,1,0)
+                            .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
+            //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
+            camera.loadViewMatrix();
+
+
+            measureTime();
         }
 
     }
