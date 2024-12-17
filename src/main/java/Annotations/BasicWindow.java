@@ -18,15 +18,11 @@ import org.jetbrains.annotations.NotNull;
 
 import org.lwjgl.glfw.*;
 
-
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import org.tourmaline.Main;
-
 
 import java.io.Closeable;
 import java.nio.IntBuffer;
-
 
 import static java.lang.StringTemplate.STR;
 import static org.lwjgl.glfw.GLFW.*;
@@ -62,6 +58,7 @@ public abstract class BasicWindow implements Closeable {
 
     private static int windowWidth, windowHeight;
     private static int shadowMapSize;
+
     // for time measurement
     private static long t1, t2;
 
@@ -228,12 +225,11 @@ public abstract class BasicWindow implements Closeable {
 
     }
 
-    public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
+    protected static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
 
         imGuiGl3.newFrame();
         imGuiGlfw.newFrame();
         ImGui.newFrame();
-
 
         interfaceRenderer.renderInterface();
 
@@ -247,8 +243,6 @@ public abstract class BasicWindow implements Closeable {
         }
 
     }
-
-
 
 
     protected static void drawElements() {
@@ -455,7 +449,6 @@ public abstract class BasicWindow implements Closeable {
     protected static void shadowPass(){
         glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
 
-
         shadowCamera.setViewProjectionMatrix(shadowMappingShader);
         scene.setActiveProgram(shadowMappingShader);
         shadowMappingShader.use();
@@ -602,10 +595,12 @@ public abstract class BasicWindow implements Closeable {
     private static void wipeFramebuffer() {
         glDeleteFramebuffers(frameBuffer);
         glDeleteTextures(colorBuffer);
+        glDeleteTextures(bloomBuffer);
     }
     private static void wipeShadowFramebuffer() {
-        glDeleteFramebuffers(sharedDepthBuffer);
         glDeleteTextures(shadowMap);
+        glDeleteFramebuffers(sharedDepthBuffer);
+
     }
 
     private static void wipeDeferredFrameBuffer() {
