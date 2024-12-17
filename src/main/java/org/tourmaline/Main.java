@@ -22,7 +22,6 @@ import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -34,9 +33,6 @@ import java.util.List;
 import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 
-
-import static org.lwjgl.opengl.ARBUniformBufferObject.GL_INVALID_INDEX;
-import static org.lwjgl.opengl.ARBUniformBufferObject.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
@@ -203,6 +199,7 @@ public class Main extends BasicWindow {
         Mouse mouse = new Mouse();
         mouse.setWindow_pointer(window_handle);
         mouse.init();
+
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             if (state == GLFW_PRESS) {
