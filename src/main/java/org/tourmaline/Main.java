@@ -337,6 +337,8 @@ public class Main extends BasicWindow {
         measureTime();
         while (!glfwWindowShouldClose(window_handle)){
 
+
+
             rigidBody.addForce(new Vector3f(0,10,0));
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);

@@ -20,6 +20,16 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.karazin</groupId>
+            <artifactId>MessProject</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/physicsArtifact.jar</systemPath>
+
+        </dependency>
+
+
         <!-- https://mvnrepository.com/artifact/org.joml/joml -->
         <dependency>
             <groupId>org.joml</groupId>
