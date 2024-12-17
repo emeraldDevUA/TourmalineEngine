@@ -210,17 +210,24 @@ public class Main extends BasicWindow {
         mouse.setWindow_pointer(window_handle);
         mouse.init();
 
+        Matrix3f inertia = new Matrix3f(
+                (float) (0.4*10*4), 0, 0,
+                0      ,  (float) 0.4*10*4,0,
+                0,       0, (float) 0.4*10*4
+        );
+
+        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),1);
+        //rigidBody.addForce(new Vector3f(8000,0,0));
+
+
+        rigidBody.setGravity(true);
+
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             if (state == GLFW_PRESS) {
                 if (key == GLFW_KEY_A) {
-                    System.out.println("A");
-                    fightingFalcon.getRotQuaternion().rotateY(0.01f).normalize();
-                    camera.getQuaternionf().rotateY(0.01f).normalize();
 
                 } else if (key == GLFW_KEY_D) {
                     System.out.println("D");
-                    fightingFalcon.getRotQuaternion().rotateY(-0.01f).normalize();
-                    camera.getQuaternionf().rotateY(-0.01f).normalize();
 
                 } else if (key == GLFW_KEY_W) {
                     System.out.println("W");
@@ -325,20 +332,23 @@ public class Main extends BasicWindow {
         if(glGetUniformBlockIndex(deferredShader.getProgram(), "material_block") == GL_INVALID_INDEX){
             throw new RuntimeException("Fuck Life");
         }
-         Matrix3f inertia = new Matrix3f(
-                (float) (0.4*1*4), 0, 0,
-                0      ,  (float) 0.4*1*4,0,
-                0,       0, (float) 0.4*1*4
-        );
 
-        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),1);
-        rigidBody.addForce(new Vector3f(0,1,0), new Vector3f(1,0,0));
-        rigidBody.setGravity(true);
         measureTime();
+
+        rigidBody.setGravity(false);
+
+        rigidBody.addForce(new Vector3f(0,-50,0), new Vector3f(0,0,3));
+        rigidBody.addForce(new Vector3f(0,50,0), new Vector3f(0,0,-3));
+
+//        rigidBody.addForce(new Vector3f(1,0,0), new Vector3f(-5,0,0));
+
+
+//        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
+//        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
         while (!glfwWindowShouldClose(window_handle)){
 
 
-            rigidBody.addForce(new Vector3f(0,10,0));
+//            rigidBody.addForce(new Vector3f(0,10,0));
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
