@@ -331,12 +331,11 @@ public class Main extends BasicWindow {
                 0,       0, (float) 0.4*1*4
         );
 
-        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),100);
-
+        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),1);
+        rigidBody.addForce(new Vector3f(0,1,0), new Vector3f(1,0,0));
         rigidBody.setGravity(true);
         measureTime();
         while (!glfwWindowShouldClose(window_handle)){
-
 
 
             rigidBody.addForce(new Vector3f(0,10,0));
@@ -371,11 +370,12 @@ public class Main extends BasicWindow {
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
 
-            rigidBody.update((float)(t2-t1)/100000);
+            rigidBody.update(0.01f);
             fightingFalcon.getRotQuaternion().x = rigidBody.getOrientation().x;
             fightingFalcon.getRotQuaternion().y = rigidBody.getOrientation().y;
             fightingFalcon.getRotQuaternion().z = rigidBody.getOrientation().z;
             fightingFalcon.getRotQuaternion().w = rigidBody.getOrientation().w;
+
             camera.setFocus(fightingFalcon.getPosition());
             camera.setPosition(fightingFalcon.getPosition()
                     .add(new Vector3f(-3,1,0)
@@ -383,7 +383,7 @@ public class Main extends BasicWindow {
             //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
             camera.loadViewMatrix();
 
-
+            System.out.println(rigidBody);
             measureTime();
         }
 
