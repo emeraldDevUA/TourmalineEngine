@@ -7,6 +7,7 @@ import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
+import Phyiscs.Airfoil;
 import Rendering.Camera;
 import Rendering.Scene;
 import Rendering.SkyBox;
@@ -14,12 +15,17 @@ import ResourceImpl.*;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
+
+import SecondPhysics.JetEngine;
+import SecondPhysics.Plane;
+import SecondPhysics.PlaneWing;
 import SecondPhysics.RigidBody;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
 import org.joml.Matrix3f;
 import org.joml.Vector3f;
+import org.karazin.PlaneConstants;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -34,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.joml.Math.*;
+import static org.karazin.Main.arrayToList;
 import static org.lwjgl.glfw.GLFW.*;
 
 
@@ -211,16 +218,30 @@ public class Main extends BasicWindow {
         mouse.init();
 
         Matrix3f inertia = new Matrix3f(
-                (float) (0.4*10*4), 0, 0,
-                0      ,  (float) 0.4*10*4,0,
-                0,       0, (float) 0.4*10*4
+                (float) (0.4*1*4), 0, 0,
+                0      ,  (float) 0.4*1*4,0,
+                0,       0, (float) 0.4*1*4
         );
 
-        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(),1);
+        inertia.m00 *= 9207;
+        inertia.m11 *= 9207;
+        inertia.m22 *= 9207;
+
+        Airfoil airfoil2412 = new Airfoil((arrayToList(PlaneConstants.NACA_2412)));
+
+        ArrayList<PlaneWing> wings = new ArrayList<>();
+
+        wings.add(new PlaneWing(new Vector3f(-1,0, -2.7f), 6.96f, 2.50f,
+                airfoil2412, new Vector3f(0,1,0), 0.2f));
+
+        wings.add(new PlaneWing(new Vector3f(-1,0, 2.7f), 6.96f, 2.50f,
+                airfoil2412, new Vector3f(0,1,0), 0.2f));
+
+        Plane rigidBody = new Plane(inertia, fightingFalcon.getPosition(),9207, wings, new JetEngine(1300f));
         //rigidBody.addForce(new Vector3f(8000,0,0));
 
 
-        rigidBody.setGravity(true);
+        rigidBody.setGravity(false);
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             if (state == GLFW_PRESS) {
@@ -335,12 +356,7 @@ public class Main extends BasicWindow {
 
         measureTime();
 
-        rigidBody.setGravity(false);
 
-        rigidBody.addForce(new Vector3f(0,-5,0), new Vector3f(0,0,3));
-        rigidBody.addForce(new Vector3f(0,5,0), new Vector3f(0,0,-3));
-
-        rigidBody.addForce(new Vector3f(500,0,0));
 
 
 //        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
