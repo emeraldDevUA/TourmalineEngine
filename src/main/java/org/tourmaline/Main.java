@@ -337,8 +337,8 @@ public class Main extends BasicWindow {
 
         rigidBody.setGravity(false);
 
-        rigidBody.addForce(new Vector3f(0,-50,0), new Vector3f(0,0,3));
-        rigidBody.addForce(new Vector3f(0,50,0), new Vector3f(0,0,-3));
+        rigidBody.addForce(new Vector3f(0,-5,0), new Vector3f(0,0,3));
+        rigidBody.addForce(new Vector3f(0,5,0), new Vector3f(0,0,-3));
 
         rigidBody.addForce(new Vector3f(500,0,0));
 
