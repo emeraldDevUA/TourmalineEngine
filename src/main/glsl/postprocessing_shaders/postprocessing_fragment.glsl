@@ -9,7 +9,7 @@ in vec2 uv_frag;
 layout (binding = 0) uniform sampler2D color;
 layout (binding = 1) uniform sampler2D bloom;
 
-layout (location = 0) out vec4 fragment;
+layout (location = 0) out highp  vec4 fragment;
 
 #include <algorithms/blur.glsl>
 #include <algorithms/fxaa.glsl>

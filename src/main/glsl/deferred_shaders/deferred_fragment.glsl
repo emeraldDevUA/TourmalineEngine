@@ -40,12 +40,12 @@ layout (std140, binding = 2) uniform material_block
 };
 
 
-layout (location = 0) out vec3 position;
-layout (location = 1) out vec4 albedo_metalness;
-layout (location = 2) out vec4 normal_roughness;
-layout (location = 3) out vec3 environment_emission;
+layout (location = 0) out highp vec3 position;
+layout (location = 1) out highp vec4 albedo_metalness;
+layout (location = 2) out highp vec4 normal_roughness;
+layout (location = 3) out highp vec3 environment_emission;
 
-layout (location = 4) out vec3 shadow_position;
+layout (location = 4) out highp vec3 shadow_position;
 
 float DistributionGGX(vec3 N, vec3 H, float rough)
 {

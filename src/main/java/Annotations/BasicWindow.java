@@ -212,12 +212,14 @@ public abstract class BasicWindow implements Closeable {
 
         glslVersion = "#version 460 core";
 
-        imGuiGlfw = new ImGuiImplGlfw();
-        imGuiGl3 = new ImGuiImplGl3();
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6);
         GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_PROFILE, GLFW.GLFW_OPENGL_CORE_PROFILE);
+
+        imGuiGlfw = new ImGuiImplGlfw();
+        imGuiGl3 = new ImGuiImplGl3();
+
         ImGui.createContext();
 
         imGuiGlfw.init(window_handle, true);
@@ -226,6 +228,7 @@ public abstract class BasicWindow implements Closeable {
 
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
 
+        io.addConfigFlags(ImGuiConfigFlags.NavEnableSetMousePos);
     }
 
     public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {

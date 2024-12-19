@@ -17,6 +17,7 @@ import Annotations.OpenGLWindow;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -152,6 +153,8 @@ public class Main extends BasicWindow {
 
         land_mat.addMap(Material.ALBEDO_MAP, land_alb);
         land_mat.addMap(Material.NORMAL_MAP, land_normal);
+        land_mat.addProperty(Material.ROUGHNESS_MAP, 0.9);
+        land_mat.addProperty(Material.METALNESS_MAP, 0.2);
 
         fightingFalcon.setMaterial(material);
         land.setMaterial(land_mat);
@@ -163,7 +166,7 @@ public class Main extends BasicWindow {
         test_shader.use();
         camera.setViewProjectionMatrix(test_shader);
         fightingFalcon.setShader(test_shader);
-        fightingFalcon.setShadowScale(new Vector3f(4));
+        fightingFalcon.setShadowScale(new Vector3f(10));
         land.setShader(test_shader);
         MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
 
@@ -252,8 +255,8 @@ public class Main extends BasicWindow {
         MouseEventHandler mouse_handler = new MouseEventHandler() {
             @Override
             public void processMouseEvent(int key, int action) {
-//                if(action == GLFW_PRESS){
-//                    if(key == GLFW_MOUSE_BUTTON_LEFT){
+                if(action == GLFW_PRESS){
+                    if(key == GLFW_MOUSE_BUTTON_LEFT){
 //                        fightingFalcon.getRotQuaternion().x = 0;
 //                        fightingFalcon.getRotQuaternion().y = 0;
 //                        fightingFalcon.getRotQuaternion().z = 0;
@@ -267,9 +270,17 @@ public class Main extends BasicWindow {
 //
 //                        //camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
 //                        camera.loadViewMatrix();
-//                    }
-//                }
+
+                        ImGuiIO io = ImGui.getIO();
+                        io.setMouseDown(key, true);
+
+                    }
+
+                }
+
+
             }
+
             @Override
             public void processMouseMovement(double X, double Y) {
 //                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
@@ -296,9 +307,15 @@ public class Main extends BasicWindow {
                 ImGui.text(STR."\{processors} Cores");
                 ImGui.text(STR."\{name}");
                 ImGui.pushID(1);
+                ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(1.0f, 0.08f, 0.58f, 1.0f)); // Hot pink
+                ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(1.0f, 0.4f, 0.7f, 1.0f)); // Brighter hot pink for hover
+                ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.getColorU32(1.0f, 0.2f, 0.6f, 1.0f)); // Slightly darker pink for active
+
                 if (ImGui.button("Text", new ImVec2(200, 50))) {
                     System.out.println("TEXT");
                 }
+
+                ImGui.popStyleColor(3); // Pop all three colors
                 ImGui.popID();
                 ImGui.end();
             }
@@ -335,6 +352,7 @@ public class Main extends BasicWindow {
             glDisable(GL_DEPTH_TEST);
             postprocessingPass();
             glEnable(GL_DEPTH_TEST);
+
 
             renderUI(ioRenderer);
             keyboard.processEvents(keyboard_handler);

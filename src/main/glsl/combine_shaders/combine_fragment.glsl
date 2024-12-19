@@ -21,7 +21,7 @@ layout (binding = 9) uniform sampler2D BRDFlookUp;
 
 
 
-layout (location = 0) out vec4 fragment;
+layout (location = 0) out highp vec4 fragment;
 layout (location = 1) out vec4 bloom;
 
 
