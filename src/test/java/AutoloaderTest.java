@@ -80,6 +80,14 @@ public class AutoloaderTest extends BasicWindow {
                         shaderRootPath +"/visualeffects_shaders/visual_effects_fragment.glsl");
         Assert.assertNotEquals(visualEffects.getProgram(), -1);
     }
+
+
+    @Test
+    public void testIMGUI(){
+
+
+    }
+
     @Override
     public void close() throws IOException {
 

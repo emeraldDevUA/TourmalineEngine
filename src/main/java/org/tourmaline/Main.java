@@ -271,8 +271,6 @@ public class Main extends BasicWindow {
 //                        //camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
 //                        camera.loadViewMatrix();
 
-                        ImGuiIO io = ImGui.getIO();
-                        io.setMouseDown(key, true);
 
                     }
 
@@ -310,6 +308,7 @@ public class Main extends BasicWindow {
                 ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(1.0f, 0.08f, 0.58f, 1.0f)); // Hot pink
                 ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(1.0f, 0.4f, 0.7f, 1.0f)); // Brighter hot pink for hover
                 ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.getColorU32(1.0f, 0.2f, 0.6f, 1.0f)); // Slightly darker pink for active
+
 
                 if (ImGui.button("Text", new ImVec2(200, 50))) {
                     System.out.println("TEXT");
@@ -354,10 +353,10 @@ public class Main extends BasicWindow {
             glEnable(GL_DEPTH_TEST);
 
 
-            renderUI(ioRenderer);
+
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
-
+            renderUI(ioRenderer);
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);

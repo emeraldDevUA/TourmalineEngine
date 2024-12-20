@@ -1,5 +1,6 @@
 package Controls;
 
+import Annotations.BasicWindow;
 import Interfaces.MouseEventHandler;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,14 +28,14 @@ public class Mouse {
     public void processEvents(MouseEventHandler handler){
 
         glfwGetCursorPos(window_pointer, X,Y);
-
+        handler.processMouseMovement(X[0],Y[0]);
 
         while(!actions.empty()) {
             handler.processMouseEvent(actions.peek().key, actions.peek().state);
             actions.pop();
         }
 
-        handler.processMouseMovement(X[0],Y[0]);
+
     }
 
     public void init(){
@@ -51,6 +52,7 @@ public class Mouse {
         glfwSetMouseButtonCallback(window_pointer, new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window,  int button, int action, int mods) {
+                BasicWindow.getImGuiGlfw().mouseButtonCallback(window, button, action, mods);
                 keys.forEach(
                         l->{
                             if( action == GLFW_PRESS && l == button) {
@@ -67,8 +69,8 @@ public class Mouse {
                             }
 
                         }
-                );
 
+                );
             }
         });
 

@@ -21,7 +21,7 @@ import org.lwjgl.glfw.*;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
-import org.tourmaline.Main;
+
 
 
 import java.io.Closeable;
@@ -55,7 +55,8 @@ import static org.lwjgl.system.MemoryStack.stackPush;
 
 public abstract class BasicWindow implements Closeable {
 
-    protected static ImGuiImplGlfw imGuiGlfw;
+    @Getter
+    private static ImGuiImplGlfw imGuiGlfw;
     protected static ImGuiImplGl3 imGuiGl3;
 
     private static String glslVersion = null;
@@ -221,34 +222,36 @@ public abstract class BasicWindow implements Closeable {
         imGuiGl3 = new ImGuiImplGl3();
 
         ImGui.createContext();
-
         imGuiGlfw.init(window_handle, true);
         imGuiGl3.init(glslVersion);
         ImGuiIO io = ImGui.getIO();
-
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
 
-        io.addConfigFlags(ImGuiConfigFlags.NavEnableSetMousePos);
+
+
     }
 
     public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
+        // Start new frame for GLFW and OpenGL bindings
+        imGuiGlfw.newFrame();
 
         imGuiGl3.newFrame();
-        imGuiGlfw.newFrame();
         ImGui.newFrame();
 
-
+        // Custom rendering logic
         interfaceRenderer.renderInterface();
 
+        // Render ImGui frame
         ImGui.render();
         imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+        // Handle multiple viewports if enabled
         if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
             final long backupCurrentContext = glfwGetCurrentContext();
             ImGui.updatePlatformWindows();
             ImGui.renderPlatformWindowsDefault();
             glfwMakeContextCurrent(backupCurrentContext);
         }
-
     }
 
 
