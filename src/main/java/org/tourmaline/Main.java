@@ -17,7 +17,10 @@ import Annotations.OpenGLWindow;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
+import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiTableColumnFlags;
+import imgui.flag.ImGuiTableFlags;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -296,19 +299,23 @@ public class Main extends BasicWindow {
         int processors = Runtime.getRuntime().availableProcessors();
 
         String name = processor.getProcessorIdentifier().getName();
+        String gpu = systemInfo.getHardware().getGraphicsCards().get(1).getName();
 
-        InterfaceRenderer ioRenderer = () -> {
-            ImGui.setNextWindowSize(new ImVec2(215, 160));
+
+        InterfaceRenderer combinedRenderer = () -> {
+            // System Info Window
+            ImGui.setNextWindowPos(new ImVec2(0, 0));
+            ImGui.setNextWindowSize(new ImVec2(215, 190));
             if (ImGui.begin("System Info")) {
                 ImGui.text(os);
                 ImGui.text(STR."\{mb} MB");
                 ImGui.text(STR."\{processors} Cores");
                 ImGui.text(STR."\{name}");
+                ImGui.text(STR."\{gpu}");
                 ImGui.pushID(1);
                 ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(1.0f, 0.08f, 0.58f, 1.0f)); // Hot pink
                 ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(1.0f, 0.4f, 0.7f, 1.0f)); // Brighter hot pink for hover
                 ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.getColorU32(1.0f, 0.2f, 0.6f, 1.0f)); // Slightly darker pink for active
-
 
                 if (ImGui.button("Text", new ImVec2(200, 50))) {
                     System.out.println("TEXT");
@@ -316,6 +323,71 @@ public class Main extends BasicWindow {
 
                 ImGui.popStyleColor(3); // Pop all three colors
                 ImGui.popID();
+                ImGui.end();
+            }
+
+            // Item List Window
+            ImGui.setNextWindowPos(new ImVec2(1920 - 500, 0));
+            ImGui.setNextWindowSize(new ImVec2(500, 150)); // Increased height to accommodate checkboxes
+            if (ImGui.begin("Item List")) {
+                // Table headers
+                if (ImGui.beginTable("Table", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg)) {
+                    ImGui.tableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.tableSetupColumn("Distance", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.tableSetupColumn("Type", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.tableSetupColumn("State", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.tableSetupColumn("Selected", ImGuiTableColumnFlags.WidthFixed);
+                    ImGui.tableHeadersRow();
+
+                    // Example list of items
+                    String[][] items = {
+                            {"S-300", "10 km", "Type 1", "Alive"},
+                            {"Mi-8", "20 km", "Type 2", "Alive"},
+                            {"Item C", "5 km", "Type 3", "Destroyed"},
+                            {"Item D", "15 km", "Type 1", "Destroyed"},
+                    };
+
+                    // Checkbox states stored in an ArrayList
+                    ArrayList<Boolean> selected = new ArrayList<>();
+                    for (int i = 0; i < items.length; i++) {
+                        selected.add(i%2==0); // Default state is unchecked
+                    }
+
+                    // Loop through and display each item
+                    for (int i = 0; i < items.length; i++) {
+                        String[] item = items[i];
+                        ImGui.tableNextRow();
+
+                        // Name column
+                        ImGui.tableSetColumnIndex(0);
+                        ImGui.text(item[0]);
+
+                        // Distance column
+                        ImGui.tableSetColumnIndex(1);
+                        ImGui.text(item[1]);
+
+                        // Type column
+                        ImGui.tableSetColumnIndex(2);
+                        ImGui.text(item[2]);
+
+                        // State column
+                        ImGui.tableSetColumnIndex(3);
+                        if ("Alive".equals(item[3])) {
+                            ImGui.textColored(new ImVec4(0.0f, 1.0f, 0.0f, 1.0f), item[3]); // Green for Alive
+                        } else {
+                            ImGui.textColored(new ImVec4(1.0f, 0.0f, 0.0f, 1.0f), item[3]); // Red for Destroyed
+                        }
+
+                        // Checkbox column
+                        ImGui.tableSetColumnIndex(4);
+                        boolean isSelected = selected.get(i);
+                        if (ImGui.checkbox(STR."##checkbox\{i}", isSelected)) {
+                            selected.set(i, !isSelected); // Toggle the state
+                        }
+                    }
+
+                    ImGui.endTable();
+                }
                 ImGui.end();
             }
         };
@@ -356,7 +428,10 @@ public class Main extends BasicWindow {
 
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
-            renderUI(ioRenderer);
+            renderUI(combinedRenderer);
+//            renderUI(ioRenderer);
+
+
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);

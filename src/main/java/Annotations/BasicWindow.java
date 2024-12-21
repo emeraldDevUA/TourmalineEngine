@@ -231,6 +231,12 @@ public abstract class BasicWindow implements Closeable {
 
     }
 
+    public static void renderUI(@NotNull InterfaceRenderer ...interfaceRenderers){
+        for(InterfaceRenderer interfaceRenderer: interfaceRenderers){
+         renderUI(interfaceRenderer);
+
+        }
+    }
     public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
         // Start new frame for GLFW and OpenGL bindings
         imGuiGlfw.newFrame();
@@ -345,6 +351,8 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, deferredShadowPositionBuffer, 0);
+
+
 
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);

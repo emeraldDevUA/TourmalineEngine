@@ -71,6 +71,10 @@ public class AutoLoader {
                     if(f.getName().toUpperCase().contains("ROUGHNESS")){
                         material.addMap(Material.ROUGHNESS_MAP, texture);
                     }
+                    if(f.getName().toUpperCase().contains("AMBIENT_OCCLUSION")){
+                        material.addMap(Material.ROUGHNESS_MAP, texture);
+                    }
+
 
                     // add them to the material
                 }
