@@ -21,6 +21,7 @@ public class Camera {
   private Vector3f focus;
   private Matrix4f projectionMatrix;
   private Matrix4f viewMatrix;
+  private Matrix4f previousViewMatrix;
 
   @Getter
   private Quaternionf quaternionf;
@@ -30,6 +31,7 @@ public class Camera {
     this.position = pos;
     this.focus = focus;
     this.viewMatrix = new Matrix4f();
+    this.previousViewMatrix = new Matrix4f();
     this.projectionMatrix = new Matrix4f();
     this.positionDifference = pos.sub(focus, new Vector3f());
     this.quaternionf = new Quaternionf(0,0,0,1);
@@ -52,7 +54,7 @@ public class Camera {
         } else {
             viewMatrix.identity();
         }
-
+        previousViewMatrix = new Matrix4f(viewMatrix);
         viewMatrix.lookAt(position, focus, new Vector3f(0, 1, 0));
     }
 
@@ -61,37 +63,63 @@ public class Camera {
       this.position = (position.rotate(quaternion));
   }
 
-  public void setViewProjectionMatrix(Shader shader){
-
-      if(shader != null){
-          shader.use();
-          int shader_pointer = shader.getProgram();
-          float[] view_matrix = new float[16];
-          float[] projection_matrix = new float[16];
-          viewMatrix.get(view_matrix);
-          glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "view_matrix"),false, view_matrix);
-          projectionMatrix.get(projection_matrix);
-          glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "projection_matrix"),false, projection_matrix);
-      }
-  }
-
-
-
-
-    public void setShadowViewProjectionMatrix(Shader shader){
-
-        if(shader != null){
+    public void setViewProjectionMatrix(Shader shader) {
+        if (shader != null) {
             shader.use();
-            int shader_pointer = shader.getProgram();
-            float[] view_matrix = new float[16];
-            float[] projection_matrix = new float[16];
-            viewMatrix.get(view_matrix);
-            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "shadow_view_matrix"),false, view_matrix);
-            projectionMatrix.get(projection_matrix);
-            glUniformMatrix4fv(glGetUniformLocation(shader_pointer, "shadow_projection_matrix"),false, projection_matrix);
+            int shaderPointer = shader.getProgram();
+
+            float[] viewMatrixData = new float[16];
+            float[] projectionMatrixData = new float[16];
+
+            viewMatrix.get(viewMatrixData);
+            projectionMatrix.get(projectionMatrixData);
+
+            int viewMatrixLocation = glGetUniformLocation(shaderPointer, "view_matrix");
+            if (viewMatrixLocation != -1) {
+                glUniformMatrix4fv(viewMatrixLocation, false, viewMatrixData);
+            }
+
+            int projectionMatrixLocation = glGetUniformLocation(shaderPointer, "projection_matrix");
+            if (projectionMatrixLocation != -1) {
+                glUniformMatrix4fv(projectionMatrixLocation, false, projectionMatrixData);
+            }
+
+            previousViewMatrix.get(viewMatrixData);
+            int previousViewMatrixLocation = glGetUniformLocation(shaderPointer, "previous_view_matrix");
+            if (previousViewMatrixLocation != -1) {
+                glUniformMatrix4fv(previousViewMatrixLocation, false, viewMatrixData);
+            }
         }
     }
 
+
+
+
+
+    public void setShadowViewProjectionMatrix(Shader shader) {
+
+        if (shader != null) {
+            shader.use();
+            int shaderPointer = shader.getProgram();
+
+            float[] viewMatrixData = new float[16];
+            float[] projectionMatrixData = new float[16];
+
+            // Get data from matrices
+            viewMatrix.get(viewMatrixData);
+            projectionMatrix.get(projectionMatrixData);
+
+            int shadowViewMatrixLocation = glGetUniformLocation(shaderPointer, "shadow_view_matrix");
+            if (shadowViewMatrixLocation != -1) {
+                glUniformMatrix4fv(shadowViewMatrixLocation, false, viewMatrixData);
+            }
+
+            int shadowProjectionMatrixLocation = glGetUniformLocation(shaderPointer, "shadow_projection_matrix");
+            if (shadowProjectionMatrixLocation != -1) {
+                glUniformMatrix4fv(shadowProjectionMatrixLocation, false, projectionMatrixData);
+            }
+        }
+    }
   public void update(){
       position = focus.add(positionDifference);
       loadViewMatrix();

@@ -47,6 +47,7 @@ import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
 import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.GL_RGBA8_SNORM;
+import static org.lwjgl.opengl.GL43.glCopyImageSubData;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 
@@ -84,6 +85,8 @@ public abstract class BasicWindow implements Closeable {
     protected static int deferredNormalRoughnessBuffer;
     protected static int deferredEnvironmentEmissionBuffer;
     protected static int deferredShadowPositionBuffer;
+    protected static int deferredPreviousPositionBuffer;
+
 
     // Forward/Postprocessing pass data
     protected static int frameBuffer;
@@ -106,6 +109,8 @@ public abstract class BasicWindow implements Closeable {
 
     protected static Camera camera;
     protected static Camera shadowCamera;
+
+
 
     protected BasicWindow() {
         t1 = System.currentTimeMillis();
@@ -352,6 +357,13 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, deferredShadowPositionBuffer, 0);
 
+        deferredPreviousPositionBuffer = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, deferredPreviousPositionBuffer);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
+                0, GL_RGB, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
 
 
@@ -416,6 +428,8 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, deferredShadowPositionBuffer);
         glActiveTexture(GL_TEXTURE5);
         glBindTexture(GL_TEXTURE_2D, shadowMap);
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, deferredPreviousPositionBuffer);
 
         glActiveTexture(GL_TEXTURE9);
         BRDFLookUp.use();
@@ -426,6 +440,14 @@ public abstract class BasicWindow implements Closeable {
         combineShader.unbind();
 
         // it's already lost here
+
+            glCopyImageSubData(
+                    deferredPositionBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, // Source texture, type, level, x, y, z
+                    deferredPreviousPositionBuffer, GL_TEXTURE_2D, 0, 0, 0, 0,   // Destination texture, type, level, x, y, z
+                    windowWidth, windowHeight, 1                           // Width, height, depth
+            );
+
+
     }
 
     private static void generateFrameBuffer() {

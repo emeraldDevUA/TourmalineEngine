@@ -1,5 +1,7 @@
 #version 460 core
 
+#include <algorithms/blur.glsl>
+
 #define PI 3.1415926
 
 in vec2 uv_frag;
@@ -16,9 +18,13 @@ layout (binding = 3) uniform sampler2D environment_emission;
 
 layout (binding = 4) uniform sampler2D shadow_position;
 layout (binding = 5) uniform sampler2D shadow_map;
+layout (binding = 6) uniform sampler2D previous_position;
 
 layout (binding = 9) uniform sampler2D BRDFlookUp;
 
+uniform mat4 view_matrix;
+uniform mat4 previous_view_matrix;
+uniform mat4 projection_matrix;
 
 
 layout (location = 0) out highp vec4 fragment;
@@ -104,6 +110,51 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
     return shadow;
 }
 
+vec4 getMotionBlur(int size, float separation, vec3 position_value, vec3 prev_position_value){
+
+    vec2 texSize = textureSize(position, 0).xy;
+
+    vec4 view_position = projection_matrix * view_matrix * vec4(position_value, 1.0);
+    vec4 view_position_prev = projection_matrix * previous_view_matrix * vec4(prev_position_value, 1.0);
+
+    view_position.xyz /= view_position.w;
+    view_position.xy = view_position.xy * 0.5 + 0.5;
+
+    view_position_prev.xyz /= view_position_prev.w;
+    view_position_prev.xy = view_position_prev.xy * 0.5 + 0.5;
+
+    vec2 direction = (view_position_prev.xy - view_position.xy);
+
+    // Clamp the direction to ensure it's not too aggressive
+    direction = clamp((direction) * separation, -0.01, 0.01);
+
+    vec4 _albedo_value = texture(albedo_metalness, uv_frag); // Initialize
+    float count = 1.0;
+    float alpha = _albedo_value.a;
+    if (length(direction) > 0) {
+        vec2 forward = uv_frag;
+        vec2 backward = uv_frag;
+
+        for (int i = 1; i < size; ++i) {
+            forward += direction;
+            backward -= direction;
+
+            forward = clamp(forward, vec2(0.0), vec2(1.0));
+            backward = clamp(backward, vec2(0.0), vec2(1.0));
+
+
+            _albedo_value += gaussian_blur(albedo_metalness, forward);
+            _albedo_value += gaussian_blur(albedo_metalness, backward);
+
+            count += 2.0;
+        }
+
+        _albedo_value /= count;
+    }
+
+    return _albedo_value;
+}
+
 void main()
 {
 //    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
@@ -121,18 +172,30 @@ void main()
     float roughness_value = texture(normal_roughness, uv_frag).a;
 
     vec3 position_value = texture(position, uv_frag).rgb;
+    vec3 prev_position_value = texture(previous_position, uv_frag).rgb;
+
     vec3 albedo_value = texture(albedo_metalness, uv_frag).rgb;
+
     vec3 environment_emission_value = texture(environment_emission, uv_frag).rgb;
 
     vec3 N = normalize(texture(normal_roughness, uv_frag).rgb);
     vec3 V = normalize(camera_position - position_value);
 
     vec3 Lo = vec3(0.0);
-float shadow_value =
-    ShadowCalculation(texture(shadow_position, uv_frag).xyz, N, vec3(0,100,0)-position_value);
+    float shadow_value = ShadowCalculation(
+        texture(shadow_position, uv_frag).xyz, N, vec3(0,100,0)-position_value
+    );
 
-    for(int i = 0; i < 8; i++)
-    {
+/**/
+    int size = 12; // Increased sample size for smoother blur
+    float separation = 0.001; // Reduced separation for softer blur
+
+    albedo_value = getMotionBlur(size, separation, position_value, prev_position_value).rgb;
+
+
+
+    for(int i = 0; i < 8; i++) {
+
         vec3 L = normalize(light_positions[i] - position_value);
         vec3 H = normalize(V + L);
 
@@ -157,19 +220,12 @@ float shadow_value =
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
-
-
-
-//(length(texture(shadow_position, uv_frag)) - length(texture(shadow_map, uv_frag)));
     fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
-//fragment = vec4(shadow_value);
+    //fragment =  _albedo_value;
 
-
-    if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1)
-
+    if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
-    else
-
+    } else {
         bloom = vec4(0.0, 0.0, 0.0, 1.0);
-
+    }
 }
