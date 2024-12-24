@@ -132,6 +132,17 @@ public class Material implements Closeable {
 
     }
 
+    public void compile(){
+        for(String string: pbrMaps.keySet()){
+            try {
+                pbrMaps.get(string).assemble();
+            }catch (Exception e){
+                System.err.println(string);
+            }
+
+        }
+    }
+
     private void updateBuffer() {
         materialBuffer.clear();
 

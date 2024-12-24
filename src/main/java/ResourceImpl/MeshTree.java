@@ -29,4 +29,22 @@ public class MeshTree extends TreeNode<Mesh> {
 
 
     }
+
+
+    public void compile() {
+        MeshTree node = this;
+        Mesh nodeValue;
+        if( (nodeValue = node.getNodeValue()) == null){
+            return;
+        }
+        nodeValue.compile();
+        if(nodeValue.getMaterial() != null){
+            nodeValue.getMaterial().compile();
+        }
+
+        List<TreeNode<Mesh>> list = node.getChildNodes();
+        //list.forEach(meshTreeNode -> { ((MeshTree)(meshTreeNode)).compile();});
+
+
+    }
 }

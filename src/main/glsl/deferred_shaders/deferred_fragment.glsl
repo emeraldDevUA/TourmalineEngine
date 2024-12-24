@@ -147,10 +147,9 @@ void main()
     if(material_has_ambient_occlusion_map) {
         environment *= texture(ambient_occlusion_map, vs_in.uv).r;
     }
-
     environment_emission = environment;
     if(material_has_emission_map) {
         environment_emission += texture(emission_map, vs_in.uv).rgb;
     }
-    //albedo_metalness.rgb = texture(albedo_map, vs_in.uv).rgb;
+
 }

@@ -31,7 +31,9 @@ void main()
     bitangent.g = -normal.r;
     bitangent.b =  normal.g;
 
-    vs_out.position  = (model_matrix * vec4(position, 1.0)).xyz;
+    vec4 model_position =  (model_matrix * vec4(position, 1.0));
+
+    vs_out.position  = model_position.xyz;
     vs_out.normal    = (model_matrix * vec4(normal, 0.0)).xyz;
     vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
     vs_out.uv = uv;
@@ -40,8 +42,9 @@ void main()
 
     vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
 
-    vec4 sp = shadow_projection_matrix * shadow_view_matrix * model_matrix * vec4(position, 1.0);
+    vec4 sp = shadow_projection_matrix * shadow_view_matrix * model_position;
+
     vs_out.shadow_position = sp.xyz/sp.w;
 
-    gl_Position = projection_matrix * view_matrix * model_matrix * vec4(position, 1.0);
+    gl_Position = projection_matrix * view_matrix * model_position;
 }

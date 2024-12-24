@@ -1,5 +1,6 @@
 import Annotations.BasicWindow;
 import Annotations.OpenGLWindow;
+import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
@@ -38,7 +39,9 @@ public class AutoloaderTest extends BasicWindow {
 
         System.out.println(STR."Elapsed time: \{t2 - t1} ms");
         loader.getDrawables().values().forEach(Assert::assertNotNull);
+        loader.getDrawables().values().forEach(MeshTree::compile);
 
+        loader.getDrawables().keySet().forEach(System.out::println);
 
         Assert.assertNotNull(loader.getDrawables().get("F16"));
     }

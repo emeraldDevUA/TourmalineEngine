@@ -10,7 +10,7 @@ layout (binding = 10) uniform samplerCube skybox;
 
 //uniform float time;
 
-out vec4 fragment;
+out highp vec4 fragment;
 
 void main()
 {

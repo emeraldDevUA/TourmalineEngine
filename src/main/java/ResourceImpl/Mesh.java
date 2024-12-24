@@ -194,6 +194,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
     @Getter
     private final Quaternionf rotQuaternion;
     @Setter
+    @Getter
     private Material material;
     @Setter
     private Shader shader;

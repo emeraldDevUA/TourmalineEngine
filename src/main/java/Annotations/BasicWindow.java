@@ -147,7 +147,7 @@ public abstract class BasicWindow implements Closeable {
         }
 
         //glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_SAMPLES, 4);
+//        glfwWindowHint(GLFW_SAMPLES, 4);
         int cnt = 0;
         for (int hint : windowHints) {
             glfwWindowHint(hint, windowHintsValues[cnt]);
@@ -176,7 +176,6 @@ public abstract class BasicWindow implements Closeable {
             );
         }
         glfwMakeContextCurrent(window_handle);
-
         glfwSwapInterval(0);
         glfwShowWindow(window_handle);
 
@@ -189,23 +188,7 @@ public abstract class BasicWindow implements Closeable {
                 resizeWindow(new int[]{width, height});
             }
         });
-        try {
 
-            Texture icon =
-                    new Texture("src/main/resources/miscellaneous/secondary_icon.png", 4);
-            GLFWImage image = GLFWImage.malloc();
-            GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
-            image
-                    .set(icon.getTextureWidth().get(0),
-                            icon.getTextureHeight().get(0),
-                            icon.getTextureData());
-
-            imagebf.put(0, image);
-            glfwSetWindowIcon(window_handle, imagebf);
-
-        } catch (NullPointerException e) {
-            System.err.println(e.getMessage());
-        }
 
 
         BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png", 4);
@@ -217,7 +200,6 @@ public abstract class BasicWindow implements Closeable {
         generateShadowBuffer();
 
         glslVersion = "#version 460 core";
-
 
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
         GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 6);
@@ -232,16 +214,25 @@ public abstract class BasicWindow implements Closeable {
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
 
+        try {
+            Texture icon =
+                    new Texture("src/main/resources/miscellaneous/icon.jpg", 4);
+            GLFWImage.Buffer imagebf = GLFWImage.malloc(1);
+            GLFWImage image = GLFWImage.malloc();
+            image.set(icon.getTextureWidth().get(0),
+                    icon.getTextureHeight().get(0),
+                    icon.getTextureData());
 
+            imagebf.put(0, image);
+            glfwSetWindowIcon(window_handle, imagebf);
 
-    }
-
-    public static void renderUI(@NotNull InterfaceRenderer ...interfaceRenderers){
-        for(InterfaceRenderer interfaceRenderer: interfaceRenderers){
-         renderUI(interfaceRenderer);
-
+        } catch (NullPointerException e) {
+            System.err.println(e.getMessage());
         }
+
     }
+
+
     public static void renderUI(@NotNull InterfaceRenderer interfaceRenderer) {
         // Start new frame for GLFW and OpenGL bindings
         imGuiGlfw.newFrame();
@@ -366,7 +357,6 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, 0);
 
 
-
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -439,7 +429,7 @@ public abstract class BasicWindow implements Closeable {
         glDepthMask(true);
         combineShader.unbind();
 
-        // it's already lost here
+
 
             glCopyImageSubData(
                     deferredPositionBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, // Source texture, type, level, x, y, z
@@ -556,14 +546,14 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-// Set border color for the texture
+        // Set border color for the texture
         float[] borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
         glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-// Attach the depth texture to the framebuffer
+        // Attach the depth texture to the framebuffer
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
 
-// Ensure no color buffer is attached (optional for shadow mapping)
+        // Ensure no color buffer is attached (optional for shadow mapping)
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
