@@ -1,7 +1,10 @@
 import Annotations.BasicWindow;
 import Annotations.OpenGLWindow;
+import Liquids.LiquidBody;
+import ResourceImpl.Mesh;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
+import ResourceImpl.Texture;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 import org.junit.Assert;
@@ -10,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -86,10 +91,17 @@ public class AutoloaderTest extends BasicWindow {
 
 
     @Test
-    public void testIMGUI(){
+    public void liquidBodyTest(){
+        LiquidBody liquidBody = new LiquidBody();
+        Map<String, List<?>> list = liquidBody.generateWater(100, 400);
 
+
+        Mesh mesh = new Mesh("Water", list);
+        mesh.compile();
+        Texture tex = liquidBody.generateCoefficients();
 
     }
+
 
     @Override
     public void close() throws IOException {

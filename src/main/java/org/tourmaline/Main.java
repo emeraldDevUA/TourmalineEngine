@@ -97,7 +97,7 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
 
-        resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_2.obj");
+        resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/LOD_3.obj");
         resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
         resourceLoadScheduler.addResource(land_normal, "src/main/resources/3D_Models/Map/gltf_embedded_0_normal.jpg");
 
@@ -401,12 +401,12 @@ public class Main extends BasicWindow {
 
 
         while (!glfwWindowShouldClose(window_handle)){
-           glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+           //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
                 shadowPass();
 
-           camera.setViewProjectionMatrix(deferredShader);
+          // camera.setViewProjectionMatrix(deferredShader);
 
                 deferredPass();
 
@@ -417,20 +417,15 @@ public class Main extends BasicWindow {
             skyBoxShader.unbind();
 
 
-
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glDisable(GL_DEPTH_TEST);
             postprocessingPass();
             glEnable(GL_DEPTH_TEST);
 
-
-
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
             renderUI(combinedRenderer);
-//            renderUI(ioRenderer);
-
 
 
             glfwPollEvents();

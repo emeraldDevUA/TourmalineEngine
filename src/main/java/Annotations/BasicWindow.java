@@ -375,7 +375,6 @@ public abstract class BasicWindow implements Closeable {
         shadowCamera.setShadowViewProjectionMatrix(deferredShader);
         scene.setActiveProgram(deferredShader);
 
-        glEnable(GL_DEPTH_TEST);
         glCullFace(GL_BACK);
 
         glBindFramebuffer(GL_FRAMEBUFFER, deferredframeBuffer);
@@ -486,14 +485,13 @@ public abstract class BasicWindow implements Closeable {
         scene.setActiveProgram(shadowMappingShader);
         shadowMappingShader.use();
 
-        glEnable(GL_DEPTH_TEST);
         glCullFace(GL_FRONT);
-        glDepthFunc(GL_LESS);
 
-        glActiveTexture(GL_TEXTURE5);
-        glBindTexture(GL_TEXTURE_2D, shadowMap);
+//        glActiveTexture(GL_TEXTURE5);
+//        glBindTexture(GL_TEXTURE_2D, shadowMap);
         glViewport(0,0, shadowMapSize, shadowMapSize);
         glClear(GL_DEPTH_BUFFER_BIT);
+
         scene.drawItems();
         shadowMappingShader.unbind();
 

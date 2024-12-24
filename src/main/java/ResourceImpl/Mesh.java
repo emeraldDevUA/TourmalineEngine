@@ -104,7 +104,7 @@ class VBO implements Drawable, Closeable {
         numNormals = normals.size();
         numUvs = textureCoordinates.size();
 
-        this.indices = BufferUtils.createIntBuffer(numVertices);
+        this.indices = BufferUtils.createIntBuffer(indices.size());
 
         indices.forEach(index ->{this.indices.put(index);});
     }
@@ -213,6 +213,27 @@ public class Mesh implements Loadable, Drawable, Closeable {
         updated = true;
         model_matrix = new float[16];
     }
+
+    public Mesh(String name, Map<String, List<?>> params) {
+        map = new ConcurrentHashMap<>();
+        position = new Vector3f(0, 0, 0);
+        scale = new Vector3f(1,1,1);
+        shadowScale = new Vector3f(1,1,1);
+        rotQuaternion = new Quaternionf(0, 0, 0, 1);
+        material = new Material();
+        updated = true;
+        model_matrix = new float[16];
+
+        map.put(name, new VBO(
+                (List<Integer>) params.get("Indices"),
+                (List<Vector3f>) params.get("Vertices"),
+                new ArrayList<>(),
+                (List<Vector2f>) params.get("UVs"))
+        );
+
+    }
+
+
 
     @Override
     public void load(String path) throws IOException {
@@ -364,22 +385,18 @@ public class Mesh implements Loadable, Drawable, Closeable {
                     .rotate(rotQuaternion);
             model_matrix = matrix4f.get(model_matrix);
         }
-            if (shader != null) {
-                int shader_pointer = shader.getProgram();
-                int scaleVectorLocation = glGetUniformLocation(shader_pointer, "scale_vector");
-                int modelMatrixLocation = glGetUniformLocation(shader_pointer, "model_matrix");
+        if (shader != null) {
+            int shader_pointer = shader.getProgram();
+            int scaleVectorLocation = glGetUniformLocation(shader_pointer, "scale_vector");
+            int modelMatrixLocation = glGetUniformLocation(shader_pointer, "model_matrix");
 
-                glUniformMatrix4fv(modelMatrixLocation, false, model_matrix);
-
-                glUniform3f(scaleVectorLocation,
-                        shadowScale.x,shadowScale.y, shadowScale.z);
+            glUniformMatrix4fv(modelMatrixLocation, false, model_matrix);
+            glUniform3f(scaleVectorLocation, shadowScale.x,shadowScale.y, shadowScale.z);
 
 
-            }
+        }
 
         material.use();
-//            glUniformBlockBinding(shader.getProgram(),
-//                    glGetUniformBlockIndex(shader.getProgram(), "material_block"), material.getBuffer());
 
         for (VBO vbo : map.values()) {
             vbo.draw();
