@@ -237,10 +237,10 @@ public class Main extends BasicWindow {
         wings.add(new PlaneWing(new Vector3f(-1,0, 2.7f), 6.96f, 2.50f,
                 airfoil2412, new Vector3f(0,1,0), 0.2f));
 
-        Plane rigidBody = new Plane(inertia, fightingFalcon.getPosition(),9207, wings, new JetEngine(1300f));
+        Plane rigidBody = new Plane(inertia, fightingFalcon.getPosition(),9207, wings, new JetEngine(13000f));
         //rigidBody.addForce(new Vector3f(8000,0,0));
-
-
+//        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(), 9207);
+//        rigidBody.addForce(new Vector3f(0,-1000,0), new Vector3f(3,0,0));
         rigidBody.setGravity(false);
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
