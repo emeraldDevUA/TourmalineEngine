@@ -98,6 +98,7 @@ public class AutoloaderTest extends BasicWindow {
 
         Mesh mesh = new Mesh("Water", list);
         mesh.compile();
+
         Texture tex = liquidBody.generateCoefficients();
 
     }
