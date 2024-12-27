@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Scene implements DrawableContainer<MeshTree> {
+
+
     private final List<MeshTree> drawables;
     @Setter
     @Getter

@@ -95,11 +95,11 @@ public class AutoloaderTest extends BasicWindow {
         LiquidBody liquidBody = new LiquidBody();
         Map<String, List<?>> list = liquidBody.generateWater(100, 400);
 
+        Mesh water = new Mesh("Water", list);
+        water.compile();
+        liquidBody.getWaterMeshes().put(4, water);
 
-        Mesh mesh = new Mesh("Water", list);
-        mesh.compile();
-
-        Texture tex = liquidBody.generateCoefficients();
+       // Texture tex = liquidBody.generateCoefficients();
 
     }
 
