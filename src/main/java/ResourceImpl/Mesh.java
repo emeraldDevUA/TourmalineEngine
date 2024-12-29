@@ -227,7 +227,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         map.put(name, new VBO(
                 (List<Integer>) params.get("Indices"),
                 (List<Vector3f>) params.get("Vertices"),
-                new ArrayList<>(),
+                (List<Vector3f>) params.get("Vertices"),
                 (List<Vector2f>) params.get("UVs"))
         );
 

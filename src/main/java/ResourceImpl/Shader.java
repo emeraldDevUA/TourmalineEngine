@@ -93,6 +93,7 @@ public class Shader implements Closeable {
     }
 
     public void setUniform(String uniformName, Object uniformObject) {
+        use();
         int uniformLocation = glGetUniformLocation(program, uniformName);
         try {
             if (uniformLocation == -1) {
@@ -100,7 +101,7 @@ public class Shader implements Closeable {
                         String.format("Uniform named %s does not exist.", uniformName)
                 );
             }
-            use();
+
             // Handle different types of uniform objects
             if (uniformObject instanceof Float) {
                 glUniform1f(uniformLocation, (Float) uniformObject);

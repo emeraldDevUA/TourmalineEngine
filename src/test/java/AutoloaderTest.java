@@ -93,7 +93,7 @@ public class AutoloaderTest extends BasicWindow {
     @Test
     public void liquidBodyTest(){
         LiquidBody liquidBody = new LiquidBody();
-        Map<String, List<?>> list = liquidBody.generateWater(100, 400);
+        Map<String, List<?>> list = liquidBody.generateWater(100, 400,800);
 
         Mesh water = new Mesh("Water", list);
         water.compile();

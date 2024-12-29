@@ -2,6 +2,7 @@ package Annotations;
 
 
 import Interfaces.InterfaceRenderer;
+import Liquids.LiquidBody;
 import Rendering.Camera;
 import ResourceImpl.CubeMap;
 import Rendering.Scene;
@@ -26,6 +27,8 @@ import org.lwjgl.system.MemoryStack;
 
 import java.io.Closeable;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 
 import static java.lang.StringTemplate.STR;
@@ -62,10 +65,10 @@ public abstract class BasicWindow implements Closeable {
 
     private static String glslVersion = null;
 
-    private static int windowWidth, windowHeight;
+    protected static int windowWidth, windowHeight;
     private static int shadowMapSize;
     // for time measurement
-    private static long t1, t2;
+    private static long t1, t2, cumulativeTime;
 
     protected static final long NULL = 0L;
 
@@ -110,12 +113,13 @@ public abstract class BasicWindow implements Closeable {
     protected static Camera camera;
     protected static Camera shadowCamera;
 
-
+    // move to the scene
+    protected static List<LiquidBody> waterBodies;
 
     protected BasicWindow() {
         t1 = System.currentTimeMillis();
         t2 = t1;
-
+        cumulativeTime = 0;
     }
 
     protected static void init(@NotNull Class<?> className) {
@@ -229,7 +233,7 @@ public abstract class BasicWindow implements Closeable {
         } catch (NullPointerException e) {
             System.err.println(e.getMessage());
         }
-
+        waterBodies = new ArrayList<>();
     }
 
 
@@ -371,6 +375,10 @@ public abstract class BasicWindow implements Closeable {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
     }
     protected static void deferredPass() {
+
+        cumulativeTime += 1;
+        deferredShader.setUniform("time", 0.001f*(float) (cumulativeTime));
+
         camera.setViewProjectionMatrix(deferredShader);
         shadowCamera.setShadowViewProjectionMatrix(deferredShader);
         scene.setActiveProgram(deferredShader);
@@ -399,6 +407,12 @@ public abstract class BasicWindow implements Closeable {
         BRDFLookUp.use();
 
         scene.drawItems();
+
+
+        deferredShader.setUniform("isWater", true);
+        deferredShader.use(); waterBodies.forEach(LiquidBody::draw);
+        deferredShader.setUniform("isWater", false);
+
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
@@ -493,6 +507,7 @@ public abstract class BasicWindow implements Closeable {
         glClear(GL_DEPTH_BUFFER_BIT);
 
         scene.drawItems();
+        waterBodies.forEach(LiquidBody::draw);
         shadowMappingShader.unbind();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
