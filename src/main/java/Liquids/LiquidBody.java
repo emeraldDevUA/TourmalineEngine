@@ -93,6 +93,7 @@ public class LiquidBody implements Drawable {
         mat.addProperty(Material.ROUGHNESS, 1.0);
         mat.addProperty(Material.METALNESS, .5);
 
+
        // mat.addMap(Material.ALBEDO_MAP, new Texture("src/main/resources/miscellaneous/water.jpg", 3));
         return mat;
     }
