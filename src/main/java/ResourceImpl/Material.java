@@ -25,12 +25,13 @@ public class Material implements Closeable {
     public static final String METALNESS_MAP = "Metalness";
     public static final String EMISSION_MAP = "Emission";
     public static final String AO_MAP = "AmbientOcclusion";
-    private static final String OPACITY = "Opacity";
-    private static final String METALNESS = "Metalness";
-    private static final String ROUGHNESS = "Roughness";
+    public static final String OPACITY = "Opacity";
+    public static final String METALNESS = "Metalness";
+    public static final String ROUGHNESS = "Roughness";
     private final Map<String, Double> physicalProperties;
     @Getter
     private final Map<String, Texture> pbrMaps;
+    @Getter
     private final Map<String, Vector3f> colors;
 
     private boolean bufferUpdated;
@@ -54,7 +55,7 @@ public class Material implements Closeable {
 
         addColor(ALBEDO_MAP, new Vector3f(1,1,1));
         addColor(EMISSION_MAP, new Vector3f(1,1,1));
-//
+
         addProperty(OPACITY, 1.0);
         addProperty(METALNESS, 0.3);
         addProperty(ROUGHNESS,1.0);
@@ -86,9 +87,9 @@ public class Material implements Closeable {
     }
 
     public void use() {
-        if(!bufferUpdated)
+        if(!bufferUpdated) {
             updateBuffer();
-        
+        }
         pbrMaps.keySet().forEach(map->{
 
             boolean isPresent = true;
@@ -144,8 +145,6 @@ public class Material implements Closeable {
     }
 
     private void updateBuffer() {
-        materialBuffer.clear();
-
 
         try {
 

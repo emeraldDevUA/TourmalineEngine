@@ -186,7 +186,7 @@ void main()
         texture(shadow_position, uv_frag).xyz, N, vec3(0,100,0)-position_value
     );
 
-/**/
+    /**/
     int size = 12; // Increased sample size for smoother blur
     float separation = 0.001; // Reduced separation for softer blur
 
@@ -221,7 +221,7 @@ void main()
     }
 
     fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
-    //fragment =  _albedo_value;
+
 
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);

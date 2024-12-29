@@ -7,6 +7,7 @@ import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
+import Liquids.LiquidBody;
 import Rendering.Camera;
 import Rendering.Scene;
 import Rendering.SkyBox;
@@ -33,6 +34,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -400,7 +402,24 @@ public class Main extends BasicWindow {
         scene.setActiveProgram(deferredShader);
 
 
+        deferredShader.setUniform("isWater", false);
+        deferredShader.setUniform("waveNumber", 3);
+
+        LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
+        Map<String, List<?>> list = liquidBody.generateWater(512, 250, 1400);
+
+        Mesh water = new Mesh("Water", list);
+        water.compile();
+        water.setShader(deferredShader);
+        water.getPosition().add(new Vector3f(10,-50,10));
+        liquidBody.getWaterMeshes().put(4, water);
+
+        waterBodies.add(liquidBody);
+
+
         while (!glfwWindowShouldClose(window_handle)){
+
+
            //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
@@ -430,6 +449,7 @@ public class Main extends BasicWindow {
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
+            measureTime();
         }
 
     }
