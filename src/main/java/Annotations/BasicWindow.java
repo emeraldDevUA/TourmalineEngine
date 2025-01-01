@@ -96,7 +96,6 @@ public abstract class BasicWindow implements Closeable {
     protected static int colorBuffer;
     protected static int bloomBuffer;
 
-
     protected static int shadowMap;
 
     // Depth buffer is shared between different framebuffers
@@ -108,6 +107,8 @@ public abstract class BasicWindow implements Closeable {
     protected static Shader postprocessingShader;
     protected static Shader skyBoxShader;
     protected static Shader shadowMappingShader;
+    protected static Shader visualEffectsShader;
+
     protected static Texture BRDFLookUp;
 
     protected static Camera camera;
@@ -282,6 +283,7 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, bloomBuffer);
 
+
         drawRenderQuad();
     }
 
@@ -377,7 +379,9 @@ public abstract class BasicWindow implements Closeable {
     protected static void deferredPass() {
 
         cumulativeTime += 1;
+
         deferredShader.setUniform("time", 0.001f*(float) (cumulativeTime));
+        visualEffectsShader.setUniform("time", 0.001f*(float) (cumulativeTime));
 
         camera.setViewProjectionMatrix(deferredShader);
         shadowCamera.setShadowViewProjectionMatrix(deferredShader);
@@ -414,6 +418,8 @@ public abstract class BasicWindow implements Closeable {
         deferredShader.setUniform("isWater", false);
 
 
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
         camera.setViewProjectionMatrix(combineShader);
@@ -440,9 +446,12 @@ public abstract class BasicWindow implements Closeable {
         glDepthMask(false);
         drawRenderQuad();
         glDepthMask(true);
+
         combineShader.unbind();
 
-
+        camera.setViewProjectionMatrix(visualEffectsShader);
+        visualEffectsShader.use();
+        scene.drawEffects();
 
             glCopyImageSubData(
                     deferredPositionBuffer, GL_TEXTURE_2D, 0, 0, 0, 0, // Source texture, type, level, x, y, z
@@ -463,6 +472,8 @@ public abstract class BasicWindow implements Closeable {
                 0, GL_RGBA, GL_FLOAT, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
         glBindTexture(GL_TEXTURE_2D, 0);
 
         bloomBuffer = glGenTextures();
@@ -473,9 +484,13 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
 
+
+
+
+
+
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, bloomBuffer, 0);
-
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
 
@@ -515,43 +530,15 @@ public abstract class BasicWindow implements Closeable {
         glCullFace(GL_BACK);
     }
     private static void generateShadowBuffer(){
-        /*
-        shadowDepthBuffer = glGenFramebuffers();
-        glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
-        shadowMap = glGenTextures();
 
-        glBindTexture(GL_TEXTURE_2D, shadowMap);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, shadowMapSize, shadowMapSize,
-                0, GL_RGBA, GL_FLOAT, 0);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        float[] borderColor = { 1.0f, 1.0f, 1.0f, 1.0f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-        glBindTexture(GL_TEXTURE_2D, 0);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, shadowMap, 0);
-
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            System.err.println("Forward framebuffer is not ready");
-
-        int[] attachments = {GL_COLOR_ATTACHMENT0};
-
-        glDrawBuffers(attachments);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-*/
         shadowDepthBuffer = glGenFramebuffers();
         glBindFramebuffer(GL_FRAMEBUFFER, shadowDepthBuffer);
 
-// Create a depth texture for the shadow map
+        // Create a depth texture for the shadow map
         shadowMap = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, shadowMap);
 
-// Configure the depth texture
+        // Configure the depth texture
         glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, shadowMapSize, shadowMapSize,
                 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -570,12 +557,12 @@ public abstract class BasicWindow implements Closeable {
         glDrawBuffer(GL_NONE);
         glReadBuffer(GL_NONE);
 
-// Check the framebuffer completeness
+        // Check the framebuffer completeness
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             System.err.println("Shadow framebuffer is not complete!");
         }
 
-// Unbind the framebuffer to prevent unintended rendering
+        // Unbind the framebuffer to prevent unintended rendering
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 

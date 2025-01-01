@@ -181,28 +181,26 @@ class VBO implements Drawable, Closeable {
         glDeleteBuffers(uvsBuffer);
     }
 }
-
+@Getter
+@Setter
 public class Mesh implements Loadable, Drawable, Closeable {
-    @Getter
-    private final Map<String, VBO> map;
-    @Getter
-    private final Vector3f position;
-    private final Vector3f scale;
-    @Getter
-    @Setter
+    private  Map<String, VBO> map;
+
+    private Vector3f position;
+    private Vector3f scale;
     private Vector3f shadowScale;
-    @Getter
-    private final Quaternionf rotQuaternion;
-    @Setter
-    @Getter
+
+    private Quaternionf rotQuaternion;
+
     private Material material;
-    @Setter
     private Shader shader;
-    @Setter
-    @Getter
+
     private boolean updated;
+    private boolean noCull;
+
 
     private float[] model_matrix;
+
     public Mesh() {
         map = new ConcurrentHashMap<>();
         position = new Vector3f(0, 0, 0);
@@ -211,6 +209,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
         material = new Material();
         updated = true;
+        noCull = false;
         model_matrix = new float[16];
     }
 
@@ -398,10 +397,15 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
         material.use();
 
+        if(noCull){
+            glDisable(GL_CULL_FACE);
+        }
         for (VBO vbo : map.values()) {
             vbo.draw();
         }
-
+        if(noCull){
+            glEnable(GL_CULL_FACE);
+        }
     }
 
     @Override

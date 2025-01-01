@@ -3,6 +3,7 @@ package org.tourmaline;
 import Annotations.BasicWindow;
 import Controls.Keyboard;
 import Controls.Mouse;
+import Effects.JetEffect;
 import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
@@ -22,6 +23,7 @@ import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -70,6 +72,8 @@ public class Main extends BasicWindow {
                 new Shader("src/main/glsl/shadow_shaders/shadow_vertex.glsl",
                         "src/main/glsl/shadow_shaders/shadow_fragment.glsl");
 
+        visualEffectsShader = new Shader("src/main/glsl/visualeffects_shaders/visual_effects_vertex.glsl",
+                "src/main/glsl/visualeffects_shaders/visual_effects_fragment.glsl");
          
         Texture albedo = new Texture();
         Texture normal = new Texture();
@@ -416,10 +420,20 @@ public class Main extends BasicWindow {
 
         waterBodies.add(liquidBody);
 
+        JetEffect jetStream = new JetEffect();
+        jetStream.setMainPosition(fightingFalcon.getPosition());
+        jetStream.setMainRotation(fightingFalcon.getRotQuaternion());
+        jetStream.compile();
+
+        //scene.addDrawItem(new MeshTree(null, jetStream.getMesh(), "th"));
+        jetStream.getMesh().setShader(visualEffectsShader);
+        scene.addEffect(jetStream);
 
         while (!glfwWindowShouldClose(window_handle)){
-
-
+            jetStream.getMesh().setPosition(new Vector3f(fightingFalcon.getPosition()).sub(fightingFalcon.getRotQuaternion().transform(
+                    new Vector3f(2.2f,0.1f,-0.015f)))
+            );
+            visualEffectsShader.setUniform("rocketPos", fightingFalcon.getPosition());
            //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
