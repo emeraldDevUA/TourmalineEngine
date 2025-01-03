@@ -86,6 +86,7 @@ public class Main extends BasicWindow {
         Mesh fightingFalcon = new Mesh();
         Mesh euroFighter = new Mesh();
         Mesh mig29 = new Mesh();
+        Mesh S300 = new Mesh();
 
         Mesh land = new Mesh();
         Material material = new Material();
@@ -102,6 +103,8 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(fightingFalcon,"src/main/resources/3D_Models/F16/F16.obj");
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
+        resourceLoadScheduler.addResource(S300, "src/main/resources/3D_Models/S300/S300.obj");
+
 
         resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/LOD_3.obj");
         resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
@@ -127,6 +130,7 @@ public class Main extends BasicWindow {
         fightingFalcon.compile();
         euroFighter.compile();
         mig29.compile();
+        S300.compile();
         land.compile();
         land_alb.assemble();
         land_normal.assemble();
@@ -168,6 +172,9 @@ public class Main extends BasicWindow {
         fightingFalcon.setMaterial(material);
         land.setMaterial(land_mat);
 
+        Material mat = new Material();
+        mat.addColor(Material.ALBEDO_MAP, new Vector3f(6f/255f, 64f/255f, 43f/255f));
+        S300.setMaterial(mat);
         List<TreeNode<Mesh>> arrayList = new ArrayList<>();
 
 
@@ -410,12 +417,12 @@ public class Main extends BasicWindow {
         deferredShader.setUniform("waveNumber", 3);
 
         LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
-        Map<String, List<?>> list = liquidBody.generateWater(512, 250, 1400);
+        Map<String, List<?>> list = liquidBody.generateWater(768, 220, 2200);
 
         Mesh water = new Mesh("Water", list);
         water.compile();
         water.setShader(deferredShader);
-        water.getPosition().add(new Vector3f(10,-50,10));
+        water.getPosition().add(new Vector3f(-120,-39,-325));
         liquidBody.getWaterMeshes().put(4, water);
 
         waterBodies.add(liquidBody);
@@ -429,17 +436,21 @@ public class Main extends BasicWindow {
         jetStream.getMesh().setShader(visualEffectsShader);
         scene.addEffect(jetStream);
 
+        S300.setPosition(new Vector3f(150,-49,-280));
+        S300.setScale(new Vector3f(2,2,2));
+        scene.addDrawItem(new MeshTree(null, S300, "S300"));
+
         while (!glfwWindowShouldClose(window_handle)){
+
             jetStream.getMesh().setPosition(new Vector3f(fightingFalcon.getPosition()).sub(fightingFalcon.getRotQuaternion().transform(
                     new Vector3f(2.2f,0.1f,-0.015f)))
             );
             visualEffectsShader.setUniform("rocketPos", fightingFalcon.getPosition());
            //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
+
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
                 shadowPass();
-
-          // camera.setViewProjectionMatrix(deferredShader);
 
                 deferredPass();
 

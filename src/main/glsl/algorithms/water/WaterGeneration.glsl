@@ -81,7 +81,7 @@ vec3 gerstnerPositions(sampler2D coefficientSampler, Wave inWave, float time, in
         vec4 rgb2 = texture(coefficientSampler, vec2(tx + 0.01, ty + 0.01) / 8.0);
 
         // Parse coefficients from texture
-        float phi = rgb1.r * 2.0 * 3.14159;
+        float phi = rgb1.r * 2 * 3.14159;
         inWave.direction = vec2(cos(phi), sin(phi));
 
         float frequencyI = rgb1.g * 0.4;

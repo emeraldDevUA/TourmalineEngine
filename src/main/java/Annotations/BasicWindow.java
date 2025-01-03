@@ -380,7 +380,7 @@ public abstract class BasicWindow implements Closeable {
 
         cumulativeTime += 1;
 
-        deferredShader.setUniform("time", 0.001f*(float) (cumulativeTime));
+        deferredShader.setUniform("time", 0.01f*(float) (cumulativeTime));
         visualEffectsShader.setUniform("time", 0.001f*(float) (cumulativeTime));
 
         camera.setViewProjectionMatrix(deferredShader);

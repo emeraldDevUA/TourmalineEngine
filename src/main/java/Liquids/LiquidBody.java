@@ -47,9 +47,10 @@ public class LiquidBody implements Drawable {
     public int waveCount = 3;
 
     Vector2f direction = new Vector2f(0.5f,0.7f);
-    float amplitude = 1F;
-    float steepness = 0.5f;
-    float speed = 0.05f;
+    float wavelength = 3f;
+    float amplitude = 1.3F;
+    float steepness = 1.6f;
+    float speed = 0.5f;
     float phase = 0.05f;
 
 
@@ -94,7 +95,10 @@ public class LiquidBody implements Drawable {
         mat.addProperty(Material.METALNESS, .5);
 
 
-       // mat.addMap(Material.ALBEDO_MAP, new Texture("src/main/resources/miscellaneous/water.jpg", 3));
+        mat.addMap(Material.ALBEDO_MAP, new Texture("src/main/resources/miscellaneous/water.jpg", 3));
+       // mat.addMap(Material.NORMAL_MAP, new Texture("src/main/resources/miscellaneous/waternormals.jpg", 3));
+
+
         return mat;
     }
 
@@ -131,8 +135,8 @@ public class LiquidBody implements Drawable {
     }
 
     private Wave calculateWave(int waveIndex, int maxWaves) {
-        float amplitude = (float) (1.5 / Math.pow(waveIndex, 2.0));
-        float frequency = (float) ((0.002 + ((waveIndex - 1) / (double) maxWaves) * 0.18) / 0.06);
+        float amplitude = (float) (this.amplitude / Math.pow(waveIndex, 2.0));
+        float frequency = (float) ((speed/this.wavelength + ((waveIndex - 1) / (double) maxWaves) * 0.18) / 0.06);
 
         return new Wave(
                 (float) ((waveIndex + 2) / (double) (maxWaves + 2)),
@@ -155,7 +159,7 @@ public class LiquidBody implements Drawable {
             data.putInt((int) (255 * wave.speed()));
             data.putInt(0);
 
-            data.putInt((int) (255 * wave.angle()));
+            data.putInt((int) (255 * wave.angle())/2);
             data.putInt((int) (255 * wave.frequency()));
             data.putInt((int) (255 * wave.amplitude()));
         }
@@ -185,8 +189,7 @@ public class LiquidBody implements Drawable {
         waterStructBuffer.putFloat(direction.x);
         waterStructBuffer.putFloat(direction.y);
         // Padding for alignment
-        waterStructBuffer.putFloat(0.0f);
-        waterStructBuffer.putFloat(0.0f);
+        waterStructBuffer.putFloat(wavelength);
 
         // float amplitude
         waterStructBuffer.putFloat(amplitude);
