@@ -70,7 +70,7 @@ void main()
 //            float phase;
 //        };
 
-         Wave initialWave = Wave(model_position.xyz, direction, .3, 2, steepness, speed, 0.1);
+         Wave initialWave = Wave(model_position.xyz, direction, wavelength, amplitude, steepness, speed, phase);
 
 
 //         wave_position = generateWave(initialWave, time);
