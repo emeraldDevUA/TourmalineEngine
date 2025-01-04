@@ -13,6 +13,7 @@ import Rendering.Camera;
 import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
+import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
@@ -56,6 +57,7 @@ public class Main extends BasicWindow {
 
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
+        AutoLoader autoLoader = new AutoLoader("src/main/resources/3D_Models", resourceLoadScheduler);
         scene = new Scene();
         init(Main.class);
 
@@ -74,80 +76,40 @@ public class Main extends BasicWindow {
 
         visualEffectsShader = new Shader("src/main/glsl/visualeffects_shaders/visual_effects_vertex.glsl",
                 "src/main/glsl/visualeffects_shaders/visual_effects_fragment.glsl");
-         
-        Texture albedo = new Texture();
-        Texture normal = new Texture();
-        Texture roughness_g = new Texture();
-        Texture roughness_b = new Texture();
-        Texture land_alb = new Texture();
-        Texture land_normal = new Texture();
 
-        Texture metalness = new Texture();
-        Mesh fightingFalcon = new Mesh();
-        Mesh euroFighter = new Mesh();
-        Mesh mig29 = new Mesh();
-        Mesh S300 = new Mesh();
-
-        Mesh land = new Mesh();
-        Material material = new Material();
-        Material land_mat = new Material();
-
-
-        resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
-        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/F16/F16_normal.png");
-        resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
-        resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
-        resourceLoadScheduler.addResource(metalness,"src/main/resources/3D_Models/F16/F16_metalness.png");
-
-
-        resourceLoadScheduler.addResource(fightingFalcon,"src/main/resources/3D_Models/F16/F16.obj");
-        resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
-        resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
-        resourceLoadScheduler.addResource(S300, "src/main/resources/3D_Models/S300/S300.obj");
-
-
-        resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/LOD_3.obj");
-        resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
-        resourceLoadScheduler.addResource(land_normal, "src/main/resources/3D_Models/Map/gltf_embedded_0_normal.jpg");
-
-
-        t1 = System.currentTimeMillis();
+        skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
+                "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
         Texture.setVerticalFlip(true);
-        resourceLoadScheduler.loadResources();
-        double load = 0;
-        while (resourceLoadScheduler.getReadiness() < 1.0){
-            if(abs(load-resourceLoadScheduler.getReadiness()) >= 0.1) {
-                load = resourceLoadScheduler.getReadiness();
-                System.out.println(STR."\{load * 100}%");
-            }
-        }
+
+        t1 = System.currentTimeMillis();
+        autoLoader.loadTrees();
         t2 = System.currentTimeMillis();
-        albedo.assemble();
-        normal.assemble();
-        roughness_g.assemble();
-        roughness_b.assemble();
-        fightingFalcon.compile();
-        euroFighter.compile();
-        mig29.compile();
+        autoLoader.asyncLoad();
+
+        while (autoLoader.getReadiness() < 1){
+            System.out.println();
+        }
+
+        t3 = System.currentTimeMillis();//
+         resourceLoadScheduler.reset();
+
+       System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
+
+        MeshTree F16 = autoLoader.getDrawables().get("F16");
+        MeshTree S300 = autoLoader.getDrawables().get("S300");
+        MeshTree Island = autoLoader.getDrawables().get("Map");
+
+        F16.compile();
         S300.compile();
-        land.compile();
-        land_alb.assemble();
-        land_normal.assemble();
-        metalness.assemble();
+        Island.compile();
 
-        t3 = System.currentTimeMillis();
-        resourceLoadScheduler.reset();
-
-        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
-        fightingFalcon.getPosition().add(new Vector3f(10,10,10));
-
-        Vector3f temp = fightingFalcon.getPosition();
+        F16.getNodeValue().getPosition().add(new Vector3f(10,10,10));
+        Vector3f temp = F16.getNodeValue().getPosition();
 
         camera = new Camera(
                 temp.add(new Vector3f(-3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
-
 
         shadowCamera = new Camera(
                 temp.add(new Vector3f(-90,120,20), new Vector3f()),
@@ -155,49 +117,34 @@ public class Main extends BasicWindow {
 
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
+
         camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,0.1f);
-        shadowCamera.loadOrthographicProjection(-1500,1500, -1500, 1500, -800, 800);
+        shadowCamera.loadOrthographicProjection
+                (-1500,1500, -1500, 1500, -800, 800);
+        camera.setViewProjectionMatrix(skyBoxShader);
 
-        material.addMap(Material.ALBEDO_MAP, albedo);
-        material.addMap(Material.NORMAL_MAP, normal);
-        material.addMap(Material.ROUGHNESS_MAP, roughness_g);
-        material.addMap(Material.METALNESS_MAP, metalness);
-        material.addProperty(Material.ROUGHNESS_MAP, 0.8);
 
-        land_mat.addMap(Material.ALBEDO_MAP, land_alb);
-        land_mat.addMap(Material.NORMAL_MAP, land_normal);
-        land_mat.addProperty(Material.ROUGHNESS_MAP, 0.9);
-        land_mat.addProperty(Material.METALNESS_MAP, 0.2);
-
-        fightingFalcon.setMaterial(material);
-        land.setMaterial(land_mat);
+        F16.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.8);
+        Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.9);
+        Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.2);
 
         Material mat = new Material();
         mat.addColor(Material.ALBEDO_MAP, new Vector3f(6f/255f, 64f/255f, 43f/255f));
-        S300.setMaterial(mat);
-        List<TreeNode<Mesh>> arrayList = new ArrayList<>();
+        S300.getNodeValue().setMaterial(mat);
 
+        F16.getNodeValue().setShadowScale(new Vector3f(10));
 
-        Shader test_shader = new Shader("src/main/glsl/vertex_test.vert", "src/main/glsl/fragment_test.frag");
-        test_shader.use();
-        camera.setViewProjectionMatrix(test_shader);
-        fightingFalcon.setShader(test_shader);
-        fightingFalcon.setShadowScale(new Vector3f(10));
-        land.setShader(test_shader);
-        MeshTree F16 = new MeshTree(arrayList, fightingFalcon,"F16");
-
-        scene.addDrawItem(F16);
-        scene.addDrawItem(new MeshTree(null, land, "land"));
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
 
         SkyBox skyBox = new SkyBox();
-        CubeMap cm = new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
+
+        CubeMap cm =
+                new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
         CubeMap radiance_cm =
                 new CubeMap("src/main/resources/skybox/radiance", ".hdr", false);
-
         CubeMap irradiance_cm =
                 new CubeMap("src/main/resources/skybox/irradiance", ".hdr", false);
 
@@ -205,10 +152,6 @@ public class Main extends BasicWindow {
         skyBox.setRadiance(radiance_cm);
         skyBox.setIrradiance(irradiance_cm);
 
-        skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
-                "src/main/glsl/skybox_shaders/skybox_frag.glsl");
-
-        camera.setViewProjectionMatrix(skyBoxShader);
         skyBox.compile();
 
         Keyboard keyboard = new Keyboard();
@@ -224,39 +167,38 @@ public class Main extends BasicWindow {
             if (state == GLFW_PRESS) {
                 if (key == GLFW_KEY_A) {
                     System.out.println("A");
-                    fightingFalcon.getRotQuaternion().rotateY(0.01f).normalize();
+                    F16.getRotQuaternion().rotateY(0.01f).normalize();
                     camera.getQuaternionf().rotateY(0.01f).normalize();
 
                 } else if (key == GLFW_KEY_D) {
                     System.out.println("D");
-                    fightingFalcon.getRotQuaternion().rotateY(-0.01f).normalize();
+                    F16.getRotQuaternion().rotateY(-0.01f).normalize();
                     camera.getQuaternionf().rotateY(-0.01f).normalize();
 
                 } else if (key == GLFW_KEY_W) {
                     System.out.println("W");
-                    fightingFalcon.getPosition().add(fightingFalcon.getRotQuaternion()
+                    F16.getPosition().add(F16.getRotQuaternion()
                             .transform(new Vector3f(1,0,0)));
                 } else if (key == GLFW_KEY_S) {
                     System.out.println("S");
-                    fightingFalcon.getRotQuaternion().rotateX(0.01f).normalize();
+                    F16.getRotQuaternion().rotateX(0.01f).normalize();
                     camera.getQuaternionf().rotateX(0.01f).normalize();
 
                 } else if (key == GLFW_KEY_C) {
-                    fightingFalcon.getRotQuaternion().rotateZ(0.01f).normalize();
+                    F16.getRotQuaternion().rotateZ(0.01f).normalize();
                     camera.getQuaternionf().rotateZ(0.01f).normalize();
 
                 } else if (key == GLFW_KEY_V) {
-                    fightingFalcon.getRotQuaternion().rotateZ(-0.01f).normalize();
+                    F16.getRotQuaternion().rotateZ(-0.01f).normalize();
                     camera.getQuaternionf().rotateZ(-0.01f).normalize();
 
                 }
 
-
-                fightingFalcon.setUpdated(true);
-                camera.setFocus(fightingFalcon.getPosition());
-                camera.setPosition(fightingFalcon.getPosition()
+                F16.setUpdated(true);
+                camera.setFocus(F16.getPosition());
+                camera.setPosition(F16.getPosition()
                         .add(new Vector3f(-3,1,0)
-                                .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
+                                .rotate(F16.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
 //                shadowCamera.setFocus(fightingFalcon.getPosition());
@@ -428,24 +370,27 @@ public class Main extends BasicWindow {
         waterBodies.add(liquidBody);
 
         JetEffect jetStream = new JetEffect();
-        jetStream.setMainPosition(fightingFalcon.getPosition());
-        jetStream.setMainRotation(fightingFalcon.getRotQuaternion());
+        jetStream.setMainPosition(F16.getPosition());
+        jetStream.setMainRotation(F16.getRotQuaternion());
         jetStream.compile();
 
         //scene.addDrawItem(new MeshTree(null, jetStream.getMesh(), "th"));
         jetStream.getMesh().setShader(visualEffectsShader);
         scene.addEffect(jetStream);
 
-        S300.setPosition(new Vector3f(150,-49,-280));
-        S300.setScale(new Vector3f(2,2,2));
-        scene.addDrawItem(new MeshTree(null, S300, "S300"));
+        S300.getNodeValue().setPosition(new Vector3f(150,-49,-280));
+        S300.getNodeValue().setScale(new Vector3f(2,2,2));
+
+        scene.addDrawItem(S300);
+        scene.addDrawItem(Island);
+        scene.addDrawItem(F16);
 
         while (!glfwWindowShouldClose(window_handle)){
 
-            jetStream.getMesh().setPosition(new Vector3f(fightingFalcon.getPosition()).sub(fightingFalcon.getRotQuaternion().transform(
+            jetStream.getMesh().setPosition(new Vector3f(F16.getPosition()).sub(F16.getRotQuaternion().transform(
                     new Vector3f(2.2f,0.1f,-0.015f)))
             );
-            visualEffectsShader.setUniform("rocketPos", fightingFalcon.getPosition());
+            visualEffectsShader.setUniform("rocketPos", F16.getPosition());
            //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);

@@ -42,7 +42,7 @@ public class AutoLoader {
     private TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
 
         final String models_formats = ".obj .fbx .glb .stl";
-        final String texture_formats = ".png .jpg";
+        final String texture_formats = ".png .jpg .jpeg";
 
         File[] files = dir.listFiles();
         assert files != null;

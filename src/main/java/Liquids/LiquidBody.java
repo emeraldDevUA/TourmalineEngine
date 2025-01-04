@@ -46,12 +46,12 @@ public class LiquidBody implements Drawable {
     private boolean bufferUpdated;
     public int waveCount = 3;
 
-    Vector2f direction = new Vector2f(0.5f,0.7f);
-    float wavelength = 3f;
-    float amplitude = 1.3F;
-    float steepness = 1.6f;
-    float speed = 0.5f;
-    float phase = 0.05f;
+    public Vector2f direction = new Vector2f(0.5f,0.7f);
+    public float wavelength = 3f;
+    public float amplitude = 1.3F;
+    public float steepness = 1.6f;
+    public float speed = 0.5f;
+    public float phase = 0.05f;
 
 
     public LiquidBody(String texturePath) {

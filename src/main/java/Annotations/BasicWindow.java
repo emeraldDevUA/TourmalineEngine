@@ -522,7 +522,7 @@ public abstract class BasicWindow implements Closeable {
         glClear(GL_DEPTH_BUFFER_BIT);
 
         scene.drawItems();
-        waterBodies.forEach(LiquidBody::draw);
+        //waterBodies.forEach(LiquidBody::draw);
         shadowMappingShader.unbind();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

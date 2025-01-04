@@ -1,7 +1,11 @@
 package ResourceImpl;
 
 import Interfaces.TreeNode;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class MeshTree extends TreeNode<Mesh> {
@@ -46,5 +50,17 @@ public class MeshTree extends TreeNode<Mesh> {
         //list.forEach(meshTreeNode -> { ((MeshTree)(meshTreeNode)).compile();});
 
 
+    }
+
+    public Vector3f getPosition() {
+        return getNodeValue().getPosition();
+    }
+
+    public Quaternionf getRotQuaternion() {
+        return getNodeValue().getRotQuaternion();
+    }
+
+    public void setUpdated(boolean updated) {
+        getNodeValue().setUpdated(updated);
     }
 }
