@@ -359,12 +359,12 @@ public class Main extends BasicWindow {
         deferredShader.setUniform("waveNumber", 3);
 
         LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
-        Map<String, List<?>> list = liquidBody.generateWater(768, 220, 2200);
+        Map<String, List<?>> list = liquidBody.generateWater(768, 240, 2200);
 
         Mesh water = new Mesh("Water", list);
         water.compile();
         water.setShader(deferredShader);
-        water.getPosition().add(new Vector3f(-120,-39,-325));
+        water.getPosition().add(new Vector3f(-140,-33,-325));
         liquidBody.getWaterMeshes().put(4, water);
 
         waterBodies.add(liquidBody);

@@ -2,6 +2,8 @@ package Effects;
 
 import ResourceImpl.Mesh;
 import ResourceImpl.Shader;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -19,14 +21,21 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.glBindVertexArray;
 import static org.lwjgl.opengl.GL30.glGenVertexArrays;
 
+@RequiredArgsConstructor
+
 public class JetEffect  extends BaseEffect{
+
+    @Setter
+    private int steps = 100;
+    private final int Z_MAX;
+    private final float radius;
 
     private Mesh jetStream;
     public JetEffect(){
-
-
-
+        Z_MAX = 20;
+        radius = .08f;
     }
+
 
     @Override
     public void draw(){
@@ -37,13 +46,13 @@ public class JetEffect  extends BaseEffect{
 
     @Override
     public void compile() {
-        int Z_MAX = 20;
-        int steps = 100;
-        float radius = .08f;
+
+
+
         List<Vector3f> vertices = new ArrayList<>(Z_MAX * steps + 2);
         List<Integer> indices = new ArrayList<>();
 
-// Precompute trigonometric values
+        // Precompute trigonometric values
         float[] cosValues = new float[steps];
         float[] sinValues = new float[steps];
         for (int j = 0; j < steps; j++) {
@@ -51,7 +60,7 @@ public class JetEffect  extends BaseEffect{
             sinValues[j] = (float) Math.sin(2 * Math.PI * j / steps);
         }
 
-// Generate vertices
+        // Generate vertices
         for (int i = 0; i <= Z_MAX+2; i++) {
             for (int j = 0; j < steps; j++) {
                 float X = 0.2f*(float) i;
@@ -61,11 +70,11 @@ public class JetEffect  extends BaseEffect{
             }
         }
 
-// Add cap vertices
+        // Add cap vertices
         vertices.add(new Vector3f(0, 0, 0));        // Bottom center
         vertices.add(new Vector3f(0, 0, Z_MAX));   // Top center
 
-// Generate side indices
+        // Generate side indices
         for (int i = 0; i <= Z_MAX + 2; i++) {
             for (int j = 0; j < steps; j++) {
                 int current = i * steps + j;
@@ -83,26 +92,6 @@ public class JetEffect  extends BaseEffect{
             }
         }
 
-// Generate cap indices
-//        int bottomCenter = vertices.size() - 2; // Bottom center vertex index
-//        int topCenter = vertices.size() - 1;   // Top center vertex index
-//
-//// Bottom cap
-//        for (int j = 0; j < steps; j++) {
-//            int next = (j + 1) % steps;
-//            indices.add(bottomCenter); // Center of the bottom cap
-//            indices.add(j);            // Current vertex on the bottom ring
-//            indices.add(next);         // Next vertex on the bottom ring
-//        }
-//
-//// Top cap
-//        for (int j = 0; j < steps; j++) {
-//            int next = (j + 1) % steps;
-//            indices.add(topCenter);                  // Center of the top cap
-//            indices.add((Z_MAX - 1) * steps + next); // Next vertex on the top ring
-//            indices.add((Z_MAX - 1) * steps + j);    // Current vertex on the top ring
-//        }
-        // Create Mesh
         Map<String, List<?>> map = new HashMap<>();
         map.put("Indices", indices);
         map.put("Normals", new ArrayList<>()); // Placeholder
