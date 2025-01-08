@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.joml.Math.*;
 import static org.karazin.Main.arrayToList;
@@ -57,6 +58,10 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 public class Main extends BasicWindow {
 
+    static float aileron =0;
+    static float elevator = 0;
+    static float rudder = 0f;
+    static float dt = 0.1f;
     public static void main(String[] args){
 
         long t1,t2,t3;
@@ -106,9 +111,9 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
 
-        resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/etopo10_2.obj");
-        resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/gltf_embedded_0.jpeg");
-        resourceLoadScheduler.addResource(land_normal, "src/main/resources/3D_Models/Map/gltf_embedded_0_normal.jpg");
+        resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/Map.obj");
+        resourceLoadScheduler.addResource(land_alb, "src/main/resources/3D_Models/Map/Map_Albedo.jpeg");
+        resourceLoadScheduler.addResource(land_normal, "src/main/resources/3D_Models/Map/Map_Normal.jpg");
 
 
         t1 = System.currentTimeMillis();
@@ -217,72 +222,107 @@ public class Main extends BasicWindow {
         mouse.setWindow_pointer(window_handle);
         mouse.init();
 
-        Matrix3f inertia = new Matrix3f(
-                (float) (0.4*1*4), 0, 0,
-                0      ,  (float) 0.4*1*4,0,
-                0,       0, (float) 0.4*1*4
-        );
 
-        inertia.m00 *= 9207;
-        inertia.m11 *= 9207;
-        inertia.m22 *= 9207;
 
-        Airfoil airfoil2412 = new Airfoil((arrayToList(PlaneConstants.NACA_2412)));
+        float wing_offset = -1.0f;
+        float tail_offset = -6.6f;
+
+        Airfoil airfoil0012 = new Airfoil(Objects.requireNonNull(arrayToList(PlaneConstants.NACA_0012)));
+
+        Airfoil airfoil2412 = new Airfoil((Objects.requireNonNull(arrayToList(PlaneConstants.NACA_2412))));
 
         ArrayList<PlaneWing> wings = new ArrayList<>();
 
-        wings.add(new PlaneWing(new Vector3f(-1,0, -2.7f), 6.96f, 2.50f,
+        wings.add(new PlaneWing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
                 airfoil2412, new Vector3f(0,1,0), 0.2f));
 
-        wings.add(new PlaneWing(new Vector3f(-1,0, 2.7f), 6.96f, 2.50f,
+        wings.add(new PlaneWing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
                 airfoil2412, new Vector3f(0,1,0), 0.2f));
 
-        Plane rigidBody = new Plane(inertia, fightingFalcon.getPosition(),9207, wings, new JetEngine(13000f));
-        //rigidBody.addForce(new Vector3f(8000,0,0));
-//        RigidBody rigidBody = new RigidBody(inertia, fightingFalcon.getPosition(), 9207);
-//        rigidBody.addForce(new Vector3f(0,-1000,0), new Vector3f(3,0,0));
-        rigidBody.setGravity(false);
+        wings.add(new PlaneWing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
+                airfoil0012, new Vector3f(0,1,0), 1f));
 
+        wings.add(new PlaneWing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
+                airfoil0012, new Vector3f(0,0,1), 0.15f));
+
+
+        JetEngine engine;
+
+        Matrix3f inertia = new Matrix3f
+                (46311.668f, -660.000f, -0.000f,
+                        -660.000f,188713.797f,-0.000f,
+                        -0.000f, -0.000f,147367.125f);
+        Plane plane = new Plane(inertia, fightingFalcon.getPosition(),
+                9207, wings, engine = new JetEngine(40f));
+
+//        plane.setControlInput(146.161f,   -8.893f,   -0.245f);
+//
         KeyboardEventHandler keyboard_handler = (key, state) -> {
+            Vector3f factor = new Vector3f(6.0f, 0.5f, 1.0f).mul(10);
             if (state == GLFW_PRESS) {
-                if (key == GLFW_KEY_A) {
 
-                } else if (key == GLFW_KEY_D) {
-                    System.out.println("D");
+                if(key == GLFW_KEY_W){
+                    aileron  = move(aileron, factor.x, dt);;
 
-                } else if (key == GLFW_KEY_W) {
-                    System.out.println("W");
-                    fightingFalcon.getPosition().add(fightingFalcon.getRotQuaternion()
-                            .transform(new Vector3f(1,0,0)));
-                } else if (key == GLFW_KEY_S) {
-                    System.out.println("S");
-                    fightingFalcon.getRotQuaternion().rotateX(0.01f).normalize();
-                    camera.getQuaternionf().rotateX(0.01f).normalize();
+                }else if(key == GLFW_KEY_S) {
+                    aileron  = move(aileron, -factor.x, dt);;
 
-                } else if (key == GLFW_KEY_C) {
-                    fightingFalcon.getRotQuaternion().rotateZ(0.01f).normalize();
-                    camera.getQuaternionf().rotateZ(0.01f).normalize();
-
-                } else if (key == GLFW_KEY_V) {
-                    fightingFalcon.getRotQuaternion().rotateZ(-0.01f).normalize();
-                    camera.getQuaternionf().rotateZ(-0.01f).normalize();
+                }
+                else{
+                    aileron = center(aileron, factor.x, dt);
 
                 }
 
 
-                fightingFalcon.setUpdated(true);
-                camera.setFocus(fightingFalcon.getPosition());
-                camera.setPosition(fightingFalcon.getPosition()
-                        .add(new Vector3f(-3,1,0)
-                                .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
-                //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
-                camera.loadViewMatrix();
+                if(key == GLFW_KEY_A){
+
+                    rudder  = move(rudder, factor.y, dt);
+                }else if(key == GLFW_KEY_D) {
+                    rudder  = move(rudder, -factor.y, dt);
+                }else{
+
+                    rudder  = center(rudder, factor.y, dt);
+
+                }
+                if(key == GLFW_KEY_C){
+                    elevator = move(rudder, factor.z, dt);
+
+                }else if(key == GLFW_KEY_V) {
+                    elevator = move(rudder, -factor.z, dt);
+                }
+
+                else{
+                    elevator = center(rudder, factor.z, dt);
+                }
+
+
+                if(key == GLFW_KEY_K) {
+
+                    engine.setThrottle(0f);
+            }   else if(key == GLFW_KEY_Y) {
+
+                    engine.setThrottle(1f);
+                }
+
+//                try {
+//                    Thread.sleep(1);
+//                } catch (InterruptedException e) {
+//                    throw new RuntimeException(e);
+//                }
+                System.out.println(STR."\{aileron} \{elevator} \{rudder}");
+//                fightingFalcon.setUpdated(true);
+//                camera.setFocus(fightingFalcon.getPosition());
+//                camera.setPosition(fightingFalcon.getPosition()
+//                        .add(new Vector3f(-3,1,0)
+//                                .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
+//                //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
+//                camera.loadViewMatrix();
 //                shadowCamera.setFocus(fightingFalcon.getPosition());
 //                shadowCamera.setPosition(fightingFalcon.getPosition()
 //                        .add(new Vector3f(-30,40,30),new Vector3f()));
 //                shadowCamera.loadViewMatrix();
 //                shadowCamera.setShadowViewProjectionMatrix(deferredShader);
-                camera.setViewProjectionMatrix(skyBoxShader);
+//                camera.setViewProjectionMatrix(skyBoxShader);
             }
         };
 
@@ -361,6 +401,8 @@ public class Main extends BasicWindow {
 
 //        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
 //        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
+
+
         while (!glfwWindowShouldClose(window_handle)){
 
 
@@ -395,21 +437,23 @@ public class Main extends BasicWindow {
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
+            plane.setControlInput(aileron,elevator, rudder);
+            plane.update(dt);
+            fightingFalcon.getRotQuaternion().x = plane.getOrientation().x;
+            fightingFalcon.getRotQuaternion().y = plane.getOrientation().y;
+            fightingFalcon.getRotQuaternion().z = plane.getOrientation().z;
+            fightingFalcon.getRotQuaternion().w = plane.getOrientation().w;
 
-            rigidBody.update(0.01f);
-            fightingFalcon.getRotQuaternion().x = rigidBody.getOrientation().x;
-            fightingFalcon.getRotQuaternion().y = rigidBody.getOrientation().y;
-            fightingFalcon.getRotQuaternion().z = rigidBody.getOrientation().z;
-            fightingFalcon.getRotQuaternion().w = rigidBody.getOrientation().w;
+            //System.out.println(plane);
+            System.out.println(aileron +" "+elevator+" "+ rudder);
+                //       aileron = 0; rudder = 0; elevator = 0;
 
             camera.setFocus(fightingFalcon.getPosition());
             camera.setPosition(fightingFalcon.getPosition()
-                    .add(new Vector3f(-3,1,0)
-                            .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
+                    .add(new Vector3f(-3,1,0), new Vector3f()));
             //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
             camera.loadViewMatrix();
 
-            System.out.println(rigidBody);
             measureTime();
         }
 
@@ -456,6 +500,20 @@ public class Main extends BasicWindow {
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }
+    }
+    public static float center(float value, float factor, float dt) {
+        if (value >= 0) {
+            return Math.max(0.0f, Math.min(1.0f, value - factor * dt));
+        } else {
+            return Math.max(-1.0f, Math.min(0.0f, value + factor * dt));
+        }
+    }
+    public static float move(float value, float factor, float dt) {
+        return clamp(value - factor * dt, -5.0f, 5.0f);
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
     }
 
 }
