@@ -253,12 +253,15 @@ public class Main extends BasicWindow {
                         -660.000f,188713.797f,-0.000f,
                         -0.000f, -0.000f,147367.125f);
         Plane plane = new Plane(inertia, fightingFalcon.getPosition(),
-                9207, wings, engine = new JetEngine(40f));
+                9207, wings, engine = new JetEngine(13000f));
 
 //        plane.setControlInput(146.161f,   -8.893f,   -0.245f);
+
+        engine.setThrottle(0f);
+        plane.setVelocity(new Vector3f(50,0,0));
 //
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            Vector3f factor = new Vector3f(6.0f, 0.5f, 1.0f).mul(10);
+            Vector3f factor = new Vector3f(6.0f, 1.5f, 1.0f).mul(20);
             if (state == GLFW_PRESS) {
 
                 if(key == GLFW_KEY_W){
@@ -297,11 +300,11 @@ public class Main extends BasicWindow {
 
 
                 if(key == GLFW_KEY_K) {
-
-                    engine.setThrottle(0f);
-            }   else if(key == GLFW_KEY_Y) {
-
                     engine.setThrottle(1f);
+
+            }   else if(key == GLFW_KEY_Y) {
+                    engine.setThrottle(0f);
+
                 }
 
 //                try {

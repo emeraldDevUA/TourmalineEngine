@@ -357,6 +357,8 @@ public class Mesh implements Loadable, Drawable, Closeable {
     public void draw() {
 
         if(updated) {
+
+           Vector3f vec =  rotQuaternion.getEulerAnglesXYZ(new Vector3f());
             Matrix4f matrix4f = new Matrix4f().identity();
             matrix4f.translate(position)
                     .scale(scale)
