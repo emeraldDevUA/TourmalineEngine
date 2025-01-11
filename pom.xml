@@ -21,14 +21,14 @@
 
     <dependencies>
 
+
         <dependency>
-            <groupId>org.karazin</groupId>
-            <artifactId>MessProject</artifactId>
+            <groupId>org.tourmaline</groupId>
+            <artifactId>QuartzPhysics</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/MessProject.jar</systemPath>
+            <systemPath>${project.basedir}/QuartzPhysics.jar</systemPath>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.joml/joml -->
         <dependency>

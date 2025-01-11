@@ -7,7 +7,7 @@ import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
-import Phyiscs.Airfoil;
+
 import Rendering.Camera;
 import Rendering.Scene;
 import Rendering.SkyBox;
@@ -16,17 +16,20 @@ import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
 
-import SecondPhysics.JetEngine;
-import SecondPhysics.Plane;
-import SecondPhysics.PlaneWing;
-import SecondPhysics.RigidBody;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImVec2;
 import org.joml.Matrix3f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.karazin.PlaneConstants;
+
 import org.lwjgl.BufferUtils;
+import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
+import org.tourmaline.PlanePhysics.Airfoil.Constants;
+import org.tourmaline.PlanePhysics.Engine;
+import org.tourmaline.PlanePhysics.Plane;
+import org.tourmaline.PlanePhysics.Wing;
+import org.tourmaline.RigidBody.RigidBody;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 
@@ -41,7 +44,7 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.joml.Math.*;
-import static org.karazin.Main.arrayToList;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 
@@ -51,6 +54,7 @@ import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
@@ -61,7 +65,7 @@ public class Main extends BasicWindow {
     static float aileron =0;
     static float elevator = 0;
     static float rudder = 0f;
-    static float dt = 0.1f;
+    static float dt = 0.01f;
     public static void main(String[] args){
 
         long t1,t2,t3;
@@ -144,7 +148,7 @@ public class Main extends BasicWindow {
         resourceLoadScheduler.reset();
 
         System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
-        fightingFalcon.getPosition().add(new Vector3f(10,10,10));
+        fightingFalcon.getPosition().add(new Vector3f(0,8000,0));
 
         Vector3f temp = fightingFalcon.getPosition();
 
@@ -226,85 +230,106 @@ public class Main extends BasicWindow {
 
         float wing_offset = -1.0f;
         float tail_offset = -6.6f;
+        Matrix3f inertia = new Matrix3f(
+                46311.668f, -660.000f, -0.000f,
+                -660.000f,188713.797f,-0.000f,
+                -0.000f, -0.000f,147367.125f);
 
-        Airfoil airfoil0012 = new Airfoil(Objects.requireNonNull(arrayToList(PlaneConstants.NACA_0012)));
+        Engine jetEngine = new Engine(13000);
+        ArrayList<Wing> wings = new ArrayList<>();
 
-        Airfoil airfoil2412 = new Airfoil((Objects.requireNonNull(arrayToList(PlaneConstants.NACA_2412))));
+        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
 
-        ArrayList<PlaneWing> wings = new ArrayList<>();
+        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
 
-        wings.add(new PlaneWing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
+
+        wings.add(new Wing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
                 airfoil2412, new Vector3f(0,1,0), 0.2f));
 
-        wings.add(new PlaneWing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
+        wings.add(new Wing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
                 airfoil2412, new Vector3f(0,1,0), 0.2f));
 
-        wings.add(new PlaneWing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
+        wings.add(new Wing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
                 airfoil0012, new Vector3f(0,1,0), 1f));
 
-        wings.add(new PlaneWing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
+        wings.add(new Wing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
                 airfoil0012, new Vector3f(0,0,1), 0.15f));
 
+       // Plane plane = new Plane(inertia, fightingFalcon.getPosition(), 9000, jetEngine, wings);
 
-        JetEngine engine;
+        //plane.setVelocity(new Vector3f(130f,0f,0f));
+       // fightingFalcon.getPosition().set(plane.getPosition());
+      //  plane.setControlInput(0,0.0f,0);
 
-        Matrix3f inertia = new Matrix3f
-                (46311.668f, -660.000f, -0.000f,
-                        -660.000f,188713.797f,-0.000f,
-                        -0.000f, -0.000f,147367.125f);
-        Plane plane = new Plane(inertia, fightingFalcon.getPosition(),
-                9207, wings, engine = new JetEngine(13000f));
+        RigidBody plane = new RigidBody(inertia, new Vector3f(0,200,0), 9000);
+        plane.setEnableGravity(false);
+        fightingFalcon.getPosition().set(plane.getPosition());
 
-//        plane.setControlInput(146.161f,   -8.893f,   -0.245f);
-
-        engine.setThrottle(0f);
-        plane.setVelocity(new Vector3f(50,0,0));
-//
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            Vector3f factor = new Vector3f(6.0f, 1.5f, 1.0f).mul(20);
+            Vector3f factor = new Vector3f(1.0f, .5f, 5.0f);
             if (state == GLFW_PRESS) {
 
                 if(key == GLFW_KEY_W){
+                    plane.applyForceAtPoint(new Vector3f(0,9.8f*9000,0),
+                            new Vector3f(5,0,0));
+
                     aileron  = move(aileron, factor.x, dt);;
-
+                    //   aileron =320f;
                 }else if(key == GLFW_KEY_S) {
-                    aileron  = move(aileron, -factor.x, dt);;
+                    plane.applyForceAtPoint(new Vector3f(0,-9.8f*9000,0),
+                            new Vector3f(5,0,0));
 
+                    aileron  = move(aileron, -factor.x, dt);;
+                    //     aileron =- 320f;
                 }
                 else{
-                    aileron = center(aileron, factor.x, dt);
+
 
                 }
 
 
                 if(key == GLFW_KEY_A){
 
+                    plane.applyForceAtPoint(new Vector3f(0,(float) 9000 /2,0),
+                            new Vector3f(wing_offset,0,2.7f));
+
                     rudder  = move(rudder, factor.y, dt);
+
                 }else if(key == GLFW_KEY_D) {
+
+                    plane.applyForceAtPoint(new Vector3f(0, (float) 9000 /2,0),
+                            new Vector3f(wing_offset,0,-2.7f));
+
                     rudder  = move(rudder, -factor.y, dt);
+
                 }else{
 
-                    rudder  = center(rudder, factor.y, dt);
-
+                //    rudder  = center(rudder, factor.y, dt);
+                 //   rudder = 0;
                 }
                 if(key == GLFW_KEY_C){
+
+                    plane.applyForceAtPoint(new Vector3f(0, 0,9000),
+                            new Vector3f(tail_offset,0,0f));
                     elevator = move(rudder, factor.z, dt);
 
                 }else if(key == GLFW_KEY_V) {
-                    elevator = move(rudder, -factor.z, dt);
+                    plane.applyForceAtPoint(new Vector3f(0, 0,-9000),
+                            new Vector3f(tail_offset,0,0f));
                 }
 
                 else{
-                    elevator = center(rudder, factor.z, dt);
+                   elevator = center(rudder, factor.z, dt);
+                  // elevator = 0;
                 }
-
+                //
 
                 if(key == GLFW_KEY_K) {
-                    engine.setThrottle(1f);
+                    plane.setOrientation(new Quaternionf(0,0,0,1));
 
             }   else if(key == GLFW_KEY_Y) {
-                    engine.setThrottle(0f);
-
+//                    engine.setThrottle(0f);
+                    plane.setAngularVelocity(new Vector3f(0));
                 }
 
 //                try {
@@ -440,17 +465,12 @@ public class Main extends BasicWindow {
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
-            plane.setControlInput(aileron,elevator, rudder);
+            plane.getAngularVelocity().mul(0.99f);
             plane.update(dt);
-            fightingFalcon.getRotQuaternion().x = plane.getOrientation().x;
-            fightingFalcon.getRotQuaternion().y = plane.getOrientation().y;
-            fightingFalcon.getRotQuaternion().z = plane.getOrientation().z;
-            fightingFalcon.getRotQuaternion().w = plane.getOrientation().w;
-
-            //System.out.println(plane);
-            System.out.println(aileron +" "+elevator+" "+ rudder);
-                //       aileron = 0; rudder = 0; elevator = 0;
-
+            fightingFalcon.setUpdated(true);
+            fightingFalcon.getRotQuaternion().set(plane.getOrientation());
+            System.out.println("Quaternion: "+plane.getOrientation());
+            System.out.println("Angular Velocity: "+plane.getAngularVelocity());
             camera.setFocus(fightingFalcon.getPosition());
             camera.setPosition(fightingFalcon.getPosition()
                     .add(new Vector3f(-3,1,0), new Vector3f()));
@@ -512,7 +532,7 @@ public class Main extends BasicWindow {
         }
     }
     public static float move(float value, float factor, float dt) {
-        return clamp(value - factor * dt, -5.0f, 5.0f);
+        return clamp(value - factor * dt, -1.0f, 1.0f);
     }
 
     private static float clamp(float value, float min, float max) {
