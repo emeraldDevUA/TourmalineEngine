@@ -232,7 +232,7 @@ void main()
 
 
     vec3 reflected =
-                normalize(reflect(normalize(position_value-camera_position), normalize(view_normal)));
+                normalize(reflect(normalize(position_value), normalize(view_normal)));
 
     float dDepth;
     float spec = metalness_value;
@@ -255,13 +255,22 @@ void main()
     float ReflectionMultiplier = pow(metalness_value, reflectionSpecularFalloffExponent)
         * screenEdgefactor * (-reflected.z);
 
-    float factor = pow(length(normalize(camera_position-position_value)),2);
-    // Get color
-    vec3 SSR = textureLod(albedo_metalness, coords.xy, 2).rgb * clamp(ReflectionMultiplier, 0.0, 0.5);
+    // Compute distance scaling factor
+    float distanceScale = 1.0 / (distance(hitPos.z, position_value.z) + 1.0);
 
-    fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
+    // Blend between original and scaled coordinates
+    float blendFactor = smoothstep(0.0, 100.0, distance(hitPos.z, position_value.z));
+    vec2 blendedCoords = mix(coords.xy, coords.xy * distanceScale, blendFactor);
 
 
+    // Sample the texture with blended coordinates
+    vec3 SSR = textureLod(albedo_metalness, blendedCoords, 2).rgb
+                * clamp(ReflectionMultiplier, 0.0, 0.9);
+
+
+    fragment = (1 - shadow_value ) * vec4(Lo + mix(environment_emission_value,
+                                                   SSR, metalness_value), 1.0);
+//  fragment =  vec4(SSR, 1.0);
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {
