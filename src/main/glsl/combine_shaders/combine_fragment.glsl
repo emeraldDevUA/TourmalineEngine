@@ -263,8 +263,8 @@ void main()
     vec2 blendedCoords = mix(coords.xy, coords.xy * distanceScale, blendFactor);
 
 
-    // Sample the texture with blended coordinates
-    vec3 SSR = textureLod(albedo_metalness, blendedCoords, 2).rgb
+
+    vec3 SSR = textureLod(albedo_metalness, blendedCoords, 0).rgb
                 * clamp(ReflectionMultiplier, 0.0, 0.9);
 
 
