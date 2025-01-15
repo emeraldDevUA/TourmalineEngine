@@ -80,7 +80,7 @@ void main()
         float k1 = 2.0 * 3.14159 / 5.0;
         float omega1 = sqrt(9.81 * k1);
 
-        vec3 wave_normal = generateWaveNormal(initialWave, time);
+        vec3 wave_normal = gerstnerNormals(coefficients, initialWave, time, 1);
 
         vec3 bitangent = vec3(wave_normal.r,-wave_normal.r,wave_normal.g);
 
