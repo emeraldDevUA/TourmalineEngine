@@ -22,6 +22,5 @@ void main()
     // Simple but ineffective way to extract camera position
     mat4 camera_direction = inverse(view_matrix);
     camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
-
     gl_Position = vec4(position, 0.0, 1.0);
 }

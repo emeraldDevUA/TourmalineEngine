@@ -461,6 +461,7 @@ public class Main extends BasicWindow {
 
         // Save the BufferedImage as a PNG file
         try {
+
             ImageIO.write(image, "PNG", new File(filePath));
             System.out.println(STR."Image saved: \{filePath}");
         } catch (IOException e) {

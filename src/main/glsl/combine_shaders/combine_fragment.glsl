@@ -26,6 +26,7 @@ uniform mat4 view_matrix;
 uniform mat4 previous_view_matrix;
 uniform mat4 projection_matrix;
 
+#include <algorithms/Reflections/Reflections.glsl>
 
 layout (location = 0) out highp vec4 fragment;
 layout (location = 1) out vec4 bloom;
@@ -220,12 +221,50 @@ void main()
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
+
+
+    vec4 temp = (view_matrix * vec4(position_value, 1));
+    vec3 hitPos = temp.xyz;
+
+    temp =  (view_matrix * vec4(N, 1));
+    mat3 view_normal_matrix = transpose(inverse(mat3(view_matrix)));
+    vec3 view_normal = normalize(view_normal_matrix * N);
+
+
+    vec3 reflected =
+                normalize(reflect(normalize(position_value-camera_position), normalize(view_normal)));
+
+    float dDepth;
+    float spec = metalness_value;
+
+    vec3 wp = vec3(position_value);
+    vec3 jitt = mix(vec3(0.0),
+                    hashVector(wp, vec3(.8, .8, .8), 19.19), spec);
+
+    float vp_z = hitPos.z;
+    reflected *= (1.0 / tan(PI/2 * 0.5));
+    vec4 coords = rayMarch(position,
+                           (vec3(jitt) + reflected * max(minRayStep, -vp_z)),
+                           hitPos, dDepth);
+
+    vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+
+
+    float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+
+    float ReflectionMultiplier = pow(metalness_value, reflectionSpecularFalloffExponent)
+        * screenEdgefactor * (-reflected.z);
+
+    float factor = pow(length(normalize(camera_position-position_value)),2);
+    // Get color
+    vec3 SSR = textureLod(albedo_metalness, coords.xy, 2).rgb * clamp(ReflectionMultiplier, 0.0, 0.5);
+
     fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
 
 
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {
-        bloom = vec4(0.0, 0.0, 0.0, 1.0);
+        bloom = vec4(SSR, 1.0);
     }
 }
