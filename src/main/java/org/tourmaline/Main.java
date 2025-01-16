@@ -257,12 +257,12 @@ public class Main extends BasicWindow {
 
        // Plane plane = new Plane(inertia, fightingFalcon.getPosition(), 9000, jetEngine, wings);
 
-        //plane.setVelocity(new Vector3f(130f,0f,0f));
-       // fightingFalcon.getPosition().set(plane.getPosition());
+     //   //plane.setVelocity(new Vector3f(130f,0f,0f));
+   //    fightingFalcon.getPosition().set(plane.getPosition());
       //  plane.setControlInput(0,0.0f,0);
 
         RigidBody plane = new RigidBody(inertia, new Vector3f(0,200,0), 9000);
-        plane.setEnableGravity(false);
+        plane.setEnableGravity(true);
         fightingFalcon.getPosition().set(plane.getPosition());
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
@@ -270,13 +270,13 @@ public class Main extends BasicWindow {
             if (state == GLFW_PRESS) {
 
                 if(key == GLFW_KEY_W){
-                    plane.applyForceAtPoint(new Vector3f(0,9.8f*9000,0),
+                    plane.applyForceAtPoint(new Vector3f(0,4f*9000,0),
                             new Vector3f(5,0,0));
 
                     aileron  = move(aileron, factor.x, dt);;
                     //   aileron =320f;
                 }else if(key == GLFW_KEY_S) {
-                    plane.applyForceAtPoint(new Vector3f(0,-9.8f*9000,0),
+                    plane.applyForceAtPoint(new Vector3f(0,-4f*9000,0),
                             new Vector3f(5,0,0));
 
                     aileron  = move(aileron, -factor.x, dt);;
@@ -290,14 +290,14 @@ public class Main extends BasicWindow {
 
                 if(key == GLFW_KEY_A){
 
-                    plane.applyForceAtPoint(new Vector3f(0,(float) 9000 /2,0),
+                    plane.applyForceAtPoint(new Vector3f(0,(float) 9000 ,0),
                             new Vector3f(wing_offset,0,2.7f));
 
                     rudder  = move(rudder, factor.y, dt);
 
                 }else if(key == GLFW_KEY_D) {
 
-                    plane.applyForceAtPoint(new Vector3f(0, (float) 9000 /2,0),
+                    plane.applyForceAtPoint(new Vector3f(0, (float) 9000,0),
                             new Vector3f(wing_offset,0,-2.7f));
 
                     rudder  = move(rudder, -factor.y, dt);
@@ -431,10 +431,12 @@ public class Main extends BasicWindow {
 //        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
 
 
+        plane.setVelocity(new Vector3f(133,0,0));
         while (!glfwWindowShouldClose(window_handle)){
 
+           fightingFalcon.getPosition().set(plane.getPosition());
+           plane.applyForceAtPoint(new Vector3f(0,plane.getMass()*9.8f,0),new Vector3f(0));
 
-//            rigidBody.addForce(new Vector3f(0,10,0));
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
