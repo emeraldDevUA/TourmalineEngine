@@ -284,6 +284,7 @@ public class Main extends BasicWindow {
                 }
                 else{
 
+
                 }
 
 
@@ -334,9 +335,12 @@ public class Main extends BasicWindow {
                     num/=abs(num);
                     plane.applyForceAtPoint(new Vector3f(0,num*thrust/2,0), new Vector3f(0));
 
-            }   else if(key == GLFW_KEY_Y) {
-//
-            }
+            }   else if(key == GLFW_KEY_N) {
+//\
+                    float thrust = 1000;
+                    plane.applyForceAtPoint(new Vector3f(-thrust,0,0), new Vector3f(0));
+
+                }
 
 //                try {
 //                    Thread.sleep(1);
@@ -357,6 +361,19 @@ public class Main extends BasicWindow {
 //                shadowCamera.loadViewMatrix();
 //                shadowCamera.setShadowViewProjectionMatrix(deferredShader);
 //                camera.setViewProjectionMatrix(skyBoxShader);
+
+
+
+                Quaternionf orientation = plane.getOrientation();
+
+                Vector3f velocity = new Vector3f(plane.getVelocity()).normalize();
+                Vector3f rotatedVec = orientation.transform(new Vector3f(1, 0, 0)).normalize(); // Assuming (1, 0, 0) is the default direction
+                float interpolationFactor = 0.1f; // Adjust this for how fast you want the interpolation
+                Vector3f interpolatedDir = velocity.lerp(rotatedVec, interpolationFactor).normalize();
+
+                plane.setVelocity(interpolatedDir.mul(plane.getVelocity().length()));
+
+
             }
         };
 
@@ -402,15 +419,15 @@ public class Main extends BasicWindow {
         InterfaceRenderer ioRenderer = () -> {
             ImGui.setNextWindowSize(new ImVec2(215, 160));
             if (ImGui.begin("System Info")) {
-                ImGui.text(os);
+                ImGui.text(plane.getPosition().toString());
                 ImGui.text(STR."\{mb} MB");
                 ImGui.text(STR."\{processors} Cores");
                 ImGui.text(STR."\{name}");
-                ImGui.pushID(1);
-                if (ImGui.button("Text", new ImVec2(200, 50))) {
-                    System.out.println("TEXT");
-                }
-                ImGui.popID();
+//                ImGui.pushID(1);
+//                if (ImGui.button("Text", new ImVec2(200, 50))) {
+//                    System.out.println("TEXT");
+//                }
+//                ImGui.popID();
                 ImGui.end();
             }
         };
@@ -451,8 +468,8 @@ public class Main extends BasicWindow {
            float num = dir.dot(new Vector3f(0,1,0));
            num/=abs(num);
 
-//           plane.applyForceAtPoint(
-//                   new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
+           plane.applyForceAtPoint(
+                   new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
             plane.getNetForce().add(new Vector3f(0, 9.8f*plane.getMass(), 0));
 
             float thrust = 135000f;
