@@ -284,7 +284,6 @@ public class Main extends BasicWindow {
                 }
                 else{
 
-
                 }
 
 
@@ -337,7 +336,7 @@ public class Main extends BasicWindow {
 
             }   else if(key == GLFW_KEY_Y) {
 //
-                }
+            }
 
 //                try {
 //                    Thread.sleep(1);
@@ -456,6 +455,8 @@ public class Main extends BasicWindow {
 //                   new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
             plane.getNetForce().add(new Vector3f(0, 9.8f*plane.getMass(), 0));
 
+            float thrust = 135000f;
+            plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
 
 
 
@@ -499,7 +500,7 @@ public class Main extends BasicWindow {
             System.out.println("Angular Velocity: "+plane.getAngularVelocity());
             camera.setFocus(fightingFalcon.getPosition());
             camera.setPosition(fightingFalcon.getPosition()
-                    .add(new Vector3f(-3,1,0), new Vector3f()));
+                    .add(new Vector3f(-3,1,0).rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
             //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
             camera.loadViewMatrix();
 
