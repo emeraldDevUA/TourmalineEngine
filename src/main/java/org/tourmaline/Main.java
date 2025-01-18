@@ -36,8 +36,7 @@ import oshi.hardware.CentralProcessor;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,6 +61,7 @@ import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
 
 public class Main extends BasicWindow {
 
+    static float scale = 1f/10f;
     static float aileron =0;
     static float elevator = 0;
     static float rudder = 0f;
@@ -263,7 +263,7 @@ public class Main extends BasicWindow {
 
         RigidBody plane = new RigidBody(inertia, new Vector3f(0,200,0), 9000);
         plane.setEnableGravity(true);
-        fightingFalcon.getPosition().set(plane.getPosition());
+        fightingFalcon.getPosition().set(plane.getPosition().mul(scale, new Vector3f()));
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             Vector3f factor = new Vector3f(1.0f, .5f, 5.0f);
@@ -324,12 +324,19 @@ public class Main extends BasicWindow {
                 }
                 //
 
-                if(key == GLFW_KEY_K) {
-                    plane.setOrientation(new Quaternionf(0,0,0,1));
+                if(key == GLFW_KEY_M) {
+                    float thrust = 135000f;
+                    plane.applyForceAtPoint(new Vector3f(thrust,0,0), new Vector3f(0));
+
+                    Vector3f dir = fightingFalcon.getRotQuaternion()
+                            .transform(new Vector3f(0,1,0));
+                    dir.normalize();
+                    float num = dir.dot(new Vector3f(0,1,0));
+                    num/=abs(num);
+                    plane.applyForceAtPoint(new Vector3f(0,num*thrust/2,0), new Vector3f(0));
 
             }   else if(key == GLFW_KEY_Y) {
-//                    engine.setThrottle(0f);
-                    plane.setAngularVelocity(new Vector3f(0));
+//
                 }
 
 //                try {
@@ -430,12 +437,27 @@ public class Main extends BasicWindow {
 //        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
 //        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
 
+        List<Float> frameTimes = new ArrayList<>();
 
-        plane.setVelocity(new Vector3f(133,0,0));
+        plane.setPosition(new Vector3f(-400,0,0));
+        plane.setVelocity(new Vector3f(10,0,0));
+
         while (!glfwWindowShouldClose(window_handle)){
 
            fightingFalcon.getPosition().set(plane.getPosition());
-           plane.applyForceAtPoint(new Vector3f(0,plane.getMass()*9.8f,0),new Vector3f(0));
+
+           Vector3f dir = fightingFalcon.getRotQuaternion().transform(new Vector3f(0,1,0));
+           dir.normalize();
+
+           float num = dir.dot(new Vector3f(0,1,0));
+           num/=abs(num);
+
+//           plane.applyForceAtPoint(
+//                   new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
+            plane.getNetForce().add(new Vector3f(0, 9.8f*plane.getMass(), 0));
+
+
+
 
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
@@ -468,6 +490,8 @@ public class Main extends BasicWindow {
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
             plane.getAngularVelocity().mul(0.99f);
+
+            plane.getAcceleration().mul(0.93f);
             plane.update(dt);
             fightingFalcon.setUpdated(true);
             fightingFalcon.getRotQuaternion().set(plane.getOrientation());
@@ -480,10 +504,25 @@ public class Main extends BasicWindow {
             camera.loadViewMatrix();
 
             measureTime();
+            frameTimes.add(getCurrentFPS());
         }
 
-    }
+        writeCsv("data.csv", frameTimes);
 
+    }
+    public static void writeCsv(String fileName, List<Float> frameTimes) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            for (int i = 0; i < frameTimes.size(); i++) {
+                writer.write(frameTimes.get(i).toString());
+                if (i < frameTimes.size() - 1) {
+                    writer.write(","); // Add a comma between values
+                }
+            }
+            writer.newLine(); // Add a new line at the end of the row
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to write CSV file", e);
+        }
+    }
     @Override
     public void close() {
         glfwDestroyWindow(window_handle);
