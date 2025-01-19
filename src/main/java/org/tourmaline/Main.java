@@ -419,7 +419,7 @@ public class Main extends BasicWindow {
         InterfaceRenderer ioRenderer = () -> {
             ImGui.setNextWindowSize(new ImVec2(215, 160));
             if (ImGui.begin("System Info")) {
-                ImGui.text(plane.getPosition().toString());
+                ImGui.text(plane.getPosition().toString( ));
                 ImGui.text(STR."\{mb} MB");
                 ImGui.text(STR."\{processors} Cores");
                 ImGui.text(STR."\{name}");
