@@ -290,14 +290,14 @@ public class Main extends BasicWindow {
 
                 if(key == GLFW_KEY_A){
 
-                    plane.applyForceAtPoint(new Vector3f(0,(float) 9000 ,0),
+                    plane.applyForceAtPoint(new Vector3f(0,(float) 3*9000 ,0),
                             new Vector3f(wing_offset,0,2.7f));
 
                     rudder  = move(rudder, factor.y, dt);
 
                 }else if(key == GLFW_KEY_D) {
 
-                    plane.applyForceAtPoint(new Vector3f(0, (float) 9000,0),
+                    plane.applyForceAtPoint(new Vector3f(0, (float) 3*9000,0),
                             new Vector3f(wing_offset,0,-2.7f));
 
                     rudder  = move(rudder, -factor.y, dt);
@@ -309,12 +309,12 @@ public class Main extends BasicWindow {
                 }
                 if(key == GLFW_KEY_C){
 
-                    plane.applyForceAtPoint(new Vector3f(0, 0,9000),
+                    plane.applyForceAtPoint(new Vector3f(0, 0,4*9000),
                             new Vector3f(tail_offset,0,0f));
                     elevator = move(rudder, factor.z, dt);
 
                 }else if(key == GLFW_KEY_V) {
-                    plane.applyForceAtPoint(new Vector3f(0, 0,-9000),
+                    plane.applyForceAtPoint(new Vector3f(0, 0,-4*9000),
                             new Vector3f(tail_offset,0,0f));
                 }
 
@@ -470,11 +470,12 @@ public class Main extends BasicWindow {
 
            plane.applyForceAtPoint(
                    new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
-            plane.getNetForce().add(new Vector3f(0, 9.8f*plane.getMass(), 0));
+            plane.getNetForce().add(new Vector3f(0, 0.9f*9.8f*plane.getMass(), 0));
 
             float thrust = 135000f;
-            plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
+            //plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
 
+            plane.applyForceAtPoint(new Vector3f(-thrust*0.01f,0,0), new Vector3f(0));
 
 
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -520,7 +521,7 @@ public class Main extends BasicWindow {
                     .add(new Vector3f(-3,1,0).rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
             //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
             camera.loadViewMatrix();
-
+            camera.setViewProjectionMatrix(skyBoxShader);
             measureTime();
             frameTimes.add(getCurrentFPS());
         }
