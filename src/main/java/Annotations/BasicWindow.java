@@ -613,17 +613,12 @@ public abstract class BasicWindow implements Closeable {
 
     protected static float getCurrentFPS() {
 
-        return 1000.0f / (t2 - t1);
+        return 10E8f / (t2 - t1);
     }
 
     protected static void measureTime() {
-
-        if (t2 != t1) {
-            t1 = t2;
-        }
-
-        t2 = System.currentTimeMillis();
-
+        t1 = t2;                 // Save the previous timestamp
+        t2 = System.nanoTime();  // Update the current timestamp
     }
 
     /**
