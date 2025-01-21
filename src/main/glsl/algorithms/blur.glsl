@@ -29,6 +29,38 @@ vec4 gaussian_blur(sampler2D color, vec2 uvs){
 
     return vec4(blurredVertex, 1.0);
 }
+vec4 fast_blur(sampler2D color, vec2 uvs) {
+    // Define the blur radius (higher = stronger blur)
+    float radius = 5.0;
+
+    // Offsets for sampling (reduce number of samples for efficiency)
+    vec2 texOffset = vec2(1.0 / textureSize(color, 0));
+
+    // Accumulator for color and weight
+    vec3 blurredColor = vec3(0.0);
+    float totalWeight = 0.0;
+
+    // Perform a simplified weighted blur using fewer samples
+    for (float x = -radius; x <= radius; x += 2.0) {
+        for (float y = -radius; y <= radius; y += 2.0) {
+            // Compute weight based on distance (Gaussian-like but simplified)
+            float weight = exp(-(x * x + y * y) / (2.0 * radius * radius));
+
+            // Sample the texture
+            vec3 sampleColor = texture(color, uvs + vec2(x, y) * texOffset).xyz;
+
+            // Accumulate weighted color
+            blurredColor += sampleColor * weight;
+            totalWeight += weight;
+        }
+    }
+
+    // Normalize the result by the total weight
+    blurredColor /= totalWeight;
+
+    return vec4(blurredColor, 1.0);
+}
+
 
 vec4 gaussian_blur5(sampler2D color, vec2 uvs) {
     // Kernel size and range (6x6 kernel)

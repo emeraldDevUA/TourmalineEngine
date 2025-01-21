@@ -20,7 +20,7 @@ public class Camera {
   @Getter
   private Vector3f focus;
   private Matrix4f projectionMatrix;
-  private Matrix4f viewMatrix;
+  private Matrix4f viewMatrix, invertedViewMatrix;
   private Matrix4f previousViewMatrix;
 
   @Getter
@@ -31,6 +31,7 @@ public class Camera {
     this.position = pos;
     this.focus = focus;
     this.viewMatrix = new Matrix4f();
+    this.invertedViewMatrix = new Matrix4f();
     this.previousViewMatrix = new Matrix4f();
     this.projectionMatrix = new Matrix4f();
     this.positionDifference = pos.sub(focus, new Vector3f());
@@ -56,6 +57,7 @@ public class Camera {
         }
         previousViewMatrix = new Matrix4f(viewMatrix);
         viewMatrix.lookAt(position, focus, new Vector3f(0, 1, 0));
+        //invertedViewMatrix = new Matrix4f(viewMatrix).invert();
     }
 
   public void setPosition(final Quaternionf quaternion, final Vector3f position){
@@ -84,11 +86,21 @@ public class Camera {
                 glUniformMatrix4fv(projectionMatrixLocation, false, projectionMatrixData);
             }
 
-            previousViewMatrix.get(viewMatrixData);
+
             int previousViewMatrixLocation = glGetUniformLocation(shaderPointer, "previous_view_matrix");
             if (previousViewMatrixLocation != -1) {
+                previousViewMatrix.get(viewMatrixData);
                 glUniformMatrix4fv(previousViewMatrixLocation, false, viewMatrixData);
             }
+
+
+            int invViewMatrixLocation = glGetUniformLocation(shaderPointer, "inverted_view_matrix");
+            if (viewMatrixLocation != -1) {
+            //    invertedViewMatrix.get(viewMatrixData);
+             //   glUniformMatrix4fv(invViewMatrixLocation, false, viewMatrixData);
+            }
+
+
         }
     }
 

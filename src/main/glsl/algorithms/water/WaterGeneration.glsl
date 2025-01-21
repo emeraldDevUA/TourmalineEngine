@@ -34,25 +34,28 @@ vec3 generateWave(Wave wave, float time) {
 
 vec3 generateWaveNormal(Wave wave, float time) {
     float k = 2.0 * 3.14159 / wave.wavelength;  // Wave number
-    float omega = sqrt(9.81 * k);              // Angular frequency
-    float theta = dot(wave.direction, wave.position.xz); // Wave phase
-    float phi = omega * time + wave.phase;     // Time-dependent phase
+    float omega = sqrt(9.81 * k);               // Angular frequency
+    float phi = omega * time + wave.phase;      // Time-dependent phase
 
-    // Calculate tangents
+    // Compute partial derivatives (tangents)
+    float theta = k * dot(wave.direction, wave.position.xz);
+    float cosThetaPhi = cos(theta + phi);
+
     vec3 tangentX = vec3(
-    1.0 - wave.direction.x * wave.direction.x,
-    -wave.amplitude * k * wave.direction.x * sin(k * theta + phi),
-    -wave.direction.x * wave.direction.y
+    1.0,
+    -wave.amplitude * k * wave.direction.x * cosThetaPhi,
+    0.0
     );
 
     vec3 tangentZ = vec3(
-    -wave.direction.x * wave.direction.y,
-    -wave.amplitude * k * wave.direction.y * sin(k * theta + phi),
-    1.0 - wave.direction.y * wave.direction.y
+    0.0,
+    -wave.amplitude * k * wave.direction.y * cosThetaPhi,
+    1.0
     );
 
-    // Compute normal
-    return normalize(cross(tangentX, tangentZ));
+    // Compute the normal using cross product of tangents
+    vec3 normal = normalize(cross(tangentZ, tangentX));
+    return normal;
 }
 
 vec3 gerstnerPositions(sampler2D coefficientSampler, Wave inWave, float time, int NB_WAVES) {
@@ -139,5 +142,5 @@ vec3 gerstnerNormals(sampler2D coefficientSampler, Wave inWave, float time, int 
         finalVector += generateWaveNormal(inWave, time);
     }
 
-    return finalVector;
+    return normalize(finalVector);
 }

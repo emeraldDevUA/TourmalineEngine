@@ -188,10 +188,10 @@ void main()
     );
 
     /**/
-    int size = 12; // Increased sample size for smoother blur
-    float separation = 0.001; // Reduced separation for softer blur
+    int size = 4; // Increased sample size for smoother blur
+    float separation = 0.01; // Reduced separation for softer blur
 
-    albedo_value = getMotionBlur(size, separation, position_value, prev_position_value).rgb;
+//    albedo_value = getMotionBlur(size, separation, position_value, prev_position_value).rgb;
 
 
 
