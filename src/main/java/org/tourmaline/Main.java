@@ -469,8 +469,8 @@ public class Main extends BasicWindow {
            num/=abs(num);
 
            plane.applyForceAtPoint(
-                   new Vector3f(0,plane.getMass()*9.8f*num/10f,0),new Vector3f(0));
-            plane.getNetForce().add(new Vector3f(0, 0.9f*9.8f*plane.getMass(), 0));
+                   new Vector3f(0,0.1f*plane.getMass() * 9.8f* num,0),new Vector3f(0));
+            plane.getNetForce().add(new Vector3f(0, 0.9f * plane.getMass() * 9.8f, 0));
 
             float thrust = 135000f;
             //plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
