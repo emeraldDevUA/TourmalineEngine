@@ -599,5 +599,12 @@ public class Main extends BasicWindow {
         return Math.max(min, Math.min(max, value));
     }
 
+
+    Vector3f computeDrag(float ro, float area, float drag, Vector3f velocity){
+        if(velocity.length() < 10E-8){}
+        Vector3f dir = new Vector3f(velocity).normalize().negate();
+        float magnitude = (float) (0.5 * ro * velocity.length()*area*drag);
+        return dir.mul(magnitude);
+    }
 }
 
