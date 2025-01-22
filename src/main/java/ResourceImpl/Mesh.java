@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.joml.*;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.assimp.Assimp;
 import org.lwjgl.opengl.GL30;
 
 
@@ -18,13 +23,7 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.lwjgl.opengl.ARBUniformBufferObject.glGetUniformBlockIndex;
-import static org.lwjgl.opengl.ARBUniformBufferObject.glUniformBlockBinding;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.glBindBuffer;
-import static org.lwjgl.opengl.GL20.*;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
+import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.opengl.GL30.*;
 
 
@@ -238,7 +237,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
     public void load(String path) throws IOException {
 
         if(!path.contains(".obj")){
-
+            lib_load(path);
             return;
         }
         File file = new File(path);
@@ -423,5 +422,59 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
     private void lib_load(String path){
 
+        ArrayList<Vector3f> vertices = new ArrayList<>();
+        ArrayList<Vector3f> normals = new ArrayList<>();
+        ArrayList<Vector2f> textureCoords = new ArrayList<>();
+        ArrayList<Integer> indices_ = new ArrayList<>();
+
+        int flags = aiProcess_Triangulate |  // Ensure all meshes are made of triangles
+                aiProcess_GenNormals |   // Generate normals if missing
+                aiProcess_OptimizeMeshes; // Optimize meshes for better performance
+
+        // Load the model using Assimp
+        AIScene scene = Assimp.aiImportFile(path, flags);
+        assert scene != null;
+        PointerBuffer meshes = scene.mMeshes();
+        String meshName = scene.mName().dataString();
+        for (int i = 0; i < scene.mNumMeshes(); i++) {
+            AIMesh aiMesh = AIMesh.create(meshes.get(i));
+
+            boolean hasNormals = aiMesh.mNormals() != null;
+            boolean hasUVs = aiMesh.mTextureCoords(0) != null;
+
+            for (int k = 0; k < aiMesh.mNumVertices(); k++) {
+                vertices.add(convertVec(aiMesh.mVertices().get(k)));
+
+
+                if (hasNormals) {
+                    normals.add(convertVec(aiMesh.mNormals().get(k)));
+                }
+
+
+                if (hasUVs) {
+                    textureCoords.add(new Vector2f(
+                            aiMesh.mTextureCoords(0).get(k).x(),
+                            aiMesh.mTextureCoords(0).get(k).y())
+                    );
+                }
+            }
+
+
+
+            for (int m = 0; m < aiMesh.mNumFaces(); m++) {
+                indices_.add(aiMesh.mFaces().get(m).mIndices().get(0));
+                indices_.add(aiMesh.mFaces().get(m).mIndices().get(1));
+                indices_.add(aiMesh.mFaces().get(m).mIndices().get(2));
+            }
+
+
+
+        }
+        map.put(meshName, new VBO(indices_, vertices, normals, textureCoords));
+
+    }
+
+    private Vector3f convertVec(AIVector3D vec){
+        return  new Vector3f(vec.x(), vec.y(), vec.z());
     }
 }

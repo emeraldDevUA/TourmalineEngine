@@ -32,10 +32,10 @@ import java.util.List;
 
 
 import static java.lang.StringTemplate.STR;
+
+
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-
-
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
@@ -51,6 +51,9 @@ import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.opengl.GL31.GL_RGBA8_SNORM;
 import static org.lwjgl.opengl.GL43.glCopyImageSubData;
+import static org.lwjgl.opengl.GL46.GL_MAX_TEXTURE_MAX_ANISOTROPY;
+import static org.lwjgl.opengl.GL46.GL_TEXTURE_MAX_ANISOTROPY;
+
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 
@@ -193,7 +196,9 @@ public abstract class BasicWindow implements Closeable {
                 resizeWindow(new int[]{width, height});
             }
         });
-
+        float[] maxAniso = new float[1];
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, maxAniso);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAniso[0]);
 
 
         BRDFLookUp = new Texture("src/main/resources/miscellaneous/BDRF.png", 4);
@@ -516,13 +521,12 @@ public abstract class BasicWindow implements Closeable {
 
         glCullFace(GL_FRONT);
 
-//        glActiveTexture(GL_TEXTURE5);
-//        glBindTexture(GL_TEXTURE_2D, shadowMap);
+
         glViewport(0,0, shadowMapSize, shadowMapSize);
         glClear(GL_DEPTH_BUFFER_BIT);
 
         scene.drawItems();
-        //waterBodies.forEach(LiquidBody::draw);
+        // waterBodies.forEach(LiquidBody::draw);
         shadowMappingShader.unbind();
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);

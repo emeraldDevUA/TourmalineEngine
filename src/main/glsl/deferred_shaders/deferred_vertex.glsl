@@ -63,7 +63,7 @@ void main()
 
         wave_position += position;
 
-        vec3 wave_normal = gerstnerNormals(coefficients, initialWave, time, 3);
+        vec3 wave_normal = gerstnerNormals(coefficients, initialWave, time, waveNumber);
         vec3 bitangent = vec3(wave_normal.r, -wave_normal.r, wave_normal.g);
 
         vs_out.position  = (model_matrix * vec4(wave_position, 1.0)).xyz;
