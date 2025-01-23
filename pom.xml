@@ -21,6 +21,7 @@
 
     <dependencies>
 
+
         <dependency>
             <groupId>org.tourmaline</groupId>
             <artifactId>QuartzPhysics</artifactId>
@@ -28,7 +29,6 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/QuartzPhysics.jar</systemPath>
         </dependency>
-
 
         <!-- https://mvnrepository.com/artifact/org.joml/joml -->
         <dependency>

@@ -24,11 +24,13 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import org.lwjgl.BufferUtils;
+import org.tourmaline.Collision.BoundingBox;
 import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
 import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
 import org.tourmaline.PlanePhysics.Plane;
 import org.tourmaline.PlanePhysics.Wing;
+import org.tourmaline.Processing.PhysicsProcessor;
 import org.tourmaline.RigidBody.RigidBody;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -342,26 +344,6 @@ public class Main extends BasicWindow {
 
                 }
 
-//                try {
-//                    Thread.sleep(1);
-//                } catch (InterruptedException e) {
-//                    throw new RuntimeException(e);
-//                }
-                System.out.println(STR."\{aileron} \{elevator} \{rudder}");
-//                fightingFalcon.setUpdated(true);
-//                camera.setFocus(fightingFalcon.getPosition());
-//                camera.setPosition(fightingFalcon.getPosition()
-//                        .add(new Vector3f(-3,1,0)
-//                                .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
-//                //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
-//                camera.loadViewMatrix();
-//                shadowCamera.setFocus(fightingFalcon.getPosition());
-//                shadowCamera.setPosition(fightingFalcon.getPosition()
-//                        .add(new Vector3f(-30,40,30),new Vector3f()));
-//                shadowCamera.loadViewMatrix();
-//                shadowCamera.setShadowViewProjectionMatrix(deferredShader);
-//                camera.setViewProjectionMatrix(skyBoxShader);
-
 
 
                 Quaternionf orientation = plane.getOrientation();
@@ -453,12 +435,35 @@ public class Main extends BasicWindow {
 //        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
 //        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
 
+        RigidBody collisionObject = new RigidBody(inertia, mig29.getPosition(), 1000);
+        collisionObject.setCollisionPrimitive(
+                new BoundingBox(collisionObject.getPosition(),
+                new Vector3f(10,10,10), collisionObject.getOrientation()));
+
+
         List<Float> frameTimes = new ArrayList<>();
 
         plane.setPosition(new Vector3f(-400,0,0));
         plane.setVelocity(new Vector3f(10,0,0));
 
-        while (!glfwWindowShouldClose(window_handle)){
+
+        plane.setCollisionPrimitive(new BoundingBox(plane.getPosition(),
+                new Vector3f(10,10,10), plane.getOrientation()));
+
+        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>(), 0.005f);
+        physicsProcessor.addRigidBody(plane);
+        physicsProcessor.addRigidBody(collisionObject);
+        physicsProcessor.start();
+        mig29.setScale(new Vector3f(10,10, 10));
+        plane.getCollisionPrimitive().setCollisionLambda(new Runnable() {
+            @Override
+            public void run() {
+          //      System.exit(0);
+            }
+        });
+        scene.addDrawItem(new MeshTree(new ArrayList<>(), mig29, "name"));
+        while (!glfwWindowShouldClose(window_handle)){;
+
 
            fightingFalcon.getPosition().set(plane.getPosition());
 
@@ -527,7 +532,7 @@ public class Main extends BasicWindow {
         }
 
         writeCsv("data.csv", frameTimes);
-
+       physicsProcessor.setRunning(false);
     }
     public static void writeCsv(String fileName, List<Float> frameTimes) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {

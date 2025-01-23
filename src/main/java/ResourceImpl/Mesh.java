@@ -187,7 +187,8 @@ public class Mesh implements Loadable, Drawable, Closeable {
     private final Map<String, VBO> map;
     @Getter
     private final Vector3f position;
-    private final Vector3f scale;
+    @Setter
+    private  Vector3f scale;
     @Getter
     @Setter
     private Vector3f shadowScale;
