@@ -435,7 +435,8 @@ public class Main extends BasicWindow {
 //        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
 //        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
 
-        RigidBody collisionObject = new RigidBody(inertia, mig29.getPosition(), 1000);
+        RigidBody collisionObject = new RigidBody(inertia, mig29.getPosition(), 10000);
+        //collisionObject.setVelocity(new Vector3f(20,0,0));
         collisionObject.setCollisionPrimitive(
                 new BoundingBox(collisionObject.getPosition(),
                 new Vector3f(10,10,10), collisionObject.getOrientation()));
@@ -455,13 +456,11 @@ public class Main extends BasicWindow {
         physicsProcessor.addRigidBody(collisionObject);
         physicsProcessor.start();
         mig29.setScale(new Vector3f(10,10, 10));
-        plane.getCollisionPrimitive().setCollisionLambda(new Runnable() {
-            @Override
-            public void run() {
-          //      System.exit(0);
-            }
-        });
+        plane.getCollisionPrimitive()
+                .setCollisionLambda(() -> System.err.println("Intersection!"));
+
         scene.addDrawItem(new MeshTree(new ArrayList<>(), mig29, "name"));
+        collisionObject.setEnableGravity(false);
         while (!glfwWindowShouldClose(window_handle)){;
 
 
@@ -473,7 +472,7 @@ public class Main extends BasicWindow {
            float num = dir.dot(new Vector3f(0,1,0));
            num/=abs(num);
 
-           plane.applyForceAtPoint(
+            plane.applyForceAtPoint(
                    new Vector3f(0,0.1f*plane.getMass() * 9.8f* num,0),new Vector3f(0));
             plane.getNetForce().add(new Vector3f(0, 0.9f * plane.getMass() * 9.8f, 0));
 
@@ -517,6 +516,7 @@ public class Main extends BasicWindow {
 
             plane.getAcceleration().mul(0.93f);
             plane.update(dt);
+            collisionObject.update(dt);
             fightingFalcon.setUpdated(true);
             fightingFalcon.getRotQuaternion().set(plane.getOrientation());
             System.out.println("Quaternion: "+plane.getOrientation());
@@ -532,7 +532,7 @@ public class Main extends BasicWindow {
         }
 
         writeCsv("data.csv", frameTimes);
-       physicsProcessor.setRunning(false);
+        physicsProcessor.setRunning(false);
     }
     public static void writeCsv(String fileName, List<Float> frameTimes) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
