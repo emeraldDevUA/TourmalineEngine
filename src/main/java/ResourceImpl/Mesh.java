@@ -185,6 +185,7 @@ class VBO implements Drawable, Closeable {
 public class Mesh implements Loadable, Drawable, Closeable {
     private  Map<String, VBO> map;
 
+    private Vector3f pivot;
     private Vector3f position;
     private Vector3f scale;
     private Vector3f shadowScale;
@@ -222,13 +223,17 @@ public class Mesh implements Loadable, Drawable, Closeable {
         updated = true;
         model_matrix = new float[16];
 
-        map.put(name, new VBO(
-                (List<Integer>) params.get("Indices"),
-                (List<Vector3f>) params.get("Vertices"),
-                (List<Vector3f>) params.get("Vertices"),
-                (List<Vector2f>) params.get("UVs"))
-        );
+        try {
+            map.put(name, new VBO(
+                    params.get("Indices") != null ? (List<Integer>) params.get("Indices") : new ArrayList<>(),
+                    params.get("Vertices") != null ? (List<Vector3f>) params.get("Vertices") : new ArrayList<>(),
+                    params.get("Normals") != null ? (List<Vector3f>) params.get("Normals") : new ArrayList<>(),
+                    params.get("UVs") != null ? (List<Vector2f>) params.get("UVs") : new ArrayList<>()
+            ));
+        }catch (ClassCastException e){
+            throw new RuntimeException("an Incorrect Hash Table Was Passed to Mesh.java");
 
+        }
     }
 
 

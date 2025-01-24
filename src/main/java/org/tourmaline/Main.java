@@ -477,3 +477,25 @@ public class Main extends BasicWindow {
 
 }
 
+class Plane{
+    private List<Vector3f> ammunitionPoints;
+    private MeshTree plane;
+   // private RigidBody rb;
+    private Mesh rudder;
+    private Mesh aileron1, aileron2;
+    private Mesh flap, flap2;
+
+    public Plane(MeshTree planeMesh, List<Vector3f> ammunitionPoints){
+        this.plane = planeMesh;
+        this.ammunitionPoints = ammunitionPoints;
+    }
+
+
+
+
+
+    public void update(float dt){
+
+    }
+
+}

@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-;
+
 
 @RequiredArgsConstructor
 public abstract class Animation<T>{
@@ -15,6 +15,5 @@ public abstract class Animation<T>{
 
     public abstract void update(float dt);
     public abstract void restartAnimation();
-
-
 }
+
