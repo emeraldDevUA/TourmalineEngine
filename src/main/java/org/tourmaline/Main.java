@@ -515,15 +515,19 @@ public class Main extends BasicWindow {
             plane.getAngularVelocity().mul(0.99f);
 
             plane.getAcceleration().mul(0.93f);
+            collisionObject.getVelocity().mul(0.99f);
             plane.update(dt);
             collisionObject.update(dt);
             fightingFalcon.setUpdated(true);
+
             fightingFalcon.getRotQuaternion().set(plane.getOrientation());
-            System.out.println("Quaternion: "+plane.getOrientation());
-            System.out.println("Angular Velocity: "+plane.getAngularVelocity());
+            mig29.getRotQuaternion().set(collisionObject.getOrientation());
+
+
             camera.setFocus(fightingFalcon.getPosition());
             camera.setPosition(fightingFalcon.getPosition()
-                    .add(new Vector3f(-3,1,0).rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
+                    .add(new Vector3f(-3,1,0)
+                            .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
             //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
             camera.loadViewMatrix();
             camera.setViewProjectionMatrix(skyBoxShader);
