@@ -165,7 +165,15 @@ void main()
         vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
         vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5)
     };
+    vec3 directional_light_colors[] = {
+        vec3(3.0, 3.0, 3.0), // White light
+        vec3(1.0, 0.8, 0.6)  // Warm light (slightly orange)
+    };
 
+    vec3 directional_light_directions[] = {
+        normalize(vec3(-1.0, -1.0, -1.0)), // Light coming from top-left diagonal
+        normalize(vec3(0.0, -1.0, 0.0))   // Light coming straight down
+    };
 
     vec3 light_color = vec3(10.0, 10.0, 10.0);
 
@@ -201,7 +209,7 @@ void main()
         vec3 H = normalize(V + L);
 
         float distance = length(light_positions[i] - position_value);
-        float attenuation = 1.0 / ( pow(distance, 1.0/2.0));
+        float attenuation = 1.0 / ( pow(distance, 2.0));
         vec3 radiance = light_color * attenuation;
 
         vec3 F0 = vec3(0.04);
@@ -221,7 +229,29 @@ void main()
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
+    for (int i = 0; i < 2; i++) {
 
+        vec3 L = normalize(-directional_light_directions[i]); // Light direction (normalized)
+        vec3 H = normalize(V + L);
+
+        vec3 radiance = directional_light_colors[i]; // No attenuation for directional lights
+
+        vec3 F0 = vec3(0.04);
+        vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
+        float NDF = DistributionGGX(N, H, roughness_value);
+        float G = GeometrySmith(N, V, L, roughness_value);
+
+        vec3 nominator = NDF * G * F;
+        float denominator = 4 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.001;
+        vec3 specular = nominator / denominator;
+
+        vec3 kS = F;
+        vec3 kD = vec3(1.0) - kS;
+        kD *= 1.0 - metalness_value;
+
+        float NdotL = max(dot(N, L), 0.0);
+        Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
+    }
 
     vec4 temp = (view_matrix * vec4(position_value, 1));
     vec3 hitPos = temp.xyz;

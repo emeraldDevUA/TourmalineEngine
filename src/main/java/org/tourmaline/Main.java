@@ -250,22 +250,30 @@ public class Main extends BasicWindow {
         SystemInfo systemInfo = new SystemInfo();
         CentralProcessor processor = systemInfo.getHardware().getProcessor();
 
-        long mb = systemInfo.getHardware().getMemory().getTotal();
+        long mb = systemInfo.getHardware().getMemory().getTotal()/1_000_000_000;
         int processors = Runtime.getRuntime().availableProcessors();
+        System.out.println(mb);
+        String cpu_name = processor.getProcessorIdentifier()
+                .getName()
+                .substring(0, 24).concat("...");
 
-        String name = processor.getProcessorIdentifier().getName();
-        String gpu = systemInfo.getHardware().getGraphicsCards().get(1).getName();
+        String gpu = systemInfo.getHardware().getGraphicsCards()
+                .get(1).getName().substring(0, 24).concat("...");;
 
+        ArrayList<Boolean> selected = new ArrayList<>(4);
+        for(int i = 0; i < 4; i++){selected.add(false);}
 
         InterfaceRenderer combinedRenderer = () -> {
             // System Info Window
             ImGui.setNextWindowPos(new ImVec2(0, 0));
             ImGui.setNextWindowSize(new ImVec2(215, 190));
+            ImGui.setNextWindowSizeConstraints(new ImVec2(215, 190),
+                    new ImVec2(215, 190));
             if (ImGui.begin("System Info")) {
                 ImGui.text(os);
-                ImGui.text(STR."\{mb} MB");
+                ImGui.text(STR."\{mb} GB");
                 ImGui.text(STR."\{processors} Cores");
-                ImGui.text(STR."\{name}");
+                ImGui.text(STR."\{cpu_name}");
                 ImGui.text(STR."\{gpu}");
                 ImGui.pushID(1);
                 ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(1.0f, 0.08f, 0.58f, 1.0f)); // Hot pink
@@ -302,13 +310,6 @@ public class Main extends BasicWindow {
                             {"Item D", "15 km", "Type 1", "Destroyed"},
                     };
 
-                    // Checkbox states stored in an ArrayList
-                    ArrayList<Boolean> selected = new ArrayList<>();
-                    for (int i = 0; i < items.length; i++) {
-                        selected.add(i%2==0); // Default state is unchecked
-                    }
-
-                    // Loop through and display each item
                     for (int i = 0; i < items.length; i++) {
                         String[] item = items[i];
                         ImGui.tableNextRow();
@@ -343,8 +344,13 @@ public class Main extends BasicWindow {
 
                     ImGui.endTable();
                 }
+
+
                 ImGui.end();
             }
+
+
+
         };
 
         scene.setSkyBox(skyBox);
