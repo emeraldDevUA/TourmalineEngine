@@ -78,9 +78,9 @@ class VBO implements Drawable, Closeable {
     }
 
     public VBO(List<Integer> indices, List<Vector3f> vertices, List<Vector3f> normals, List<Vector2f> textureCoordinates) {
-        this.vertices = BufferUtils.createFloatBuffer(indices.size() * 3);
-        this.normals = BufferUtils.createFloatBuffer(indices.size() * 3);
-        this.uv = BufferUtils.createFloatBuffer(indices.size() * 2);
+        this.vertices = BufferUtils.createFloatBuffer(vertices.size() * 3);
+        this.normals = BufferUtils.createFloatBuffer(normals.size() * 3);
+        this.uv = BufferUtils.createFloatBuffer(textureCoordinates.size() * 2);
 
         for (int i = 0; i < vertices.size(); i++) {
             this.vertices.put(vertices.get(i).x);

@@ -7,9 +7,6 @@
 in vec2 uv_frag;
 in vec3 camera_position;
 
-in vec3  light_sources[50];
-in vec3  light_colors[10];
-in float light_intensity[10];
 
 layout (binding = 0) uniform sampler2D position;
 layout (binding = 1) uniform sampler2D albedo_metalness;
@@ -21,6 +18,9 @@ layout (binding = 5) uniform sampler2D shadow_map;
 layout (binding = 6) uniform sampler2D previous_position;
 
 layout (binding = 9) uniform sampler2D BRDFlookUp;
+
+
+#include <algorithms/LightStructs.glsl>
 
 uniform mat4 view_matrix;
 uniform mat4 previous_view_matrix;
@@ -163,7 +163,8 @@ void main()
     // Real scene lights are not implemented yet so I am using these "built-it" for testing
     vec3 light_positions[] = {
         vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
-        vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5)
+        vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
+        pointLights[0].position
     };
     vec3 directional_light_colors[] = {
         vec3(3.0, 3.0, 3.0), // White light
@@ -306,4 +307,7 @@ void main()
     } else {
         bloom = vec4(SSR, 1.0);
     }
+
+
+
 }

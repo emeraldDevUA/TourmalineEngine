@@ -4,6 +4,8 @@ package Rendering;
 import Effects.BaseEffect;
 import Interfaces.DrawableContainer;
 import Liquids.LiquidBody;
+import Rendering.Lights.AbstractLight;
+import Rendering.Lights.PointLight;
 import ResourceImpl.Mesh;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
@@ -19,12 +21,14 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     private final List<BaseEffect> effects;
     private final List<LiquidBody> liquidBodies;
     private final List<MeshTree> drawables;
+    @Getter
+    private final List<AbstractLight> lights;
     @Setter
     @Getter
     private SkyBox skyBox;
 
     public Scene(){
-
+        lights = new ArrayList<>();
         effects = new ArrayList<>();
         drawables = new ArrayList<>();
         liquidBodies = new ArrayList<>();
@@ -89,5 +93,16 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
         }
     }
 
+    public void addLightSources(AbstractLight light){
+        lights.add(light);
 
+        if(light instanceof PointLight){
+            drawables.add(
+                    new MeshTree(new ArrayList<>(),
+                    ((PointLight) light).getLightMesh(),
+                    String.valueOf(Math.random()))
+            );
+
+        }
+    }
 }

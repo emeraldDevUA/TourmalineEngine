@@ -10,6 +10,8 @@ import Interfaces.MouseEventHandler;
 import Interfaces.TreeNode;
 import Liquids.LiquidBody;
 import Rendering.Camera;
+import Rendering.Lights.LightingConfigurator;
+import Rendering.Lights.PointLight;
 import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
@@ -391,6 +393,23 @@ public class Main extends BasicWindow {
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
 
+        PointLight pointLight = new PointLight(new Vector3f(10));
+        pointLight.setLightColor(new Vector3f(1,0,0));
+
+
+
+//                Vec( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
+//                vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
+
+        PointLight newPL = new PointLight(new Vector3f(20));
+        newPL.setLightColor(new Vector3f(1,1,0));
+
+        scene.addLightSources(newPL);
+        scene.addLightSources(pointLight);
+
+        LightingConfigurator.setLights(scene.getLights(), combineShader);
+
+
         while (!glfwWindowShouldClose(window_handle)){
 
             jetStream.getMesh().setPosition(new Vector3f(F16.getPosition()).sub(F16.getRotQuaternion().transform(
@@ -478,20 +497,41 @@ public class Main extends BasicWindow {
 }
 
 class Plane{
+
+    // will prob have to convert it into a table or a list with tuples
     private List<Vector3f> ammunitionPoints;
     private MeshTree plane;
    // private RigidBody rb;
     private Mesh rudder;
     private Mesh aileron1, aileron2;
-    private Mesh flap, flap2;
+    private Mesh flap1, flap2;
 
-    public Plane(MeshTree planeMesh, List<Vector3f> ammunitionPoints){
+    private Mesh wheel1;
+    private Mesh wheel2;
+    private Mesh wheel3;
+
+    private List<JetEffect> jetStreams;
+
+    public Plane(MeshTree planeMesh, List<Vector3f> ammunitionPoints,
+                 List<Vector3f> enginePos){
         this.plane = planeMesh;
         this.ammunitionPoints = ammunitionPoints;
+
+        rudder = planeMesh.findNode("Rudder");
+
+        aileron1 = planeMesh.findNode("Aileron1");
+        aileron2 = planeMesh.findNode("Aileron2");
+
+        flap1 = planeMesh.findNode("Flap1");
+        flap2 = planeMesh.findNode("Flap2");
+
+        wheel1 = planeMesh.findNode("Wheel1");
+        wheel2 = planeMesh.findNode("Wheel2");
+        wheel3 = planeMesh.findNode("Wheel3");
+
+
+        jetStreams = new ArrayList<>();
     }
-
-
-
 
 
     public void update(float dt){

@@ -16,7 +16,7 @@ import static org.joml.Math.cos;
 import static org.joml.Math.sin;
 
 public class PointLight extends AbstractLight {
-    private Vector3f position;
+    private final Vector3f position;
     @Getter
     private Mesh lightMesh;
     @Getter
@@ -52,42 +52,50 @@ public class PointLight extends AbstractLight {
     }
 
 
-    private void generatePrimitive(){
-        List<Vector3f> vertices  = new ArrayList<>();
-        List<Integer>  indices   = new ArrayList<>();
+    public void generatePrimitive(){
+        List<Vector3f> vertices = new ArrayList<>();
+        List<Integer> indices = new ArrayList<>();
 
-        float po = this.lightIntensity;
-        float steps = 20;
-        for(int j = 0; j < steps; j ++){
-        for(int i = 0; i < steps; i ++) {
-            vertices.add(new Vector3f(
-                    po * sin(((float) i) / steps * 6.28f),
-                    po * cos(((float) i) / steps * 6.28f),
-                    po * sin(((float) j) / steps * 6.28f)
+        float po = this.lightIntensity; // Radius of the sphere
+        int steps = 50; // Number of subdivisions (both latitude and longitude)
 
-            ));
-            // Current vertex
-            int current = j * (int) steps + i;
+        // Generate vertices
+        for (int j = 0; j <= steps; j++) {
+            float theta = (float) ((float) j / steps * (float) 6*Math.PI); // Latitude angle
+            for (int i = 0; i <= steps; i++) {
+                float phi = (float) i / steps * 2.0f * (float) Math.PI; // Longitude angle
 
-            // Next vertex in the longitude direction
-            int nextI = (i + 1) % (int) steps; // Wrap around horizontally
-            int nextJ = (j + 1) % (int) steps; // Wrap around vertically
+                // Optimize trigonometric calculations
+                float sinTheta = (float) Math.sin(theta);
+                float cosTheta = (float) Math.cos(theta);
+                float sinPhi = (float) Math.sin(phi);
+                float cosPhi = (float) Math.cos(phi);
 
-            // Calculate indices
-            int topRight    = j * (int) steps + nextI;
-            int bottomLeft  = nextJ * (int) steps + i;
-            int bottomRight = nextJ * (int) steps + nextI;
+                // Calculate vertex positions using spherical coordinates
+                float x = po * sinTheta * cosPhi;
+                float y = po * sinTheta * sinPhi;
+                float z = po * cosTheta;
 
-            // Triangle 1
-            indices.add(current);
-            indices.add(topRight);
-            indices.add(bottomLeft);
+                vertices.add(new Vector3f(x, y, z));
+            }
+        }
 
-            // Triangle 2
-            indices.add(topRight);
-            indices.add(bottomRight);
-            indices.add(bottomLeft);
+        // Generate indices
+        for (int j = 0; j < steps; j++) {
+            for (int i = 0; i < steps; i++) {
+                int current = j * (steps + 1) + i;
+                int next = current + (steps + 1);
 
+                // First triangle
+                indices.add(current);
+                indices.add(next);
+                indices.add(current + 1);
+
+                // Second triangle
+                indices.add(current + 1);
+                indices.add(next);
+                indices.add(next + 1);
+            }
         }
 
         Map<String, List<?>> map = new HashMap<>();
@@ -97,8 +105,13 @@ public class PointLight extends AbstractLight {
         lightMesh = new Mesh(STR."GenericLight\{Math.random()}", map);
         lightMesh.compile();
         lightMesh.getMaterial().addColor(Material.ALBEDO_MAP, lightColor);
-     }
+        lightMesh.setNoCull(true);
+    }
 
+    @Override
+    public void setLightColor(Vector3f lightColor) {
+        super.setLightColor(lightColor);
+        lightMesh.getMaterial().addColor(Material.ALBEDO_MAP, lightColor);
 
     }
 }

@@ -16,61 +16,51 @@ public class LightingConfigurator {
     private static ByteBuffer BufferedLights = ByteBuffer.allocateDirect(COMPUTED_SIZE);
 
 
-    public static void setLights(List<AbstractLight> lights, Shader shaderProgram){
-
-        if(bufferBase == -1)
-             bufferBase = glGenBuffers();
-
-
-        // a lot honestly
-
-        glBindBuffer(GL_UNIFORM_BUFFER, bufferBase);
-        glBufferData(GL_UNIFORM_BUFFER, COMPUTED_SIZE, GL_STATIC_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
+    public static void setLights(List<AbstractLight> lights, Shader shaderProgram) {
+        if (bufferBase == -1) {
+            bufferBase = glGenBuffers();
+            glBindBuffer(GL_UNIFORM_BUFFER, bufferBase);
+            glBufferData(GL_UNIFORM_BUFFER, COMPUTED_SIZE, GL_STATIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
 
         List<PointLight> pointLights = new ArrayList<>();
         List<DirectionalLight> dirLights = new ArrayList<>();
-        lights.forEach(light->{
-            if(light instanceof PointLight){
-                pointLights.add((PointLight) light);
-            }else if(light instanceof DirectionalLight){
-                dirLights.add((DirectionalLight) light);
-            }else{
-                throw new ClassCastException(STR."Unsupported Light Type! \{light.getClass().getName()}");
-            }
 
+        lights.forEach(light -> {
+            if (light instanceof PointLight) {
+                pointLights.add((PointLight) light);
+            } else if (light instanceof DirectionalLight) {
+                dirLights.add((DirectionalLight) light);
+            } else {
+                System.err.println("Unsupported Light Type: " + light.getClass().getName());
+            }
         });
 
-        int bound = 5;
-        for(int i =  0 ; i < bound; i ++){
-            DirectionalLight dl = dirLights.get(i);
-            if(dl!=null) {
-                BufferedLights.put(dl.formLight());
-            }else{
-                BufferedLights.put(DirectionalLight.getEmptyBuffer());
-            }
+        int boundDir = Math.min(5, dirLights.size());
+        int boundPoint = Math.min(50, pointLights.size());
+
+        for (int i = 0; i < boundDir; i++) {
+            BufferedLights.put(dirLights.get(i).formLight());
         }
+//        for (int i = boundDir; i < 5; i++) {
+//            BufferedLights.put(DirectionalLight.getEmptyBuffer());
+//        }
 
-        bound = 50;
-
-        for(int i =  0 ; i < bound; i ++){
-            PointLight pl = pointLights.get(i);
-            if(pl!=null) {
-                BufferedLights.put(pl.formLight());
-            }else{
-                BufferedLights.put(PointLight.getEmptyBuffer());
-            }
+        for (int i = 0; i < boundPoint; i++) {
+            BufferedLights.put(pointLights.get(i).formLight());
+        }
+        for (int i = boundPoint; i < 50; i++) {
+            BufferedLights.put(PointLight.getEmptyBuffer());
         }
 
         BufferedLights.flip();
 
         shaderProgram.use();
         glBindBufferBase(GL_UNIFORM_BUFFER, 4, bufferBase);
-
-        shaderProgram.setUniform("number_pointLights", pointLights.size());
-        shaderProgram.setUniform("number_dirLights",   dirLights.size());
-
+        glBufferSubData(GL_UNIFORM_BUFFER, 0, BufferedLights);
+        shaderProgram.setUniform("number_pointLights", boundPoint);
+        shaderProgram.setUniform("number_dirLights", boundDir);
         shaderProgram.unbind();
     }
 
