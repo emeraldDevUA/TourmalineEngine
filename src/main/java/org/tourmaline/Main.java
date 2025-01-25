@@ -15,6 +15,7 @@ import Rendering.Lights.PointLight;
 import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
+import ResourceImpl.Utils.PivotUtils;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -405,7 +406,7 @@ public class Main extends BasicWindow {
         newPL.setLightColor(new Vector3f(1,1,0));
 
         scene.addLightSources(newPL);
-        scene.addLightSources(pointLight);
+
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
@@ -503,8 +504,11 @@ class Plane{
     private MeshTree plane;
    // private RigidBody rb;
     private Mesh rudder;
+    private float maxRudderAngle;
     private Mesh aileron1, aileron2;
+    private float maxAileronAngle;
     private Mesh flap1, flap2;
+    private float maxFlapsAngle;
 
     private Mesh wheel1;
     private Mesh wheel2;
@@ -531,6 +535,22 @@ class Plane{
 
 
         jetStreams = new ArrayList<>();
+
+        //calculate Pivots
+
+    }
+
+
+    public void openLandingGear(){
+
+
+
+    }
+
+    public void closeLandingGear(){
+
+
+
     }
 
 
