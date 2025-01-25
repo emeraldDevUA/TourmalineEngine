@@ -43,6 +43,7 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
         for(MeshTree drawable: drawables){
             drawable.getNodeValue().draw();
         }
+
     }
 
     @Override
@@ -94,15 +95,26 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     }
 
     public void addLightSources(AbstractLight light){
-        lights.add(light);
+        String pntLights = "PointLights";
 
-        if(light instanceof PointLight){
-            drawables.add(
-                    new MeshTree(new ArrayList<>(),
-                    ((PointLight) light).getLightMesh(),
-                    String.valueOf(Math.random()))
-            );
+        for(MeshTree tree:drawables)
+        {
+            if(tree.getNodeName().compareTo(pntLights) == 0){
+                tree.addNode(new MeshTree(new ArrayList<>(),
+                        ((PointLight) light).getLightMesh(),
+                        String.valueOf(Math.random())));
+
+                System.out.println(tree);
+                tree.getChildNodes().forEach(System.out::println);
+                return;
+            }
 
         }
+        drawables.add(new MeshTree(new ArrayList<>(),
+                ((PointLight) light).getLightMesh(), pntLights ));
+
+
+
+
     }
 }

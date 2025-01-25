@@ -60,7 +60,7 @@ public class PointLight extends AbstractLight {
         int steps = 50; // Number of subdivisions (both latitude and longitude)
 
         // Generate vertices
-        for (int j = 0; j <= steps; j++) {
+        for (int j = 0; j < steps; j++) {
             float theta = (float) ((float) j / steps * (float) 6*Math.PI); // Latitude angle
             for (int i = 0; i <= steps; i++) {
                 float phi = (float) i / steps * 2.0f * (float) Math.PI; // Longitude angle

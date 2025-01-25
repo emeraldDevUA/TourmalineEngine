@@ -238,7 +238,6 @@ public class Main extends BasicWindow {
                 }
 
 
-
             }
 
             @Override
@@ -397,6 +396,7 @@ public class Main extends BasicWindow {
 
         PointLight pointLight = new PointLight(new Vector3f(10));
         pointLight.setLightColor(new Vector3f(1,0,0));
+        pointLight.getLightMesh().setShader(deferredShader);
 
 
 
@@ -407,7 +407,9 @@ public class Main extends BasicWindow {
         newPL.setLightColor(new Vector3f(1,1,0));
 
         scene.addLightSources(newPL);
+        scene.addLightSources(pointLight);
 
+        newPL.getLightMesh().setShader(deferredShader);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
