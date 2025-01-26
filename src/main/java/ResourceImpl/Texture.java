@@ -191,7 +191,7 @@ public class Texture implements EnhancedLoadable {
 
         int format;
         int internal;
-        format = GL_RGBA8;
+        format = GL_RGBA16;
         internal = GL_RGBA;
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth.get(0), textureHeight.get(0), 0,

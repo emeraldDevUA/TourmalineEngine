@@ -27,6 +27,7 @@ import imgui.ImVec4;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
+import lombok.AllArgsConstructor;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
@@ -121,15 +122,15 @@ public class Main extends BasicWindow {
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
 
-        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,0.1f);
+        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 2000,0.1f);
         shadowCamera.loadOrthographicProjection
                 (-1500,1500, -1500, 1500, -800, 800);
         camera.setViewProjectionMatrix(skyBoxShader);
 
 
         F16.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.8);
-        Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.9);
-        Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.2);
+        Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.6);
+        Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.3);
 
         Material mat = new Material();
         mat.addColor(Material.ALBEDO_MAP, new Vector3f(6f/255f, 64f/255f, 43f/255f));
@@ -500,10 +501,23 @@ public class Main extends BasicWindow {
 
 }
 
+
+@AllArgsConstructor
+class PhysicalMesh{
+    private MeshTree mesh;
+   // private RigidBody rigidBody;
+
+    public void addPhysicalMesh(Scene scene, List<?> rigidBodies){
+        //rigidBodies.add(rigidBody);
+        scene.addDrawItem(mesh);
+    }
+
+}
 class Plane{
 
     // will prob have to convert it into a table or a list with tuples
     private List<Vector3f> ammunitionPoints;
+    private List<PhysicalMesh> ammo;
     private MeshTree plane;
    // private RigidBody rb;
     private Mesh rudder;
@@ -539,25 +553,41 @@ class Plane{
 
         jetStreams = new ArrayList<>();
 
+        enginePos.forEach(vertex->{
+            JetEffect jf = new JetEffect();
+            jf.setMainPosition(vertex);
+            jetStreams.add(jf);
+        });
+
         //calculate Pivots
 
     }
 
 
     public void openLandingGear(){
-
+            // add animations, change state
 
 
     }
 
     public void closeLandingGear(){
-
-
+        // add animations, change state
 
     }
 
 
     public void update(float dt){
+        // animations update
+        // rigid body update
+        //
+    }
+
+
+    public void addSceneData(Scene scene){
+        scene.addDrawItem(plane);
+        for(JetEffect jf:jetStreams){
+            scene.addEffect(jf);
+        }
 
     }
 
