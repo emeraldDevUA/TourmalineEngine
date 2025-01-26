@@ -77,6 +77,8 @@ float DistributionGGX(vec3 N, vec3 H, float rough)
      return ggx1 * ggx2;
  }
 
+
+
 //https://developer.nvidia.com/gpugems/gpugems2/part-ii-shading-lighting-and-shadows/chapter-17-efficient-soft-edged-shadows-using
 float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
 {
@@ -97,16 +99,20 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
     float shadow = 0.0;
     vec2 texelSize = 1.0 / textureSize(shadow_map, 0); // Size of a single texel
 
-    int n  = 1;
-    for (int x = -n; x <= n; ++x) {
-        for (int y = -n; y <= n; ++y) {
+    int n = 1; // Kernel radius
+    int samples = 0; // Counter for total samples
+
+    for (float x = -n; x <= n; x += 0.1) {
+        for (float y = -n; y <= n; y += 0.1) {
             vec2 offset = vec2(x, y) * texelSize;
             float closestDepth = texture(shadow_map, projCoords.xy + offset).r;
-            shadow += (currentDepth - bias > closestDepth) ? 0.8 : 0.0;
+            shadow += (currentDepth - bias > closestDepth) ? 1 : 0.0;
+            samples++; // Increment sample counter
         }
     }
 
-    shadow /= 9.0; // Average the results of the 3x3 PCF kernel
+    // Average the shadow based on the actual number of samples
+    shadow /= samples;
 
     return shadow;
 }
@@ -257,7 +263,6 @@ void main()
     vec4 temp = (view_matrix * vec4(position_value, 1));
     vec3 hitPos = temp.xyz;
 
-    temp =  (view_matrix * vec4(N, 1));
     mat3 view_normal_matrix = transpose(inverse(mat3(view_matrix)));
     vec3 view_normal = normalize(view_normal_matrix * N);
 
@@ -307,8 +312,7 @@ void main()
     } else {
         bloom = vec4(SSR, 1.0);
     }
-
-//    fragment = vec4(pointLights[0].color, 1);
+//   fragment = vec4(SSR, 1);
 
 
 }
