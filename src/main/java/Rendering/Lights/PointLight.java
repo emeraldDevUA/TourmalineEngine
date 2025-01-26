@@ -12,8 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.joml.Math.cos;
-import static org.joml.Math.sin;
 
 public class PointLight extends AbstractLight {
     private final Vector3f position;
@@ -22,7 +20,7 @@ public class PointLight extends AbstractLight {
     @Getter
     private static  ByteBuffer emptyBuffer;
 
-    private static final int posLightSize = 48 ;
+    private static final int posLightSize = 32 ;
     public PointLight(Vector3f position){
         super();
         this.position = position;

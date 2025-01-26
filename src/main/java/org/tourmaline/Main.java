@@ -410,7 +410,7 @@ public class Main extends BasicWindow {
         scene.addLightSources(pointLight);
 
         newPL.getLightMesh().setShader(deferredShader);
-
+        pointLight.getLightMesh().setShader(deferredShader);
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
 

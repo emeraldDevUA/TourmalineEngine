@@ -6,7 +6,7 @@ import Interfaces.DrawableContainer;
 import Liquids.LiquidBody;
 import Rendering.Lights.AbstractLight;
 import Rendering.Lights.PointLight;
-import ResourceImpl.Mesh;
+
 import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
 import lombok.Getter;

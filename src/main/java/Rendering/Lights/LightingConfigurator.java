@@ -12,8 +12,8 @@ import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 public class LightingConfigurator {
     private static int bufferBase = -1;
-    private static int COMPUTED_SIZE = 624;
-    private static ByteBuffer BufferedLights = ByteBuffer.allocateDirect(COMPUTED_SIZE);
+    private static final int COMPUTED_SIZE = 1760;
+    private static final ByteBuffer BufferedLights = ByteBuffer.allocateDirect(COMPUTED_SIZE);
 
 
     public static void setLights(List<AbstractLight> lights, Shader shaderProgram) {
@@ -33,7 +33,7 @@ public class LightingConfigurator {
             } else if (light instanceof DirectionalLight) {
                 dirLights.add((DirectionalLight) light);
             } else {
-                System.err.println("Unsupported Light Type: " + light.getClass().getName());
+                System.err.println(STR."Unsupported Light Type: \{light.getClass().getName()}");
             }
         });
 
@@ -43,9 +43,9 @@ public class LightingConfigurator {
         for (int i = 0; i < boundDir; i++) {
             BufferedLights.put(dirLights.get(i).formLight());
         }
-//        for (int i = boundDir; i < 5; i++) {
-//            BufferedLights.put(DirectionalLight.getEmptyBuffer());
-//        }
+        for (int i = boundDir; i < 5; i++) {
+            BufferedLights.put(PointLight.getEmptyBuffer());
+        }
 
         for (int i = 0; i < boundPoint; i++) {
             BufferedLights.put(pointLights.get(i).formLight());
@@ -55,10 +55,20 @@ public class LightingConfigurator {
         }
 
         BufferedLights.flip();
+        glBindBuffer(GL_UNIFORM_BUFFER, bufferBase);
+        if (BufferedLights.capacity() >= COMPUTED_SIZE) {
+            // Allocate buffer only once
+            glBufferData(GL_UNIFORM_BUFFER, COMPUTED_SIZE, GL_STATIC_DRAW);
+        } else {
+            // Update existing buffer data
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, BufferedLights);
+        }
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         shaderProgram.use();
         glBindBufferBase(GL_UNIFORM_BUFFER, 4, bufferBase);
-        glBufferSubData(GL_UNIFORM_BUFFER, 0, BufferedLights);
+
+
         shaderProgram.setUniform("number_pointLights", boundPoint);
         shaderProgram.setUniform("number_dirLights", boundDir);
         shaderProgram.unbind();

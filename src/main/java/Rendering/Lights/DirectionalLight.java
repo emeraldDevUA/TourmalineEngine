@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 public class DirectionalLight extends AbstractLight{
 
     private Vector3f direction;
-    private static final int dirLightSize = 48;
+    private static final int dirLightSize = 32;
 
     @Getter
     private static  ByteBuffer emptyBuffer;

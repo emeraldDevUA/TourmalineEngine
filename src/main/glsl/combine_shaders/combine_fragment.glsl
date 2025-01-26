@@ -167,8 +167,8 @@ void main()
         pointLights[0].position
     };
     vec3 directional_light_colors[] = {
-        vec3(3.0, 3.0, 3.0), // White light
-        vec3(1.0, 0.8, 0.6)  // Warm light (slightly orange)
+        vec3(2.8, 2.8, 2.8), // White light
+        vec3(0.8, 0.6, 0.4)  // Warm light (slightly orange)
     };
 
     vec3 directional_light_directions[] = {
@@ -230,7 +230,7 @@ void main()
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 1; i++) {
 
         vec3 L = normalize(-directional_light_directions[i]); // Light direction (normalized)
         vec3 H = normalize(V + L);
@@ -308,6 +308,7 @@ void main()
         bloom = vec4(SSR, 1.0);
     }
 
+//    fragment = vec4(pointLights[0].color, 1);
 
 
 }
