@@ -4,6 +4,15 @@ vec4 linearGradient(vec4 color1, vec4 color2, float t){
     return mix(color1, color2, t);
 }
 
+vec4 linearGradient4(vec4 color1, vec4 color2, vec4 color3, vec4 color4, float t) {
+    if (t < 0.33) {
+        return mix(color1, color2, t / 0.33);
+    } else if (t < 0.66) {
+        return mix(color2, color3, (t - 0.33) / 0.33);
+    } else {
+        return mix(color3, color4, (t - 0.66) / 0.34); // The last range covers the rest of t
+    }
+}
 
 vec4 radialGradient(vec2 uv, vec2 center, float radius, vec4 innerColor, vec4 outerColor) {
     // Compute the distance from the center

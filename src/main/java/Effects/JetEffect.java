@@ -39,6 +39,7 @@ public class JetEffect  extends BaseEffect{
 
     @Override
     public void draw(){
+        jetStream.getShader().setUniform("effectType", 1);
 
         jetStream.draw();
 

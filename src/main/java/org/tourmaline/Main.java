@@ -7,7 +7,6 @@ import Effects.JetEffect;
 import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
-import Interfaces.TreeNode;
 import Liquids.LiquidBody;
 import Rendering.Camera;
 import Rendering.Lights.LightingConfigurator;
@@ -15,7 +14,7 @@ import Rendering.Lights.PointLight;
 import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
-import ResourceImpl.Utils.PivotUtils;
+
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -28,7 +27,6 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import lombok.AllArgsConstructor;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -43,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static org.joml.Math.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -267,6 +264,11 @@ public class Main extends BasicWindow {
         ArrayList<Boolean> selected = new ArrayList<>(4);
         for(int i = 0; i < 4; i++){selected.add(false);}
 
+
+        List<Boolean> selectedMissile = new ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            selectedMissile.add(false); // Initialize all as unselected
+        }
         InterfaceRenderer combinedRenderer = () -> {
             // System Info Window
             ImGui.setNextWindowPos(new ImVec2(0, 0));
@@ -295,7 +297,7 @@ public class Main extends BasicWindow {
 
             // Item List Window
             ImGui.setNextWindowPos(new ImVec2(1920 - 500, 0));
-            ImGui.setNextWindowSize(new ImVec2(500, 150)); // Increased height to accommodate checkboxes
+            ImGui.setNextWindowSize(new ImVec2(500, 370)); // Increased height to accommodate checkboxes
             if (ImGui.begin("Item List")) {
                 // Table headers
                 if (ImGui.beginTable("Table", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg)) {
@@ -313,6 +315,7 @@ public class Main extends BasicWindow {
                             {"Item C", "5 km", "Type 3", "Destroyed"},
                             {"Item D", "15 km", "Type 1", "Destroyed"},
                     };
+
 
                     for (int i = 0; i < items.length; i++) {
                         String[] item = items[i];
@@ -345,6 +348,39 @@ public class Main extends BasicWindow {
                             selected.set(i, !isSelected); // Toggle the state
                         }
                     }
+                    ImGui.endTable();
+
+
+                }
+                if (ImGui.beginTable("MissileTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg)) {
+                    ImGui.tableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
+                    ImGui.tableSetupColumn("Selected", ImGuiTableColumnFlags.WidthFixed);
+
+                    ImGui.tableHeadersRow();
+
+                    // Missile points for the table
+                    String[] missilePoints = {
+                            "1", "2", "3",
+                            "4", "5", "6",
+                            "7", "8", "9"
+                    };
+
+
+                    // Render table rows
+                    for (int i = 0; i < missilePoints.length; i++) {
+                        ImGui.tableNextRow();
+
+                        // Column 0: Display the missile point
+                        ImGui.tableSetColumnIndex(0);
+                        ImGui.text(missilePoints[i]);
+
+                        // Column 1: Checkbox for selection
+                        ImGui.tableSetColumnIndex(1);
+                        boolean isSelected = selectedMissile.get(i); // Get current state
+                        if (ImGui.checkbox("##checkbox" + i, isSelected)) {
+                            selectedMissile.set(i, !isSelected); // Toggle the state
+                        }
+                    }
 
                     ImGui.endTable();
                 }
@@ -352,8 +388,6 @@ public class Main extends BasicWindow {
 
                 ImGui.end();
             }
-
-
 
         };
 
@@ -380,6 +414,7 @@ public class Main extends BasicWindow {
         waterBodies.add(liquidBody);
 
         JetEffect jetStream = new JetEffect();
+
         jetStream.setMainPosition(F16.getPosition());
         jetStream.setMainRotation(F16.getRotQuaternion());
         jetStream.compile();
@@ -399,10 +434,6 @@ public class Main extends BasicWindow {
         pointLight.setLightColor(new Vector3f(1,0,0));
         pointLight.getLightMesh().setShader(deferredShader);
 
-
-
-//                Vec( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
-//                vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
 
         PointLight newPL = new PointLight(new Vector3f(20));
         newPL.setLightColor(new Vector3f(1,1,0));

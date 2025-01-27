@@ -24,6 +24,7 @@ public class Shader implements Closeable {
     public static final int CAMERA_BLOCK = 1;
     public static final int MATERIAL_BLOCK = 2;
     public static final int WAVE_BLOCK = 3;
+    public static final int LIGHT_BLOCK = 4;
 
     public static final int ALBEDO_MAP_BINDING = 4;
     public static final int METALNESS_MAP_BINDING = 5;
@@ -103,37 +104,35 @@ public class Shader implements Closeable {
             }
 
             // Handle different types of uniform objects
-            if (uniformObject instanceof Float) {
-                glUniform1f(uniformLocation, (Float) uniformObject);
-            } else if (uniformObject instanceof Integer) {
-                glUniform1i(uniformLocation, (Integer) uniformObject);
-            } else if (uniformObject instanceof Boolean) {
-                glUniform1i(uniformLocation, (Boolean) uniformObject ? 1 : 0); // Convert boolean to integer
-            } else if (uniformObject instanceof Vector2f vec) {
-                glUniform2f(uniformLocation, vec.x, vec.y);
-            } else if (uniformObject instanceof Vector3f vec) {
-                glUniform3f(uniformLocation, vec.x, vec.y, vec.z);
-            } else if (uniformObject instanceof Vector4f vec) {
-                glUniform4f(uniformLocation, vec.x, vec.y, vec.z, vec.w);
-            } else if (uniformObject instanceof Matrix3f mat) {
-                FloatBuffer buffer = BufferUtils.createFloatBuffer(9); // Allocate buffer for 3x3 matrix
-                mat.get(buffer); // Transfer matrix data to the buffer
-                buffer.flip(); // Prepare buffer for reading
-                glUniformMatrix3fv(uniformLocation, false, buffer);
-            } else if (uniformObject instanceof Matrix4f mat) {
-                FloatBuffer buffer = BufferUtils.createFloatBuffer(16); // Allocate buffer for 4x4 matrix
-                mat.get(buffer); // Transfer matrix data to the buffer
-                buffer.flip(); // Prepare buffer for reading
-                glUniformMatrix4fv(uniformLocation, false, buffer);
-            } else {
-                throw new IllegalArgumentException(
+            switch (uniformObject) {
+                case Float v -> glUniform1f(uniformLocation, v);
+                case Integer i -> glUniform1i(uniformLocation, i);
+                case Boolean b -> glUniform1i(uniformLocation, b ? 1 : 0); // Convert boolean to integer
+                case Vector2f vec -> glUniform2f(uniformLocation, vec.x, vec.y);
+                case Vector3f vec -> glUniform3f(uniformLocation, vec.x, vec.y, vec.z);
+                case Vector4f vec -> glUniform4f(uniformLocation, vec.x, vec.y, vec.z, vec.w);
+                case Matrix3f mat -> {
+
+                    FloatBuffer buffer = BufferUtils.createFloatBuffer(9); // Allocate buffer for 3x3 matrix
+                    mat.get(buffer); // Transfer matrix data to the buffer
+                    buffer.flip(); // Prepare buffer for reading
+
+                    glUniformMatrix3fv(uniformLocation, false, buffer);
+                }
+                case Matrix4f mat -> {
+
+                    FloatBuffer buffer = BufferUtils.createFloatBuffer(16); // Allocate buffer for 4x4 matrix
+                    mat.get(buffer); // Transfer matrix data to the buffer
+                    buffer.flip(); // Prepare buffer for reading
+
+                    glUniformMatrix4fv(uniformLocation, false, buffer);
+                }
+                case null, default -> throw new IllegalArgumentException(
                         String.format("Unsupported uniform type: %s", uniformObject.getClass().getSimpleName())
                 );
             }
-            unbind();
         } catch (ErroneousUniformLocationException | IllegalArgumentException e) {
             System.err.println(e.getMessage());
-            unbind();
         }
     }
 

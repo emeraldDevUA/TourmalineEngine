@@ -1,5 +1,6 @@
 #version 460 core
 
+#include <algorithms/gradient.glsl>
 
 in vec3 fragPosition;  // Position of the fragment in world space
 in vec3 viewPosition;  // Camera position in world space
@@ -9,15 +10,48 @@ layout (location = 1) out vec4 fragColor;    // Output color
 uniform vec3 rocketPos;    // Rocket's position in world space
 //uniform vec3 jetColor;     // Base color of the jet stream
 uniform float time;        // Time variable for dynamics
+uniform int effectType;
+
+
+void processJetEffect();
+
+void processExplosion();
 
 
 
-// Simple noise function for turbulence
 float noise(vec3 p) {
     return fract(sin(dot(p, vec3(12.9898, 78.233, 45.164))) * 43758.5453);
 }
 
 void main() {
+
+    switch(effectType){
+        case 1:
+            processJetEffect();
+        break;
+
+        case 2:
+            processExplosion();
+        break;
+
+    }
+
+}
+
+void processExplosion(){
+    vec4 color1 = vec4(0);
+    vec4 color2 = vec4(0);
+    vec4 color3 = vec4(0);
+    vec4 color4 = vec4(0);
+
+    vec3 diff = fragPosition - rocketPos;
+    float t = clamp(length(diff), 0, 1);
+    fragColor = linearGradient4(color1, color2, color3, color4, t);
+
+}
+
+
+void processJetEffect(){
 
     vec2 vST = vec2(fragPosition.xz);
     float uFrequency = 30.0 + 10.0 * sin(time);
@@ -67,5 +101,5 @@ void main() {
         // Outside the jet stream, discard the fragment
         discard;
     }
-}
 
+}

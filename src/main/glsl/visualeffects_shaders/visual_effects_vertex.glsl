@@ -1,7 +1,8 @@
 #version 460 core
 
 layout(location = 0) in vec3 position;
-
+layout(location = 1) in vec3 normals;
+layout(location = 2) in vec2 uvs;
 
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
@@ -13,20 +14,52 @@ out vec3 viewPosition;
 
 uniform vec3 rocketPos;
 uniform float time;        // Time variable for dynamics
+uniform int effectType;
 
 
 float f(float d){
 
     return 3/d;
 }
+
+void processJetEffect();
+void processExplosion();
+
 void main() {
+    mat4 camera_direction = inverse(view_matrix);
+    viewPosition = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
+
+
+    switch(effectType){
+            case 1:
+                processJetEffect();
+            break;
+
+            case 2:
+                processExplosion();
+            break;
+    }
     // Calculate world position and fragment position
+
+}
+
+void processExplosion(){
+    float noiseValue = 1;
+    vec3 normal = ( model_matrix* vec4(position, 1) ).xyz;
+
+     vec3 newPos = position + normal * noiseValue;
+     fragPosition = (model_matrix * vec4(newPos, 1)).xyz;
+
+
+    gl_Position = projection_matrix * view_matrix  * vec4(newPos, 1);
+}
+
+void processJetEffect(){
+
     vec4 worldPosition = model_matrix * vec4(position, 1);
     fragPosition = worldPosition.xyz;
 
     // Calculate camera position in world space
-    mat4 camera_direction = inverse(view_matrix);
-    viewPosition = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
 
     // Calculate distance from the rocket
     vec3 diff = fragPosition - rocketPos;
@@ -51,4 +84,5 @@ void main() {
 
     // Calculate final vertex position
     gl_Position = projection_matrix * view_matrix * scaled_model_matrix * vec4(position, 1);
+
 }
