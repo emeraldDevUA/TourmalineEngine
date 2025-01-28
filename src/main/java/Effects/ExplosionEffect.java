@@ -14,6 +14,7 @@ public class ExplosionEffect  extends BaseEffect{
     public void draw(){
         explosionMesh.getShader()
                 .setUniform("effectType", 2);
+        explosionMesh.getShader().setUniform("rocketPos", getMainPosition());
         explosionMesh.draw();
     }
     @Override
@@ -25,7 +26,7 @@ public class ExplosionEffect  extends BaseEffect{
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
+        explosionMesh.setPosition(getMainPosition());
     }
 
     public Mesh getMesh() {

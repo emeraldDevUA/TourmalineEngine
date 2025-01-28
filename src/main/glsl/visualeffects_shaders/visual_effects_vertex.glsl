@@ -47,13 +47,23 @@ void main() {
 
 void processExplosion(){
     float noiseValue = cnoise(position);
-    vec3 normal = ( model_matrix* vec4(normal, 1) ).xyz;
+//    vec3 normal = ( model_matrix* vec4(normal, 1) ).xyz;
 
-     vec3 newPos = position + normal * noiseValue;
-     fragPosition = (model_matrix * vec4(position, 1)).xyz;
+    mat3 normal_matrix = transpose(inverse(mat3(model_matrix)));
+    vec3 normal = normalize(normal_matrix * normal);
+
+    vec3 newPos = position + normal * noiseValue;
+
+//    mat4 scaleMatrix = mat4(1.0);
+//    scaleMatrix[0][0] = newPos.x/position.x;
+//    scaleMatrix[1][1] = newPos.y/position.y;
+//    scaleMatrix[2][2] = newPos.z/position.z;
+//
+//    mat4 scaled_model_matrix = model_matrix * scaleMatrix;
+        fragPosition = (model_matrix * vec4(newPos, 1)).xyz;
 
 
-    gl_Position = projection_matrix * view_matrix  * vec4(newPos, 1);
+    gl_Position = projection_matrix * view_matrix * model_matrix* vec4(newPos, 1);
 }
 
 void processJetEffect(){
