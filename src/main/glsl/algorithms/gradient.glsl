@@ -10,7 +10,7 @@ vec4 linearGradient4(vec4 color1, vec4 color2, vec4 color3, vec4 color4, float t
     } else if (t < 0.66) {
         return mix(color2, color3, (t - 0.33) / 0.33);
     } else {
-        return mix(color3, color4, (t - 0.66) / 0.34); // The last range covers the rest of t
+        return mix(color3, color4, (t - 0.66) / 0.34); // Adjusted range for the last segment
     }
 }
 

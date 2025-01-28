@@ -1,7 +1,9 @@
 #version 460 core
 
+#include<algorithms/Noise/PerlinNoise3d.glsl>
+
 layout(location = 0) in vec3 position;
-layout(location = 1) in vec3 normals;
+layout(location = 1) in vec3 normal;
 layout(location = 2) in vec2 uvs;
 
 uniform mat4 view_matrix;
@@ -44,11 +46,11 @@ void main() {
 }
 
 void processExplosion(){
-    float noiseValue = 1;
-    vec3 normal = ( model_matrix* vec4(position, 1) ).xyz;
+    float noiseValue = cnoise(position);
+    vec3 normal = ( model_matrix* vec4(normal, 1) ).xyz;
 
      vec3 newPos = position + normal * noiseValue;
-     fragPosition = (model_matrix * vec4(newPos, 1)).xyz;
+     fragPosition = (model_matrix * vec4(position, 1)).xyz;
 
 
     gl_Position = projection_matrix * view_matrix  * vec4(newPos, 1);

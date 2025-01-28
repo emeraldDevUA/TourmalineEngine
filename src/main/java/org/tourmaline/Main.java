@@ -3,6 +3,7 @@ package org.tourmaline;
 import Annotations.BasicWindow;
 import Controls.Keyboard;
 import Controls.Mouse;
+import Effects.ExplosionEffect;
 import Effects.JetEffect;
 import Interfaces.InterfaceRenderer;
 import Interfaces.KeyboardEventHandler;
@@ -419,6 +420,13 @@ public class Main extends BasicWindow {
         jetStream.setMainRotation(F16.getRotQuaternion());
         jetStream.compile();
 
+        ExplosionEffect explosionEffect = new ExplosionEffect();
+
+        explosionEffect.setMainPosition(new Vector3f(200));
+        explosionEffect.compile();
+
+        explosionEffect.getMesh().setShader(visualEffectsShader);
+        scene.addEffect(explosionEffect);
         //scene.addDrawItem(new MeshTree(null, jetStream.getMesh(), "th"));
         jetStream.getMesh().setShader(visualEffectsShader);
         scene.addEffect(jetStream);
@@ -435,7 +443,7 @@ public class Main extends BasicWindow {
         pointLight.getLightMesh().setShader(deferredShader);
 
 
-        PointLight newPL = new PointLight(new Vector3f(20));
+        PointLight newPL = new PointLight(new Vector3f(100));
         newPL.setLightColor(new Vector3f(1,1,0));
 
         scene.addLightSources(newPL);
@@ -444,6 +452,7 @@ public class Main extends BasicWindow {
         newPL.getLightMesh().setShader(deferredShader);
         pointLight.getLightMesh().setShader(deferredShader);
         LightingConfigurator.setLights(scene.getLights(), combineShader);
+
 
 
         while (!glfwWindowShouldClose(window_handle)){

@@ -105,7 +105,9 @@ class VBO implements Drawable, Closeable {
 
         this.indices = BufferUtils.createIntBuffer(indices.size());
 
-        indices.forEach(index ->{this.indices.put(index);});
+        for (int i = 0; i < indices.size(); i++) {
+            this.indices.put(indices.get(i));
+        }
     }
 
 
@@ -225,10 +227,10 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
         try {
             map.put(name, new VBO(
-                    params.get("Indices") != null ? (List<Integer>) params.get("Indices") : new ArrayList<>(),
-                    params.get("Vertices") != null ? (List<Vector3f>) params.get("Vertices") : new ArrayList<>(),
-                    params.get("Normals") != null ? (List<Vector3f>) params.get("Normals") : new ArrayList<>(),
-                    params.get("UVs") != null ? (List<Vector2f>) params.get("UVs") : new ArrayList<>()
+                    params.get("Indices") != null ?   (List<Integer>) params.get("Indices") : new ArrayList<>(),
+                    params.get("Vertices") != null ?  (List<Vector3f>) params.get("Vertices") : new ArrayList<>(),
+                    params.get("Normals") != null ?   (List<Vector3f>) params.get("Normals") : new ArrayList<>(),
+                    params.get("UVs") != null ?       (List<Vector2f>) params.get("UVs") : new ArrayList<>()
             ));
         }catch (ClassCastException e){
             throw new RuntimeException("an Incorrect Hash Table Was Passed to Mesh.java");
