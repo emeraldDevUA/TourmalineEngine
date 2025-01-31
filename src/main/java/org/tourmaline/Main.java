@@ -21,11 +21,9 @@ import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
 import Annotations.OpenGLWindow;
-import imgui.ImGui;
-import imgui.ImGuiIO;
-import imgui.ImVec2;
-import imgui.ImVec4;
+import imgui.*;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import lombok.AllArgsConstructor;
@@ -252,6 +250,11 @@ public class Main extends BasicWindow {
             }
         };
 
+        ImFont smallFont = ImGui.getIO().getFonts()
+                .addFontFromFileTTF("src/main/resources/miscellaneous/Iceland-Regular.ttf", 16);
+        ImFont largeFont = ImGui.getIO().getFonts()
+                .addFontFromFileTTF("src/main/resources/miscellaneous/Iceland-Regular.ttf", 36);
+        ImGui.getIO().getFonts().build();
 
         String os = System.getProperty("os.name");
         SystemInfo systemInfo = new SystemInfo();
@@ -260,27 +263,24 @@ public class Main extends BasicWindow {
         long mb = systemInfo.getHardware().getMemory().getTotal()/1_000_000_000;
         int processors = Runtime.getRuntime().availableProcessors();
         System.out.println(mb);
-        String cpu_name = processor.getProcessorIdentifier()
-                .getName()
-                .substring(0, 24).concat("...");
 
-        String gpu = systemInfo.getHardware().getGraphicsCards()
-                .get(1).getName().substring(0, 24).concat("...");;
+        String cpu_name = processor.getProcessorIdentifier().getName().substring(0, 24).concat("...");
+        String gpu = systemInfo.getHardware().getGraphicsCards().get(1).getName()
+                .substring(0, 24).concat("...");;
 
         ArrayList<Boolean> selected = new ArrayList<>(4);
+        List<Boolean> selectedMissile = new ArrayList<>(9);
         for(int i = 0; i < 4; i++){selected.add(false);}
+        for (int i = 0; i < 9; i++) {selectedMissile.add(false);}
 
 
-        List<Boolean> selectedMissile = new ArrayList<>();
-        for (int i = 0; i < 9; i++) {
-            selectedMissile.add(false); // Initialize all as unselected
-        }
         InterfaceRenderer combinedRenderer = () -> {
             // System Info Window
             ImGui.setNextWindowPos(new ImVec2(0, 0));
             ImGui.setNextWindowSize(new ImVec2(215, 190));
             ImGui.setNextWindowSizeConstraints(new ImVec2(215, 190),
                     new ImVec2(215, 190));
+            ImGui.pushFont(smallFont);
             if (ImGui.begin("System Info")) {
                 ImGui.text(os);
                 ImGui.text(STR."\{mb} GB");
@@ -303,7 +303,7 @@ public class Main extends BasicWindow {
 
             // Item List Window
             ImGui.setNextWindowPos(new ImVec2(1920 - 500, 0));
-            ImGui.setNextWindowSize(new ImVec2(500, 370)); // Increased height to accommodate checkboxes
+            ImGui.setNextWindowSize(new ImVec2(500, 470)); // Increased height to accommodate checkboxes
             if (ImGui.begin("Item List")) {
                 // Table headers
                 if (ImGui.beginTable("Table", 5, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg)) {
@@ -314,7 +314,7 @@ public class Main extends BasicWindow {
                     ImGui.tableSetupColumn("Selected", ImGuiTableColumnFlags.WidthFixed);
                     ImGui.tableHeadersRow();
 
-                    // Example list of items
+                    // Example items for the table
                     String[][] items = {
                             {"S-300", "10 km", "Type 1", "Alive"},
                             {"Mi-8", "20 km", "Type 2", "Alive"},
@@ -322,7 +322,7 @@ public class Main extends BasicWindow {
                             {"Item D", "15 km", "Type 1", "Destroyed"},
                     };
 
-
+                    // Table rows
                     for (int i = 0; i < items.length; i++) {
                         String[] item = items[i];
                         ImGui.tableNextRow();
@@ -342,22 +342,27 @@ public class Main extends BasicWindow {
                         // State column
                         ImGui.tableSetColumnIndex(3);
                         if ("Alive".equals(item[3])) {
-                            ImGui.textColored(new ImVec4(0.0f, 1.0f, 0.0f, 1.0f), item[3]); // Green for Alive
+                            ImGui.textColored(new ImVec4(0.0f, 1.0f, 0.0f, 1.0f), item[3]);
                         } else {
-                            ImGui.textColored(new ImVec4(1.0f, 0.0f, 0.0f, 1.0f), item[3]); // Red for Destroyed
+                            ImGui.textColored(new ImVec4(1.0f, 0.0f, 0.0f, 1.0f), item[3]);
                         }
 
-                        // Checkbox column
+                        // Checkbox column with single selection logic
                         ImGui.tableSetColumnIndex(4);
-                        boolean isSelected = selected.get(i);
-                        if (ImGui.checkbox(STR."##checkbox\{i}", isSelected)) {
-                            selected.set(i, !isSelected); // Toggle the state
+                        int index = i; // Capture index to use inside lambda
+                        if (ImGui.checkbox("##checkbox" + i, selected.get(i))) {
+                            // Deselect all checkboxes
+                            for (int j = 0; j < selected.size(); j++) {
+                                selected.set(j, false);
+                            }
+                            // Select the clicked checkbox
+                            selected.set(index, true);
                         }
                     }
                     ImGui.endTable();
-
-
                 }
+
+
                 if (ImGui.beginTable("MissileTable", 2, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg)) {
                     ImGui.tableSetupColumn("Name", ImGuiTableColumnFlags.WidthStretch);
                     ImGui.tableSetupColumn("Selected", ImGuiTableColumnFlags.WidthFixed);
@@ -384,11 +389,33 @@ public class Main extends BasicWindow {
                         ImGui.tableSetColumnIndex(1);
                         boolean isSelected = selectedMissile.get(i); // Get current state
                         if (ImGui.checkbox("##checkbox" + i, isSelected)) {
-                            selectedMissile.set(i, !isSelected); // Toggle the state
+                            selectedMissile.replaceAll(ignored -> false);
+                            // Select the clicked checkbox
+                            selectedMissile.set(i, true);
                         }
                     }
 
                     ImGui.endTable();
+
+                    ImGui.pushStyleColor(ImGuiCol.Button, ImGui.colorConvertFloat4ToU32(
+                            new ImVec4(0.3f, 0.3f, 0.7f, 1.0f))); // Base color
+                    ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.colorConvertFloat4ToU32(
+                            new ImVec4(0.4f, 0.4f, 0.9f, 1.0f))); // Hover color
+                    ImGui.pushStyleColor(ImGuiCol.ButtonActive, ImGui.colorConvertFloat4ToU32(
+                            new ImVec4(0.2f, 0.2f, 0.6f, 1.0f))); // Active color
+
+                    ImGui.popFont();
+                    ImGui.pushFont(largeFont);
+
+
+                    if (ImGui.button("Fire      ", new ImVec2(570f, 40f))) {
+                        System.out.println("TEXT");
+                    }
+
+                    ImGui.popFont();
+                    // Restore the default colors
+                    ImGui.popStyleColor(3);
+
                 }
 
 
@@ -461,7 +488,8 @@ public class Main extends BasicWindow {
 
 
         while (!glfwWindowShouldClose(window_handle)){
-
+            camera.loadViewMatrix();
+            camera.setShadowViewProjectionMatrix(combineShader);
             jetStream.getMesh().setPosition(new Vector3f(F16.getPosition()).sub(F16.getRotQuaternion().transform(
                     new Vector3f(2.2f,0.1f,-0.015f)))
             );
