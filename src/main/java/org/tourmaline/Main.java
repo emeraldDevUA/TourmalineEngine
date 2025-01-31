@@ -23,7 +23,7 @@ import ResourceLoading.ResourceLoadScheduler;
 import Annotations.OpenGLWindow;
 import imgui.*;
 import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiStyleVar;
+
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import lombok.AllArgsConstructor;
@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -266,7 +267,7 @@ public class Main extends BasicWindow {
 
         String cpu_name = processor.getProcessorIdentifier().getName().substring(0, 24).concat("...");
         String gpu = systemInfo.getHardware().getGraphicsCards().get(1).getName()
-                .substring(0, 24).concat("...");;
+                .substring(0, 24).concat("...");
 
         ArrayList<Boolean> selected = new ArrayList<>(4);
         List<Boolean> selectedMissile = new ArrayList<>(9);
@@ -349,14 +350,11 @@ public class Main extends BasicWindow {
 
                         // Checkbox column with single selection logic
                         ImGui.tableSetColumnIndex(4);
-                        int index = i; // Capture index to use inside lambda
-                        if (ImGui.checkbox("##checkbox" + i, selected.get(i))) {
+                        if (ImGui.checkbox(STR."##checkbox\{i}", selected.get(i))) {
                             // Deselect all checkboxes
-                            for (int j = 0; j < selected.size(); j++) {
-                                selected.set(j, false);
-                            }
+                            Collections.fill(selected, false);
                             // Select the clicked checkbox
-                            selected.set(index, true);
+                            selected.set(i, true);
                         }
                     }
                     ImGui.endTable();
@@ -388,8 +386,8 @@ public class Main extends BasicWindow {
                         // Column 1: Checkbox for selection
                         ImGui.tableSetColumnIndex(1);
                         boolean isSelected = selectedMissile.get(i); // Get current state
-                        if (ImGui.checkbox("##checkbox" + i, isSelected)) {
-                            selectedMissile.replaceAll(ignored -> false);
+                        if (ImGui.checkbox(STR."##checkbox\{i}", isSelected)) {
+                            Collections.fill(selectedMissile, false);
                             // Select the clicked checkbox
                             selectedMissile.set(i, true);
                         }
@@ -408,7 +406,7 @@ public class Main extends BasicWindow {
                     ImGui.pushFont(largeFont);
 
 
-                    if (ImGui.button("Fire      ", new ImVec2(570f, 40f))) {
+                    if (ImGui.button("Fire       ", new ImVec2(570f, 40f))) {
                         System.out.println("TEXT");
                     }
 
@@ -509,7 +507,7 @@ public class Main extends BasicWindow {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glDisable(GL_DEPTH_TEST);
-            postprocessingPass();
+                postprocessingPass();
             glEnable(GL_DEPTH_TEST);
 
             keyboard.processEvents(keyboard_handler);
@@ -573,6 +571,7 @@ public class Main extends BasicWindow {
 
 
 @AllArgsConstructor
+@SuppressWarnings("unused")
 class PhysicalMesh{
     private MeshTree mesh;
    // private RigidBody rigidBody;
@@ -597,6 +596,7 @@ class Tuple<A, B>{
     }
 }
 
+@SuppressWarnings("unused")
 class Plane{
 
     // will prob have to convert it into a table or a list with tuples
