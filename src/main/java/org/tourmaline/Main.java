@@ -16,6 +16,7 @@ import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
 
+import ResourceImpl.Utils.PivotUtils;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -28,6 +29,10 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -460,14 +465,11 @@ public class Main extends BasicWindow {
             jetStream.getMesh().setPosition(new Vector3f(F16.getPosition()).sub(F16.getRotQuaternion().transform(
                     new Vector3f(2.2f,0.1f,-0.015f)))
             );
-            visualEffectsShader.setUniform("rocketPos", F16.getPosition());
-           //glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-                shadowPass();
-
-                deferredPass();
+           shadowPass();
+           deferredPass();
 
 
             skyBoxShader.use();
@@ -553,11 +555,24 @@ class PhysicalMesh{
     }
 
 }
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+class Tuple<A, B>{
+    public  A a;
+    public  B b;
+
+    @Override
+    public String toString(){
+        return STR."<\{a} \{b}>";
+    }
+}
+
 class Plane{
 
     // will prob have to convert it into a table or a list with tuples
-    private List<Vector3f> ammunitionPoints;
-    private List<PhysicalMesh> ammo;
+    private List<Tuple<PhysicalMesh, Vector3f>> ammoList;
     private MeshTree plane;
    // private RigidBody rb;
     private Mesh rudder;
@@ -573,10 +588,10 @@ class Plane{
 
     private List<JetEffect> jetStreams;
 
-    public Plane(MeshTree planeMesh, List<Vector3f> ammunitionPoints,
+    public Plane(MeshTree planeMesh, List<Tuple<PhysicalMesh, Vector3f>> ammunitionPoints,
                  List<Vector3f> enginePos){
         this.plane = planeMesh;
-        this.ammunitionPoints = ammunitionPoints;
+        this.ammoList = ammunitionPoints;
 
         rudder = planeMesh.findNode("Rudder");
 
@@ -599,8 +614,25 @@ class Plane{
             jetStreams.add(jf);
         });
 
-        //calculate Pivots
+        List<Vector3f> vertices = getVector3fs(rudder);
+        rudder.setPivot(PivotUtils.xPivot(
+                vertices, true));
+        vertices.clear();
 
+        rudder.setPivot(PivotUtils.xPivot(
+                vertices, true));
+
+
+    }
+
+    @NotNull
+    private List<Vector3f> getVector3fs(Mesh mesh) {
+        List<VBO> list = (List<VBO>) mesh.getMap().values();
+        List<Vector3f> vertices = new ArrayList<>();
+        list.forEach(item->{
+            vertices.addAll(item.getFinalVertices());
+        });
+        return vertices;
     }
 
 

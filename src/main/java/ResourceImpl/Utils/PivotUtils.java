@@ -16,20 +16,64 @@ public class PivotUtils {
     }
 
     public static Vector3f xPivot(List<Vector3f> vertices, boolean findMax){
+        Vector3f firstVertex = vertices.getFirst();
+        if(findMax) {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.x < vertex.x) {
+                    firstVertex = vertex;
+                }
+            }
+        }
+        else {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.x > vertex.x) {
+                    firstVertex = vertex;
+                }
+            }
+        }
 
-
-        return new Vector3f(0);
+        return firstVertex;
     }
     public static Vector3f yPivot(List<Vector3f> vertices, boolean findMax){
 
+        Vector3f firstVertex = vertices.getFirst();
+        if(findMax) {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.y < vertex.y) {
+                    firstVertex = vertex;
+                }
+            }
+        }
+        else {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.y > vertex.y) {
+                    firstVertex = vertex;
+                }
+            }
+        }
 
-        return new Vector3f(0);
+        return firstVertex;
     }
 
     public static Vector3f zPivot(List<Vector3f> vertices, boolean findMax){
 
+        Vector3f firstVertex = vertices.getFirst();
+        if(findMax) {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.z < vertex.z) {
+                    firstVertex = vertex;
+                }
+            }
+        }
+        else {
+            for (Vector3f vertex : vertices) {
+                if (firstVertex.z > vertex.z) {
+                    firstVertex = vertex;
+                }
+            }
+        }
 
-        return new Vector3f(0);
+        return firstVertex;
     }
 
 }
