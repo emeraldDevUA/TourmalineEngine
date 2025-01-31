@@ -724,4 +724,12 @@ class Plane{
 
     }
 
+
+    private void recalculateMass(){
+
+    }
+
+    private void recalculateInertia(){
+
+    }
 }
