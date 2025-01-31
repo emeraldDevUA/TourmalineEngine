@@ -157,15 +157,11 @@ public class Main extends BasicWindow {
         camera = new Camera(
                 temp.add(new Vector3f(-3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
-//        shadowCamera = new Camera(
-//                new Vector3f(0, 1000, 0),
-//                new Vector3f(0,0,0)
-//        );
 
         shadowCamera = new Camera(
                 temp.add(new Vector3f(-90,120,20), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
-//        System.out.println(STR."\{camera.getPosition()}   \{camera.getFocus()}");
+
 
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
@@ -257,11 +253,6 @@ public class Main extends BasicWindow {
         wings.add(new Wing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
                 airfoil0012, new Vector3f(0,0,1), 0.15f));
 
-       // Plane plane = new Plane(inertia, fightingFalcon.getPosition(), 9000, jetEngine, wings);
-
-     //   //plane.setVelocity(new Vector3f(130f,0f,0f));
-   //    fightingFalcon.getPosition().set(plane.getPosition());
-      //  plane.setControlInput(0,0.0f,0);
 
         RigidBody plane = new RigidBody(inertia, new Vector3f(0,200,0), 9000);
         plane.setEnableGravity(true);
@@ -306,8 +297,6 @@ public class Main extends BasicWindow {
 
                 }else{
 
-                //    rudder  = center(rudder, factor.y, dt);
-                 //   rudder = 0;
                 }
                 if(key == GLFW_KEY_C){
 
@@ -322,9 +311,8 @@ public class Main extends BasicWindow {
 
                 else{
                    elevator = center(rudder, factor.z, dt);
-                  // elevator = 0;
+
                 }
-                //
 
                 if(key == GLFW_KEY_M) {
                     float thrust = 135000f;
@@ -338,7 +326,6 @@ public class Main extends BasicWindow {
                     plane.applyForceAtPoint(new Vector3f(0,num*thrust/2,0), new Vector3f(0));
 
             }   else if(key == GLFW_KEY_N) {
-//\
                     float thrust = 1000;
                     plane.applyForceAtPoint(new Vector3f(-thrust,0,0), new Vector3f(0));
 
@@ -405,11 +392,7 @@ public class Main extends BasicWindow {
                 ImGui.text(STR."\{mb} MB");
                 ImGui.text(STR."\{processors} Cores");
                 ImGui.text(STR."\{name}");
-//                ImGui.pushID(1);
-//                if (ImGui.button("Text", new ImVec2(200, 50))) {
-//                    System.out.println("TEXT");
-//                }
-//                ImGui.popID();
+
                 ImGui.end();
             }
         };
@@ -431,12 +414,9 @@ public class Main extends BasicWindow {
 
 
 
-
-//        rigidBody.addForce(new Vector3f(0,10,0), new Vector3f(0,0,3));
-//        rigidBody.addForce(new Vector3f(0,-10,0), new Vector3f(0,0,-3));
-
         RigidBody collisionObject = new RigidBody(inertia, mig29.getPosition(), 10000);
-        //collisionObject.setVelocity(new Vector3f(20,0,0));
+
+
         collisionObject.setCollisionPrimitive(
                 new BoundingBox(collisionObject.getPosition(),
                 new Vector3f(10,10,10), collisionObject.getOrientation()));
