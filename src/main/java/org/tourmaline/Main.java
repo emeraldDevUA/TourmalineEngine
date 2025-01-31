@@ -646,8 +646,24 @@ class Plane{
         rudder.setPivot(PivotUtils.xPivot(
                 vertices, true));
         vertices.clear();
+        vertices = getVector3fs(aileron1);
 
-        rudder.setPivot(PivotUtils.xPivot(
+        aileron1.setPivot(PivotUtils.xPivot(
+                vertices, true));
+        vertices.clear();
+        vertices = getVector3fs(aileron2);
+
+        aileron2.setPivot(PivotUtils.xPivot(
+                vertices, true));
+
+        vertices = getVector3fs(flap1);
+
+        flap1.setPivot(PivotUtils.zPivot(
+                vertices, false));
+        vertices.clear();
+        vertices = getVector3fs(flap2);
+
+        flap2.setPivot(PivotUtils.zPivot(
                 vertices, true));
 
 
@@ -663,6 +679,23 @@ class Plane{
         return vertices;
     }
 
+    public boolean launchProjectile(int index){
+
+        if(ammoList.get(index) == null){
+            return false;
+        }
+        // check target type
+//        if(ammoList.get(index).getA().targetType()!= targetType){
+//            return false;
+//        }
+
+
+        //ammoList.get(index).launch();
+
+        ammoList.set(index, null);
+
+        return true;
+    }
 
     public void openLandingGear(){
             // add animations, change state
