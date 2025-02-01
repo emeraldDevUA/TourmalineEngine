@@ -40,8 +40,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import static org.joml.Math.*;
@@ -259,7 +261,7 @@ public class Main extends BasicWindow {
         fightingFalcon.getPosition().set(plane.getPosition().mul(scale, new Vector3f()));
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            Vector3f factor = new Vector3f(2.8f, 5f, 4.0f);
+            Vector3f factor = new Vector3f(2.4f, 5f, 4.0f);
             if (state == GLFW_PRESS) {
 
                 Quaternionf planeOrientation = plane.getOrientation();
@@ -335,6 +337,7 @@ public class Main extends BasicWindow {
 
 
                 Vector3f velocity = new Vector3f(plane.getVelocity()).normalize();
+                
                 Vector3f rotatedVec = planeOrientation
                         .transform(new Vector3f(1, 0, 0)).normalize();
                 // Assuming (1, 0, 0) is the default direction
@@ -342,7 +345,6 @@ public class Main extends BasicWindow {
                 // Adjust this for how fast you want the interpolation
                 Vector3f interpolatedDir = velocity
                         .lerp(rotatedVec, interpolationFactor).normalize();
-
                 plane.setVelocity(interpolatedDir.mul(plane.getVelocity().length()));
 
 
@@ -388,13 +390,20 @@ public class Main extends BasicWindow {
 
         String name = processor.getProcessorIdentifier().getName();
 
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(
+                new Locale("uk", "UA"));
+
+        numberFormat.setMaximumFractionDigits(2);
         InterfaceRenderer ioRenderer = () -> {
-            ImGui.setNextWindowSize(new ImVec2(215, 160));
+
+            ImGui.setNextWindowSize(new ImVec2(245, 160));
             if (ImGui.begin("System Info")) {
-                ImGui.text(plane.getPosition().toString( ));
-                ImGui.text(STR."\{mb} MB");
-                ImGui.text(STR."\{processors} Cores");
-                ImGui.text(STR."\{name}");
+                ImGui.text(STR."Pos:\{plane.getPosition().toString(numberFormat)}");
+                ImGui.text(STR."Vel:\{STR."\{plane.getVelocity().toString(numberFormat)} \{plane.getVelocity().length()} m/s"}");
+                ImGui.text(STR."XYZW: \{plane.getOrientation().toString(numberFormat)}");
+                ImGui.text(STR."AngVel: \{plane.getAngularVelocity().toString(numberFormat)} \{plane.getAngularVelocity().length()} rad/s");
+
+                ImGui.text(STR."a: \{plane.getAcceleration().toString(numberFormat)} \{plane.getAcceleration().length()} m/s^2");
 
                 ImGui.end();
             }
