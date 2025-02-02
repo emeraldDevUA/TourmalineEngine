@@ -54,9 +54,8 @@ void main()
 
 
     vec4 model_position =  (model_matrix * vec4(position, 1.0));
-
+    vec3 bitangent = vec3(normal.r,-normal.r,normal.g);
     if(isWater){
-
 
         Wave initialWave = Wave(model_position.xyz, direction, wavelength, amplitude, steepness, speed, phase);
         vec3 wave_position = gerstnerPositions(coefficients, initialWave, time, waveNumber);
@@ -64,31 +63,25 @@ void main()
         wave_position += position;
 
         vec3 wave_normal = gerstnerNormals(coefficients, initialWave, time, waveNumber);
-        vec3 bitangent = vec3(wave_normal.r, -wave_normal.r, wave_normal.g);
 
-        vs_out.position  = (model_matrix * vec4(wave_position, 1.0)).xyz;
+        bitangent = vec3(wave_normal.r, -wave_normal.r, wave_normal.g);
+
+        model_position = model_matrix*vec4(wave_position, 1);
+
         vs_out.normal    = (model_matrix * vec4(wave_normal, 1.0)).xyz;
-        vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
-
-        vec4 sp = shadow_projection_matrix * shadow_view_matrix * model_matrix* vec4(wave_position, 1);
-        vs_out.shadow_position = sp.xyz/sp.w;
-
-        gl_Position = projection_matrix * view_matrix * model_matrix*vec4(wave_position, 1);
     }
     else {
 
-        vec3 bitangent = vec3(normal.r,-normal.r,normal.g);
-
-        vs_out.position  = model_position.xyz;
         vs_out.normal    = (model_matrix * vec4(normal, 0.0)).xyz;
-        vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
-
-
-        vec4 sp = shadow_projection_matrix * shadow_view_matrix * model_position;
-        vs_out.shadow_position = sp.xyz/sp.w;
-
-
-        gl_Position = projection_matrix * view_matrix * model_position;
     }
 
+
+    vec4 shadowCoordinates = shadow_projection_matrix * shadow_view_matrix * model_position;
+
+    vs_out.shadow_position = shadowCoordinates.xyz/shadowCoordinates.w;
+    vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
+    vs_out.position  = model_position.xyz;
+
+
+    gl_Position = projection_matrix * view_matrix * model_position;
 }

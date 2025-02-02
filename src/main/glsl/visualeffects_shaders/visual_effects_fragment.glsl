@@ -7,11 +7,12 @@ in vec3 viewPosition;  // Camera position in world space
 
 layout (location = 1) out vec4 fragColor;    // Output color
 
-uniform vec3 rocketPos;    // Rocket's position in world space
-//uniform vec3 jetColor;     // Base color of the jet stream
-uniform float time;        // Time variable for dynamics
+
+
+uniform vec3 rocketPos;
 uniform int effectType;
 
+uniform float time;
 
 void processJetEffect();
 
