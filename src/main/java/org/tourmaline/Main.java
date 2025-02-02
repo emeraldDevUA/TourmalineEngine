@@ -28,8 +28,7 @@ import org.tourmaline.Collision.BoundingBox;
 import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
 import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
-import org.tourmaline.PlanePhysics.Plane;
-import org.tourmaline.PlanePhysics.Wing;
+
 import org.tourmaline.Processing.PhysicsProcessor;
 import org.tourmaline.RigidBody.RigidBody;
 import oshi.SystemInfo;
@@ -167,7 +166,7 @@ public class Main extends BasicWindow {
 
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
-        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 1000,0.1f);
+        camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 4000,0.1f);
         shadowCamera.loadOrthographicProjection(-1500,1500, -1500, 1500, -800, 800);
 
         material.addMap(Material.ALBEDO_MAP, albedo);
@@ -236,24 +235,24 @@ public class Main extends BasicWindow {
                 -0.000f, -0.000f,147367.125f);
 
         Engine jetEngine = new Engine(13000);
-        ArrayList<Wing> wings = new ArrayList<>();
-
-        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
-
-        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
-
-
-        wings.add(new Wing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
-                airfoil2412, new Vector3f(0,1,0), 0.2f));
-
-        wings.add(new Wing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
-                airfoil2412, new Vector3f(0,1,0), 0.2f));
-
-        wings.add(new Wing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
-                airfoil0012, new Vector3f(0,1,0), 1f));
-
-        wings.add(new Wing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
-                airfoil0012, new Vector3f(0,0,1), 0.15f));
+//        ArrayList<Wing> wings = new ArrayList<>();
+//
+//        Airfoil airfoil0012 = new Airfoil(arrayToList(Constants.NACA_0012));
+//
+//        Airfoil airfoil2412 = new Airfoil(arrayToList(Constants.NACA_2412));
+//
+//
+//        wings.add(new Wing(new Vector3f(wing_offset,0, -2.7f), 6.96f, 2.50f,
+//                airfoil2412, new Vector3f(0,1,0), 0.2f));
+//
+//        wings.add(new Wing(new Vector3f(wing_offset,0, 2.7f), 6.96f, 2.50f,
+//                airfoil2412, new Vector3f(0,1,0), 0.2f));
+//
+//        wings.add(new Wing(new Vector3f(tail_offset,-0.1f, 0.0f), 6.54f, 2.70f,
+//                airfoil0012, new Vector3f(0,1,0), 1f));
+//
+//        wings.add(new Wing(new Vector3f(tail_offset,0.0f, 0.0f), 5.31f, 3.1f,
+//                airfoil0012, new Vector3f(0,0,1), 0.15f));
 
 
         RigidBody plane = new RigidBody(inertia, new Vector3f(0,200,0), 9000);

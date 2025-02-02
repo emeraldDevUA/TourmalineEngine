@@ -84,4 +84,11 @@ public class AutoloaderTest extends BasicWindow {
     public void close() throws IOException {
 
     }
+
+
+    @Test
+    public void testMeshClustering(){
+
+
+    }
 }
