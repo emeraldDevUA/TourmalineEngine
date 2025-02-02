@@ -260,7 +260,7 @@ public class Main extends BasicWindow {
         fightingFalcon.getPosition().set(plane.getPosition().mul(scale, new Vector3f()));
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            Vector3f factor = new Vector3f(2.4f, 5f, 4.0f);
+            Vector3f factor = new Vector3f(2.4f, 6f, 4.0f);
             if (state == GLFW_PRESS) {
 
                 Quaternionf planeOrientation = plane.getOrientation();
