@@ -5,7 +5,6 @@ import ResourceImpl.Material;
 import ResourceImpl.Mesh;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Texture;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +21,7 @@ public class AutoLoader {
     private final ResourceLoadScheduler resourceLoadScheduler;
     public void loadTrees() {
 
-        drawables = new ConcurrentHashMap<String, MeshTree>();
+        drawables = new ConcurrentHashMap<>();
 
         File folder = new File(rootFolder);
 
@@ -51,38 +50,46 @@ public class AutoLoader {
         Mesh mesh = null;
 
         for (File f : files) {
+            boolean containsModels = false;
+            boolean containsTextures = false;
             if (f.isDirectory()) {
                 loadMesh(f, meshTree);
             } else {
                 String extension = f.toPath().toString().split("\\.")[1];
-                if (models_formats.contains(extension)) {
+
+                containsModels = models_formats.contains(extension);
+                containsTextures = texture_formats.contains(extension);
+
+                if (containsModels) {
                     mesh = new Mesh();
                     resourceLoadScheduler.addResource(mesh, f.getPath());
-                } else if (texture_formats.contains(extension)) {
-                    Texture texture = new Texture();
-                    resourceLoadScheduler.addResource(texture, f.getPath());
+                } else {
 
-                    if(f.getName().toUpperCase().contains("ALBEDO")){
-                        material.addMap(Material.ALBEDO_MAP, texture);
-                    }
-                    if(f.getName().toUpperCase().contains("NORMAL")){
-                        material.addMap(Material.NORMAL_MAP, texture);
-                    }
-                    if(f.getName().toUpperCase().contains("ROUGHNESS")){
-                        material.addMap(Material.ROUGHNESS_MAP, texture);
-                    }
-                    if(f.getName().toUpperCase().contains("AMBIENT_OCCLUSION")){
-                        material.addMap(Material.ROUGHNESS_MAP, texture);
-                    }
+                    if (containsTextures) {
+                        Texture texture = new Texture();
+                        resourceLoadScheduler.addResource(texture, f.getPath());
+
+                        if(f.getName().toUpperCase().contains("ALBEDO")){
+                            material.addMap(Material.ALBEDO_MAP, texture);
+                        }
+                        if(f.getName().toUpperCase().contains("NORMAL")){
+                            material.addMap(Material.NORMAL_MAP, texture);
+                        }
+                        if(f.getName().toUpperCase().contains("ROUGHNESS")){
+                            material.addMap(Material.ROUGHNESS_MAP, texture);
+                        }
+                        if(f.getName().toUpperCase().contains("AMBIENT_OCCLUSION")){
+                            material.addMap(Material.ROUGHNESS_MAP, texture);
+                        }
 
 
-                    // add them to the material
+                        // add them to the material
+                    }
                 }
             }
 
 
-            if (mesh != null) {
-
+            if (mesh != null && containsModels) {
                 mesh.setMaterial(material);
                 TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, f.getName());
                 if(meshTree == null){

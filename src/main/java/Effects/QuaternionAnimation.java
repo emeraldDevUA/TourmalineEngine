@@ -37,4 +37,9 @@ public class QuaternionAnimation extends Animation<Quaternionf> {
     public void restartAnimation() {
 
     }
+
+    @Override
+    public float getDivergence() {
+        return Math.abs(state.dot(finalPos));
+    }
 }

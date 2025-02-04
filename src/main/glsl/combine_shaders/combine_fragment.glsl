@@ -62,6 +62,19 @@ float DistributionGGX(vec3 N, vec3 H, float rough)
      return num / denom;
  }
 
+float DistributionTR(vec3 N, vec3 H, float rough)
+{
+    float a = rough * rough;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
+
+    float num = a * a;
+    float denom = (NdotH2 * (a * a - 1.0) + 1.0);
+    denom = PI * denom * denom;
+
+    return num / denom;
+}
+
  vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float rough)
  {
      return F0 + (max(vec3(1.0 - rough), F0) - F0) * pow(1.0 - cosTheta, 5.0);
@@ -306,13 +319,13 @@ void main()
 
     fragment = (1 - shadow_value ) * vec4(Lo + mix(environment_emission_value,
                                                    SSR, metalness_value), 1.0);
-//  fragment =  vec4(SSR, 1.0);
+
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {
         bloom = vec4(SSR, 1.0);
     }
-//   fragment = vec4(SSR, 1);
+
 
 
 }

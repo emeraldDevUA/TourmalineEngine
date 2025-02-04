@@ -16,5 +16,7 @@ public abstract class Animation<T>{
 
     public abstract void update(float dt);
     public abstract void restartAnimation();
+
+    public abstract float getDivergence();
 }
 

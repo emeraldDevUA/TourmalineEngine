@@ -49,6 +49,9 @@ public class AutoloaderTest extends BasicWindow {
         loader.getDrawables().keySet().forEach(System.out::println);
 
         Assert.assertNotNull(loader.getDrawables().get("F16"));
+        loader.getDrawables().get("F16").getChildNodes().forEach(Item->{
+            System.err.println(Item.getNodeName());
+        });
     }
 
     @Test
