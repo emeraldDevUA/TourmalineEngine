@@ -19,8 +19,11 @@ public abstract class AbstractLight {
     public AbstractLight(){
         lightColor = new Vector3f(1,0,0);
         lightIntensity = 10;
-
     }
+    public  AbstractLight(Vector3f lightColor){
+        this.lightColor = lightColor;
+    }
+
 
     public abstract ByteBuffer formLight();
 

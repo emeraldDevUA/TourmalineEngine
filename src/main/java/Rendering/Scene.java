@@ -15,6 +15,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody> {
 
@@ -41,7 +42,7 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     @Override
     public void drawItems() {
         for(MeshTree drawable: drawables){
-            drawable.getNodeValue().draw();
+            drawable.draw();
         }
 
     }
@@ -90,31 +91,36 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
 
     public void setActiveProgram(Shader shader) {
         for(MeshTree tree: drawables){
-            tree.getNodeValue().setShader(shader);
+            tree.setShader(shader);
         }
     }
 
-    public void addLightSources(AbstractLight light){
-        String pntLights = "PointLights";
-
-        for(MeshTree tree:drawables)
-        {
-            if(tree.getNodeName().compareTo(pntLights) == 0){
-                tree.addNode(new MeshTree(new ArrayList<>(),
-                        ((PointLight) light).getLightMesh(),
-                        String.valueOf(Math.random())));
-
-                System.out.println(tree);
-                tree.getChildNodes().forEach(System.out::println);
-                return;
-            }
-
+    public void addLightSources(AbstractLight light) {
+        if (!(light instanceof PointLight pointLight)) {
+            throw new IllegalArgumentException("Unsupported light type: " + light.getClass().getName());
         }
-        drawables.add(new MeshTree(new ArrayList<>(),
-                ((PointLight) light).getLightMesh(), pntLights ));
 
+        String pntLights = "PointLights";
+        MeshTree targetTree = null;
 
+        // Find an existing "PointLights" tree
+        for (MeshTree tree : drawables) {
+            if (pntLights.equals(tree.getNodeName())) {
+                targetTree = tree;
+                break;
+            }
+        }
 
+        if (targetTree == null) {
+            // Create a new "PointLights" tree if not found
+            targetTree = new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), pntLights);
+            drawables.add(targetTree);
+        } else {
+            // Add new PointLight node
+            targetTree.addNode(new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), UUID.randomUUID().toString()));
+        }
 
+        System.out.println(targetTree);
+        targetTree.getChildNodes().forEach(System.out::println);
     }
 }

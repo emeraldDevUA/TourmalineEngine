@@ -1,6 +1,7 @@
 package Rendering.Lights;
 
 import ResourceImpl.Shader;
+import org.lwjgl.opengl.GL31;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public class LightingConfigurator {
         if (bufferBase == -1) {
             bufferBase = glGenBuffers();
             glBindBuffer(GL_UNIFORM_BUFFER, bufferBase);
-            glBufferData(GL_UNIFORM_BUFFER, COMPUTED_SIZE, GL_STATIC_DRAW);
+            glBufferData(GL_UNIFORM_BUFFER, COMPUTED_SIZE, GL_DYNAMIC_DRAW);
             glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -66,7 +67,10 @@ public class LightingConfigurator {
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         shaderProgram.use();
-        glBindBufferBase(GL_UNIFORM_BUFFER, 4, bufferBase);
+        int blockIndex = GL31.glGetUniformBlockIndex(
+                shaderProgram.getProgram(), "LightBlock");
+
+        GL31.glUniformBlockBinding(shaderProgram.getProgram(), blockIndex, 4);
 
 
         shaderProgram.setUniform("number_pointLights", boundPoint);

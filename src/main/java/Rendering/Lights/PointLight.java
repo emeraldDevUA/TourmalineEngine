@@ -13,7 +13,7 @@ import java.nio.ByteOrder;
 
 
 public class PointLight extends AbstractLight {
-    private final Vector3f position;
+    private Vector3f position;
     @Getter
     private Mesh lightMesh;
     @Getter
@@ -27,7 +27,8 @@ public class PointLight extends AbstractLight {
                 .order(ByteOrder.nativeOrder());
         emptyBuffer =  ByteBuffer.allocateDirect(posLightSize)
                 .order(ByteOrder.nativeOrder());
-        generatePrimitive();
+        lightMesh = new Mesh();
+        lightMesh.setPosition(position);
     }
 
     @Override
@@ -50,10 +51,7 @@ public class PointLight extends AbstractLight {
 
 
     public void generatePrimitive(){
-
-
         try {
-            lightMesh = new Mesh();
             lightMesh.load("src/main/resources/miscellaneous/Sphere32.obj");
             lightMesh.setScale(new Vector3f(lightIntensity/50f));
             lightMesh.compile();
@@ -68,7 +66,5 @@ public class PointLight extends AbstractLight {
     @Override
     public void setLightColor(Vector3f lightColor) {
         super.setLightColor(lightColor);
-        lightMesh.getMaterial().addColor(Material.ALBEDO_MAP, lightColor);
-
     }
 }

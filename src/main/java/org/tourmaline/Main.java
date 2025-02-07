@@ -468,19 +468,22 @@ public class Main extends BasicWindow {
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
 
-        PointLight pointLight = new PointLight(new Vector3f(10));
+
+
+        PointLight pointLight = new PointLight(new Vector3f(10,10,10));
         pointLight.setLightColor(new Vector3f(1,0,0));
-        pointLight.getLightMesh().setShader(deferredShader);
-
-
-        PointLight newPL = new PointLight(new Vector3f(100));
-        newPL.setLightColor(new Vector3f(1,1,0));
-
-        scene.addLightSources(newPL);
+        pointLight.generatePrimitive();
         scene.addLightSources(pointLight);
 
-        newPL.getLightMesh().setShader(deferredShader);
-        pointLight.getLightMesh().setShader(deferredShader);
+
+
+        PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
+        pointLight2.setLightColor(new Vector3f(0,0,1));
+        pointLight2.generatePrimitive();
+        scene.addLightSources(pointLight2);
+
+
+
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
 

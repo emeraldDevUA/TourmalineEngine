@@ -26,7 +26,7 @@ import static org.lwjgl.opengl.GL30.*;
 
 @Getter
 @Setter
-public class Mesh implements Loadable, Drawable, Closeable {
+public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private  Map<String, VBO> map;
 
     private Vector3f pivot;
@@ -117,11 +117,11 @@ public class Mesh implements Loadable, Drawable, Closeable {
             }
             if (line.contains("object") || line.contains("o")) {
                 name = line.split(" ")[1];
-                VBO retrievedVBO = map.get(name);
-
-                if(retrievedVBO != null){
-                    map.put(STR."_\{name}", retrievedVBO);
-                }
+//                VBO retrievedVBO = map.get(name);
+//
+//                if(retrievedVBO != null){
+//                    map.put(STR."_\{name}", retrievedVBO);
+//                }
             }
             if (line.substring(0, 2).compareTo("v ") == 0) {
                 vals = getFloatValues(line);
@@ -325,5 +325,17 @@ public class Mesh implements Loadable, Drawable, Closeable {
 
     private Vector3f convertVec(AIVector3D vec){
         return  new Vector3f(vec.x(), vec.y(), vec.z());
+    }
+
+    @Override
+    public Mesh clone() {
+        try {
+            Mesh clone = (Mesh) super.clone();
+            clone.setPosition(new Vector3f(clone.getPosition()));
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

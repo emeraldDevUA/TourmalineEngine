@@ -30,8 +30,20 @@ public class MeshTree extends TreeNode<Mesh> {
                 }
             }
         }
+    }
 
 
+    public void setShader(Shader shader) {
+        MeshTree node = this;
+        List<TreeNode<Mesh>> list = node.getChildNodes();
+        if(node.getNodeValue()!=null) {
+            node.getNodeValue().setShader(shader);
+            if(list!=null){
+                for(TreeNode<Mesh> meshTreeNode: list){
+                    ((MeshTree)(meshTreeNode)).setShader(shader);
+                }
+            }
+        }
     }
 
 
