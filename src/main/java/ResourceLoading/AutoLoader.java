@@ -40,6 +40,7 @@ public class AutoLoader {
 
     private TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
 
+
         final String models_formats = ".obj .fbx .glb .stl";
         final String texture_formats = ".png .jpg .jpeg";
 
@@ -53,7 +54,10 @@ public class AutoLoader {
             boolean containsModels = false;
             boolean containsTextures = false;
             if (f.isDirectory()) {
-                loadMesh(f, meshTree);
+                TreeNode<Mesh> childNode = loadMesh(f, null);
+                if (meshTree != null && childNode != null) {
+                    meshTree.addNode(childNode);
+                }
             } else {
                 String extension = f.toPath().toString().split("\\.")[1];
 
@@ -79,7 +83,7 @@ public class AutoLoader {
                             material.addMap(Material.ROUGHNESS_MAP, texture);
                         }
                         if(f.getName().toUpperCase().contains("AMBIENT_OCCLUSION")){
-                            material.addMap(Material.ROUGHNESS_MAP, texture);
+                            material.addMap(Material.AO_MAP, texture);
                         }
 
 

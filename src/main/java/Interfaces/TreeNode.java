@@ -27,7 +27,7 @@ public abstract class TreeNode<T> {
 
     public T findNode(String name){
         TreeNode<T> node = this;
-        if(node.getNodeName().compareTo(name) == 0){
+        if(node.getNodeName().equalsIgnoreCase(name)){
             return  nodeValue;
         }
         // Recursively check the child nodes

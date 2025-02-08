@@ -50,6 +50,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL14.GL_MIN;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
@@ -103,6 +104,8 @@ public class Main extends BasicWindow {
        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
         MeshTree F16 = autoLoader.getDrawables().get("F16");
+
+
         MeshTree S300 = autoLoader.getDrawables().get("S300");
         MeshTree Island = autoLoader.getDrawables().get("Map");
 
@@ -110,7 +113,9 @@ public class Main extends BasicWindow {
         S300.compile();
         Island.compile();
 
-        F16.getNodeValue().getPosition().add(new Vector3f(10,10,10));
+
+        F16.setPosition(new Vector3f(50,10,10));
+
         Vector3f temp = F16.getNodeValue().getPosition();
 
         camera = new Camera(
@@ -130,7 +135,20 @@ public class Main extends BasicWindow {
         camera.setViewProjectionMatrix(skyBoxShader);
 
 
-        F16.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.8);
+        Material mainMat = F16.getNodeValue().getMaterial();
+        mainMat.addProperty(Material.ROUGHNESS_MAP, 0.8);
+        F16.findNode("F16_Aileron1.obj").getMaterial().close();
+        F16.findNode("F16_Aileron2.obj").getMaterial().close();
+        F16.findNode("F16_Elevator.obj").getMaterial().close();
+        F16.findNode("F16_Rudder.obj").getMaterial().close();
+
+
+        F16.findNode("F16_Aileron1.obj").setMaterial(mainMat);
+        F16.findNode("F16_Aileron2.obj").setMaterial(mainMat);
+        F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
+        F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
+
+
         Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.6);
         Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.3);
 
@@ -139,7 +157,7 @@ public class Main extends BasicWindow {
         S300.getNodeValue().setMaterial(mat);
 
         F16.getNodeValue().setShadowScale(new Vector3f(10));
-
+        F16.forwardTransform();
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LEQUAL);
@@ -483,7 +501,7 @@ public class Main extends BasicWindow {
         scene.addLightSources(pointLight2);
 
 
-    LightingConfigurator.setLights(scene.getLights(), combineShader);
+        LightingConfigurator.setLights(scene.getLights(), combineShader);
 
 
 
@@ -502,8 +520,10 @@ public class Main extends BasicWindow {
 
 
             skyBoxShader.use();
+
                 glActiveTexture(GL_TEXTURE10);
                 skyBox.draw();
+
             skyBoxShader.unbind();
 
 

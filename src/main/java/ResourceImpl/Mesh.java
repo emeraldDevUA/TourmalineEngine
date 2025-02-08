@@ -41,7 +41,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
 
     private boolean updated;
     private boolean noCull;
-
+    private boolean enableBlending;
 
     private float[] model_matrix;
 
@@ -245,6 +245,11 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
 
         material.use();
 
+        if(enableBlending){
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendEquation(GL_FUNC_ADD);
+        }
         if(noCull){
             glDisable(GL_CULL_FACE);
         }
@@ -253,6 +258,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         }
         if(noCull){
             glEnable(GL_CULL_FACE);
+        }
+        if(enableBlending){glDisable(GL_BLEND);
         }
     }
 
