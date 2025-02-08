@@ -483,8 +483,7 @@ public class Main extends BasicWindow {
         scene.addLightSources(pointLight2);
 
 
-
-        LightingConfigurator.setLights(scene.getLights(), combineShader);
+    LightingConfigurator.setLights(scene.getLights(), combineShader);
 
 
 

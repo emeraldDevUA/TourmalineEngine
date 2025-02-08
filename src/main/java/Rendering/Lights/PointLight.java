@@ -19,7 +19,7 @@ public class PointLight extends AbstractLight {
     @Getter
     private static  ByteBuffer emptyBuffer;
 
-    private static final int posLightSize = 32 ;
+    private static final int posLightSize = 48 ;
     public PointLight(Vector3f position){
         super();
         this.position = position;
@@ -27,24 +27,37 @@ public class PointLight extends AbstractLight {
                 .order(ByteOrder.nativeOrder());
         emptyBuffer =  ByteBuffer.allocateDirect(posLightSize)
                 .order(ByteOrder.nativeOrder());
+        for(int i = 0; i < 48/4; i ++){
+            emptyBuffer.putFloat(1.0f);
+        }
+        emptyBuffer.flip();
         lightMesh = new Mesh();
         lightMesh.setPosition(position);
     }
 
     @Override
-    public ByteBuffer formLight(){
+    public ByteBuffer formLight() {
         LightBuffer.clear();
 
+        // Color (vec3) → Needs padding
         LightBuffer.putFloat(lightColor.x);
         LightBuffer.putFloat(lightColor.y);
         LightBuffer.putFloat(lightColor.z);
+        LightBuffer.putFloat(0.0f);  // Padding to align to vec4 (std140 rule)
 
+        // Position (vec3) → Needs padding
         LightBuffer.putFloat(position.x);
         LightBuffer.putFloat(position.y);
         LightBuffer.putFloat(position.z);
+        LightBuffer.putFloat(0.0f);  // Padding to align to vec4 (std140 rule)
 
+        // Intensity (float) → No extra padding needed
         LightBuffer.putFloat(lightIntensity);
+        LightBuffer.putFloat(0.0f);  // Extra padding to make struct 48 bytes
+        LightBuffer.putFloat(0.0f);
+        LightBuffer.putFloat(0.0f);
 
+        LightBuffer.flip(); // **Important! Ensures OpenGL reads correct data**
 
         return LightBuffer;
     }

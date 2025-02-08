@@ -134,8 +134,8 @@ vec4 getMotionBlur(int size, float separation, vec3 position_value, vec3 prev_po
 
     vec2 texSize = textureSize(position, 0).xy;
 
-    vec4 view_position = projection_matrix * view_matrix * vec4(position_value, 1.0);
-    vec4 view_position_prev = projection_matrix * previous_view_matrix * vec4(prev_position_value, 1.0);
+    vec4 view_position = projection_matrix * view_matrix * vec4(position_value*2, 1.0);
+    vec4 view_position_prev = projection_matrix * previous_view_matrix * vec4(prev_position_value*2, 1.0);
 
     view_position.xyz /= view_position.w;
     view_position.xy = view_position.xy * 0.5 + 0.5;
@@ -145,6 +145,7 @@ vec4 getMotionBlur(int size, float separation, vec3 position_value, vec3 prev_po
 
     vec2 direction = (view_position_prev.xy - view_position.xy);
 
+    float zDiff = abs(view_position_prev.z - view_position.z);
     // Clamp the direction to ensure it's not too aggressive
     direction = clamp((direction) * separation, -0.01, 0.01);
 
@@ -163,8 +164,8 @@ vec4 getMotionBlur(int size, float separation, vec3 position_value, vec3 prev_po
             backward = clamp(backward, vec2(0.0), vec2(1.0));
 
 
-            _albedo_value += gaussian_blur(albedo_metalness, forward);
-            _albedo_value += gaussian_blur(albedo_metalness, backward);
+            _albedo_value += fast_blur(albedo_metalness, forward);
+            _albedo_value += fast_blur(albedo_metalness, backward);
 
             count += 2.0;
         }
@@ -183,7 +184,7 @@ void main()
     vec3 light_positions[] = {
         vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
         vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
-        pointLights[0].position
+          pointLights[0].position, pointLights[1].position
     };
     vec3 directional_light_colors[] = {
         vec3(2.8, 2.8, 2.8), // White light
@@ -219,7 +220,7 @@ void main()
     int size = 4; // Increased sample size for smoother blur
     float separation = 0.01; // Reduced separation for softer blur
 
-//    albedo_value = getMotionBlur(size, separation, position_value, prev_position_value).rgb;
+//   albedo_value = getMotionBlur(size, separation, position_value, prev_position_value).rgb;
 
 
 
@@ -275,23 +276,22 @@ void main()
 
     vec4 temp = (view_matrix * vec4(position_value, 1));
     vec3 hitPos = temp.xyz;
+    float vp_z = hitPos.z;
+    vec3 view_normal = normalize( N);
 
-    mat3 view_normal_matrix = transpose(inverse(mat3(view_matrix)));
-    vec3 view_normal = normalize(view_normal_matrix * N);
 
-
-    vec3 reflected =
-                normalize(reflect(normalize(position_value), normalize(view_normal)));
+    vec3 view_dir = normalize(-hitPos);  // View direction from camera to fragment
+    vec3 reflected = normalize(reflect(-view_dir, view_normal));
 
     float dDepth;
     float spec = metalness_value;
 
-    vec3 wp = vec3(position_value);
+    vec3 wp = vec3(temp.xyz);
     vec3 jitt = mix(vec3(0.0),
-                    hashVector(wp, vec3(.8, .8, .8), 19.19), spec);
+                    hashVector(wp, vec3(.3, .3, .3), 19.19), spec);
 
-    float vp_z = hitPos.z;
-    reflected *= (1.0 / tan(PI/2 * 0.5));
+
+//    reflected *= (1.0 / tan(PI/2 * 0.5));
     vec4 coords = rayMarch(position,
                            (vec3(jitt) + reflected * max(minRayStep, -vp_z)),
                            hitPos, dDepth);
@@ -300,17 +300,18 @@ void main()
 
 
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+    screenEdgefactor = pow(screenEdgefactor, 3.0);  // Stronger falloff
 
     float ReflectionMultiplier = pow(metalness_value, reflectionSpecularFalloffExponent)
         * screenEdgefactor * (-reflected.z);
 
     // Compute distance scaling factor
-    float distanceScale = 1.0 / (distance(hitPos.z, position_value.z) + 1.0);
+    float distanceScale = 1.0 / (abs(hitPos.z - position_value.z) + 1.0);
 
     // Blend between original and scaled coordinates
     float blendFactor = smoothstep(0.0, 100.0, distance(hitPos.z, position_value.z));
     vec2 blendedCoords = mix(coords.xy, coords.xy * distanceScale, blendFactor);
-
+    blendedCoords = clamp(blendedCoords, 0.01, 0.99);
 
 
     vec3 SSR = textureLod(albedo_metalness, blendedCoords, 0).rgb
@@ -325,7 +326,7 @@ void main()
     } else {
         bloom = vec4(SSR, 1.0);
     }
-
-
+//
+//fragment = vec4(pointLights[6].position, 1);
 
 }

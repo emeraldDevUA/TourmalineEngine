@@ -2,6 +2,8 @@
 
 #define PI 3.1415926
 
+uniform bool isWater;
+
 in VS_OUT
 {
     vec3 position;
@@ -141,6 +143,7 @@ void main()
     vec3 prefiltered_radiance = vec3(textureLod(radiance, R, normal_roughness.a * MAX_REFLECTION_LOD));
     vec2 radianceBRDF = texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
     vec3 specular = prefiltered_radiance * (F * radianceBRDF.x + radianceBRDF.y);
+
 
     vec3 environment = kD * diffuse + specular;
 

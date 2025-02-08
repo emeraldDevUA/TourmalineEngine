@@ -52,7 +52,8 @@ void main()
     vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
     vs_out.uv = uv;
 
-
+    mat3 normal_matrix = transpose(inverse(mat3(model_matrix)));
+    vec3 normal = normalize(normal_matrix * normal);
     vec4 model_position =  (model_matrix * vec4(position, 1.0));
     vec3 bitangent = vec3(normal.r,-normal.r,normal.g);
     if(isWater){
@@ -68,11 +69,11 @@ void main()
 
         model_position = model_matrix*vec4(wave_position, 1);
 
-        vs_out.normal    = (model_matrix * vec4(wave_normal, 1.0)).xyz;
+        vs_out.normal    = (normal_matrix * (wave_normal)).xyz;
     }
     else {
 
-        vs_out.normal    = (model_matrix * vec4(normal, 0.0)).xyz;
+        vs_out.normal    = normal.xyz;
     }
 
 

@@ -90,12 +90,12 @@ public class LiquidBody implements Drawable {
 
     private Material initializeMaterial() {
         Material mat = new Material();
-        mat.addColor(Material.ALBEDO_MAP, new Vector3f(0f, 0.8f, 0.6f));
+        mat.addColor(Material.ALBEDO_MAP, new Vector3f(0f, 0.9f, 0.6f));
         mat.addProperty(Material.ROUGHNESS, 1.0);
-        mat.addProperty(Material.METALNESS, .5);
+        mat.addProperty(Material.METALNESS, .1);
 
-
-        mat.addMap(Material.ALBEDO_MAP, new Texture("src/main/resources/miscellaneous/water.jpg", 3));
+        //
+       mat.addMap(Material.ALBEDO_MAP, new Texture("src/main/resources/miscellaneous/water.jpg", 3));
        // mat.addMap(Material.NORMAL_MAP, new Texture("src/main/resources/miscellaneous/waternormals.jpg", 3));
 
 

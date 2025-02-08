@@ -54,19 +54,22 @@ vec3 hashVector(vec3 vector, vec3 scale, float K){
 
 vec3 BinarySearch(sampler2D positionTexture, vec3 direction, vec3 hitCoord, float dDepth) {
     for (int j = 0; j < 5; j++) { // 5 refinement steps
-                                  hitCoord += direction * 0.5; // Refine in smaller steps
-                                  float depth = textureLod(positionTexture, hitCoord.xy, ssr_lod).z;
-                                  dDepth = hitCoord.z - depth;
-                                  if (abs(dDepth) < 0.01) break; // Early exit if close enough
+         hitCoord += direction * 0.5; // Refine in smaller steps
+         float depth = textureLod(positionTexture, hitCoord.xy, 0.0).z; // Use LOD 0 for accuracy
+         dDepth = hitCoord.z - depth;
+         if (abs(dDepth) < 0.003) {
+             break;
+         }
+
     }
     return hitCoord;
 }
-vec4 rayMarch(sampler2D positionTexture, vec3 direction,
-inout vec3 hitCoord, out float dDepth) {
+
+vec4 rayMarch(sampler2D positionTexture, vec3 direction, inout vec3 hitCoord, out float dDepth) {
     vec4 projectedCoords;
     float depth;
 
-    direction *= step;
+    direction = normalize(direction) * step; // Ensure proper step size
 
     for (int i = 0; i < maxSteps; i++) {
         hitCoord += direction;
@@ -75,29 +78,23 @@ inout vec3 hitCoord, out float dDepth) {
         projectedCoords.xy /= projectedCoords.w;
         projectedCoords.xy = projectedCoords.xy * 0.5 + 0.5;
 
-        // Early exit if ray leaves screen bounds
         if (projectedCoords.x < 0.0 || projectedCoords.x > 1.0 ||
         projectedCoords.y < 0.0 || projectedCoords.y > 1.0) {
-            break;
+            break; // Exit if outside screen bounds
         }
 
-        depth = textureLod(positionTexture, projectedCoords.xy, ssr_lod).z;
+        depth = textureLod(positionTexture, projectedCoords.xy, 0.0).z;
 
-        // Handle invalid depths
-        if (depth == 0.0 || depth > 1000) {
-            continue;
+        if (depth == 0.0 || depth > 500) {
+            continue; // Ignore invalid depth values
         }
 
         dDepth = hitCoord.z - depth;
+        float epsilon = 0.003; // Adjusted epsilon for better precision
 
-        // Improved depth comparison with epsilon
-        float epsilon = 0.01;
-        if (abs(direction.z - dDepth) < 1.2 + epsilon) {
-            if (dDepth <= epsilon && dDepth >= -epsilon) {
-                return vec4(BinarySearch(positionTexture, direction, hitCoord, dDepth), 1.0);
-            }
+        if (abs(dDepth) < epsilon) {
+            return vec4(BinarySearch(positionTexture, direction, hitCoord, dDepth), 1.0);
         }
     }
-
     return vec4(projectedCoords.xy, depth, 0.0);
 }

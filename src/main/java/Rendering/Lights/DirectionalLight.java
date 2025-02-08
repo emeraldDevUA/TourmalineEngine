@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
 public class DirectionalLight extends AbstractLight{
 
     private Vector3f direction;
-    private static final int dirLightSize = 32;
+    private static final int dirLightSize = 48;
 
     @Getter
     private static  ByteBuffer emptyBuffer;
@@ -18,8 +18,14 @@ public class DirectionalLight extends AbstractLight{
         this.direction = direction;
         this.LightBuffer = ByteBuffer.allocateDirect(dirLightSize)
                 .order(ByteOrder.nativeOrder());
-        emptyBuffer =  ByteBuffer.allocateDirect(dirLightSize)
+
+        emptyBuffer = ByteBuffer.allocateDirect(dirLightSize)
                 .order(ByteOrder.nativeOrder());
+
+        for(int i = 0; i < dirLightSize/4; i ++){
+            emptyBuffer.putFloat(0.0f);
+        }
+        emptyBuffer.flip();
     }
 
 
