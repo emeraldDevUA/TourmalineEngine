@@ -148,6 +148,7 @@ public class Main extends BasicWindow {
         F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
         F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
 
+        F16.findNode("F16_glass.obj").setEnableBlending(true);
 
         Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.6);
         Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.3);
@@ -520,11 +521,10 @@ public class Main extends BasicWindow {
 
 
             skyBoxShader.use();
-
                 glActiveTexture(GL_TEXTURE10);
-                skyBox.draw();
-
+                scene.getSkyBox().draw();
             skyBoxShader.unbind();
+
 
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);

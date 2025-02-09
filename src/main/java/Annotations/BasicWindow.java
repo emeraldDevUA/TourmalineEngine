@@ -415,15 +415,13 @@ public abstract class BasicWindow implements Closeable {
         glActiveTexture(GL_TEXTURE12);
         BRDFLookUp.use();
 
-        scene.drawItems();
-
 
         deferredShader.setUniform("isWater", true);
         deferredShader.use(); waterBodies.forEach(LiquidBody::draw);
         deferredShader.setUniform("isWater", false);
 
 
-
+        scene.drawItems();
 
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 

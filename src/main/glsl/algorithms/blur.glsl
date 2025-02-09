@@ -47,7 +47,8 @@ vec4 fast_blur(sampler2D color, vec2 uvs) {
             float weight = exp(-(x * x + y * y) / (2.0 * radius * radius));
 
             // Sample the texture
-            vec3 sampleColor = texture(color, uvs + vec2(x, y) * texOffset).xyz;
+            vec3 sampleColor = texture(color,
+                 clamp(uvs + vec2(x, y) * texOffset, 0.01, 0.99)).xyz;
 
             // Accumulate weighted color
             blurredColor += sampleColor * weight;

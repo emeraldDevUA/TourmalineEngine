@@ -1,11 +1,10 @@
 package ResourceImpl;
 
 import Interfaces.TreeNode;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import java.util.Calendar;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +28,11 @@ public class MeshTree extends TreeNode<Mesh> {
     }
 
     public void setPosition(Vector3f position){
-
         traverse(mesh -> {mesh.setPosition(position);});
     }
 
     public void draw() {
         traverse(Mesh::draw);
-
     }
 
 

@@ -203,8 +203,10 @@ public class Material implements Closeable {
         addProperty(ROUGHNESS, (double) mtl.roughness);
         addProperty(METALNESS, (double) mtl.metallic);
         addProperty(OPACITY,   (double) mtl.opacity);
-        addProperty(ROUGHNESS,   (double) mtl.roughness);
-        addProperty(METALNESS,   (double) mtl.metallic);
+        addProperty(EMISSION_MAP,   (double) mtl.emissive);
+
+
+        addColor(ALBEDO_MAP, mtl.diffuse);
 
     }
 }
