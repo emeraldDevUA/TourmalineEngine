@@ -175,16 +175,33 @@ vec4 getMotionBlur(int size, float separation, vec3 position_value, vec3 prev_po
 
     return _albedo_value;
 }
+float sqr(float x)
+{
+    return x * x;
+}
+
+float attenuate_no_cusp(float distance, float radius,
+                        float max_intensity, float falloff)
+{
+    float s = distance / radius;
+
+    if (s >= 1.0)
+    return 0.0;
+
+    float s2 = sqr(s);
+
+    return max_intensity * sqr(1 - s2) / (1 + falloff * s2);
+}
 
 void main()
 {
 //    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
 //    vec3( -5, -5,  5), vec3( 5, -5,  5), vec3( 5, 5, -5), vec3( -5, 5,  5)}
-    // Real scene lights are not implemented yet so I am using these "built-it" for testing
+//    Real scene lights are not implemented yet so I am using these "built-it" for testing
     vec3 light_positions[] = {
         vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
         vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
-          pointLights[0].position, pointLights[1].position
+        pointLights[0].position, pointLights[1].position
     };
     vec3 directional_light_colors[] = {
         vec3(2.8, 2.8, 2.8), // White light
@@ -224,13 +241,17 @@ void main()
 
 
 
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < number_pointLights; i++) {
 
         vec3 L = normalize(light_positions[i] - position_value);
         vec3 H = normalize(V + L);
 
         float distance = length(light_positions[i] - position_value);
-        float attenuation = 1.0 / ( pow(distance, 2.0));
+        float attenuation = attenuate_no_cusp(distance, 50,10, 20);
+
+        if(i > 7){
+            light_color= pointLights[0].color* pointLights[0].intensity;
+        }
         vec3 radiance = light_color * attenuation;
 
         vec3 F0 = vec3(0.04);
@@ -250,7 +271,7 @@ void main()
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < number_dirLights; i++) {
 
         vec3 L = normalize(-directional_light_directions[i]); // Light direction (normalized)
         vec3 H = normalize(V + L);
