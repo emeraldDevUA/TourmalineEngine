@@ -120,7 +120,6 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
             targetTree.addNode(new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), UUID.randomUUID().toString()));
         }
 
-        System.out.println(targetTree);
-        targetTree.getChildNodes().forEach(System.out::println);
+            lights.add(light);
     }
 }

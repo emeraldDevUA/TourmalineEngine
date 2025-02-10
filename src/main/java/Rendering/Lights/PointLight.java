@@ -13,23 +13,32 @@ import java.nio.ByteOrder;
 
 
 public class PointLight extends AbstractLight {
-    private Vector3f position;
+    private final Vector3f position;
     @Getter
     private Mesh lightMesh;
     @Getter
     private static  ByteBuffer emptyBuffer;
 
     private static final int posLightSize = 48 ;
+
+
+    static {
+        emptyBuffer = ByteBuffer.allocateDirect(posLightSize)
+                .order(ByteOrder.nativeOrder());
+
+        for (int i = 0; i < posLightSize / 4; i++) {
+            emptyBuffer.putFloat(0.0f);
+        }
+        emptyBuffer.flip();
+    }
+
+
     public PointLight(Vector3f position){
         super();
         this.position = position;
         this.LightBuffer = ByteBuffer.allocateDirect(posLightSize)
                 .order(ByteOrder.nativeOrder());
-        emptyBuffer =  ByteBuffer.allocateDirect(posLightSize)
-                .order(ByteOrder.nativeOrder());
-        for(int i = 0; i < 48/4; i ++){
-            emptyBuffer.putFloat(1.0f);
-        }
+
         emptyBuffer.flip();
         lightMesh = new Mesh();
         lightMesh.setPosition(position);
@@ -54,10 +63,10 @@ public class PointLight extends AbstractLight {
         // Intensity (float) → No extra padding needed
         LightBuffer.putFloat(lightIntensity);
         LightBuffer.putFloat(0.0f);  // Extra padding to make struct 48 bytes
-        LightBuffer.putFloat(0.0f);
-        LightBuffer.putFloat(0.0f);
+
 
         LightBuffer.flip(); // **Important! Ensures OpenGL reads correct data**
+
 
         return LightBuffer;
     }
