@@ -297,7 +297,7 @@ void main()
     }
 
     vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
-    vec3 viewPos = (view_matrix*vec4(position_value, 1.0)).xyz/2 + 0.5;
+    vec3 viewPos = (vec4(position_value, 1.0)).xyz;
 
 
     // Reflection vector
