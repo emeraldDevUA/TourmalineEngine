@@ -88,6 +88,7 @@ public class Main extends BasicWindow {
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
         Texture.setVerticalFlip(true);
+        Mesh.setUseAssimp(true);
 
         t1 = System.currentTimeMillis();
         autoLoader.loadTrees();
@@ -155,6 +156,7 @@ public class Main extends BasicWindow {
 
         Material mat = new Material();
         mat.addColor(Material.ALBEDO_MAP, new Vector3f(6f/255f, 64f/255f, 43f/255f));
+        mat.addProperty(Material.METALNESS, 0.0);
         S300.getNodeValue().setMaterial(mat);
 
         F16.getNodeValue().setShadowScale(new Vector3f(10));

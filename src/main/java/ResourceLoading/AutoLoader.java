@@ -38,75 +38,80 @@ public class AutoLoader {
     }
 
 
-    private TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
-
-
-        final String models_formats = ".obj .fbx .glb .stl";
-        final String texture_formats = ".png .jpg .jpeg";
+    private TreeNode<Mesh> loadMesh(File dir, TreeNode<Mesh> meshTree) {
+        final Set<String> modelFormats = Set.of("obj", "fbx", "glb", "stl");
+        final Set<String> textureFormats = Set.of("png", "jpg", "jpeg");
 
         File[] files = dir.listFiles();
-        assert files != null;
+        if (files == null) return meshTree;  // or throw an exception, as needed
 
-        Material material = new Material();
-        Mesh mesh = null;
-
+        // Option: Collect textures first.
+        // This map could be used to assign textures to a material.
+        Material sharedMaterial = new Material();
         for (File f : files) {
-            boolean containsModels = false;
-            boolean containsTextures = false;
-            if (f.isDirectory()) {
-                TreeNode<Mesh> childNode = loadMesh(f, null);
-                if (meshTree != null && childNode != null) {
-                    meshTree.addNode(childNode);
-                }
-            } else {
-                String extension = f.toPath().toString().split("\\.")[1];
+            if (!f.isDirectory()) {
+                String fileName = f.getName();
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex == -1) continue; // Skip files without extension
 
-                containsModels = models_formats.contains(extension);
-                containsTextures = texture_formats.contains(extension);
+                String extension = fileName.substring(dotIndex + 1).toLowerCase();
+                if (textureFormats.contains(extension)) {
+                    Texture texture = new Texture();
+                    resourceLoadScheduler.addResource(texture, f.getPath());
 
-                if (containsModels) {
-                    mesh = new Mesh();
-                    resourceLoadScheduler.addResource(mesh, f.getPath());
-                } else {
-
-                    if (containsTextures) {
-                        Texture texture = new Texture();
-                        resourceLoadScheduler.addResource(texture, f.getPath());
-
-                        if(f.getName().toUpperCase().contains("ALBEDO")){
-                            material.addMap(Material.ALBEDO_MAP, texture);
-                        }
-                        if(f.getName().toUpperCase().contains("NORMAL")){
-                            material.addMap(Material.NORMAL_MAP, texture);
-                        }
-                        if(f.getName().toUpperCase().contains("ROUGHNESS")){
-                            material.addMap(Material.ROUGHNESS_MAP, texture);
-                        }
-                        if(f.getName().toUpperCase().contains("AMBIENT_OCCLUSION")){
-                            material.addMap(Material.AO_MAP, texture);
-                        }
-
-
-                        // add them to the material
+                    String upperName = fileName.toUpperCase();
+                    if (upperName.contains("ALBEDO")) {
+                        sharedMaterial.addMap(Material.ALBEDO_MAP, texture);
                     }
-                }
-            }
-
-
-            if (mesh != null && containsModels) {
-                mesh.setMaterial(material);
-                TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, f.getName());
-                if(meshTree == null){
-                    meshTree = node;
-                }
-                else{
-                    meshTree.addNode(node);
+                    if (upperName.contains("NORMAL")) {
+                        sharedMaterial.addMap(Material.NORMAL_MAP, texture);
+                    }
+                    if (upperName.contains("ROUGHNESS")) {
+                        sharedMaterial.addMap(Material.ROUGHNESS_MAP, texture);
+                    }
+                    if (upperName.contains("AMBIENT_OCCLUSION")) {
+                        sharedMaterial.addMap(Material.AO_MAP, texture);
+                    }
                 }
             }
         }
 
+        // Then, process files (including subdirectories) to load meshes.
+        for (File f : files) {
+            if (f.isDirectory()) {
+                // Process subdirectories. You might want to pass the same tree, or create a new node for the folder.
+                TreeNode<Mesh> childNode = loadMesh(f, null);
+                if (childNode != null) {
+                    if (meshTree == null) {
+                        meshTree = childNode;
+                    } else {
+                        meshTree.addNode(childNode);
+                    }
+                }
+            } else {
+                String fileName = f.getName();
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex == -1) continue;
+                String extension = fileName.substring(dotIndex + 1).toLowerCase();
 
-        //resourceLoadScheduler.getResources();
+                if (modelFormats.contains(extension)) {
+                    // Create a new mesh and assign the shared material.
+                    Mesh mesh = new Mesh();
+                    resourceLoadScheduler.addResource(mesh, f.getPath());
+
+                    // Optionally, if each mesh should have its own material instance,
+                    // clone the sharedMaterial or build a new one.
+                    mesh.setMaterial(sharedMaterial);
+
+                    TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, fileName);
+                    if (meshTree == null) {
+                        meshTree = node;
+                    } else {
+                        meshTree.addNode(node);
+                    }
+                }
+            }
+        }
         return meshTree;
     }
 

@@ -42,7 +42,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private boolean updated;
     private boolean noCull;
     private boolean enableBlending;
-
+    @Setter
+    private static boolean useAssimp;
     private float[] model_matrix;
 
     public Mesh() {
@@ -54,6 +55,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         material = new Material();
         updated = true;
         noCull = false;
+        useAssimp=false;
         model_matrix = new float[16];
     }
 
@@ -66,7 +68,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         material = new Material();
         updated = true;
         model_matrix = new float[16];
-
+        useAssimp=false;
         try {
             map.put(name, new VBO(
                     params.get("Indices") != null ?   (List<Integer>) params.get("Indices") : new ArrayList<>(),
@@ -85,7 +87,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     @Override
     public void load(String path) throws IOException {
 
-        if(!path.contains(".obj")){
+        if(!path.contains(".obj")|| useAssimp){
             lib_load(path);
             return;
         }
@@ -152,6 +154,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
                             finalUVs.add(textureCoords.get((array[1] - 1)));
                             finalNormals.add(vectors.get((array[2] - 1)));
                             indices.add(array[0] - 1);
+
                         } catch (NullPointerException e) {
                             System.err.println(STR."\{vertices.size()}\n\{vectors.size()}\n\{textureCoords.size()}");
                             break;
@@ -166,8 +169,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
                 }
 
 
-                //setting bias values because of how OBJ format is structured
-                // [ every new vertex is enumerated sequentially, not from 1 to N for every separate object]
+
                  map.put(name, new VBO(finalVertices, finalNormals, finalUVs));
                 // map.put(name, new VBO(indices, vertices, vectors, textureCoords));
                 // indices.clear();

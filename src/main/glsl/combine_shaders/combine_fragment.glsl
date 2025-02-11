@@ -193,6 +193,7 @@ float attenuate_no_cusp(float distance, float radius,
     return max_intensity * sqr(1 - s2) / (1 + falloff * s2);
 }
 
+
 void main()
 {
 //    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
@@ -218,7 +219,7 @@ void main()
     float metalness_value = texture(albedo_metalness, uv_frag).a;
     float roughness_value = texture(normal_roughness, uv_frag).a;
 
-    vec3 position_value = texture(position, uv_frag).rgb;
+    vec3 position_value =  texture(position, uv_frag).rgb;
     vec3 prev_position_value = texture(previous_position, uv_frag).rgb;
 
     vec3 albedo_value = texture(albedo_metalness, uv_frag).rgb;
@@ -295,48 +296,31 @@ void main()
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
-    vec4 temp = (view_matrix * vec4(position_value, 1));
-    vec3 hitPos = temp.xyz;
-    float vp_z = hitPos.z;
-    vec3 view_normal = normalize( N);
+    vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
+    vec3 viewPos = (view_matrix*vec4(position_value, 1.0)).xyz/2 + 0.5;
 
 
-    vec3 view_dir = normalize(-hitPos);  // View direction from camera to fragment
-    vec3 reflected = normalize(reflect(-view_dir, view_normal));
+    // Reflection vector
+    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
 
+
+    // Ray cast
+    vec3 hitPos = viewPos;
     float dDepth;
-    float spec = metalness_value;
 
-    vec3 wp = vec3(temp.xyz);
     vec3 jitt = mix(vec3(0.0),
-                    hashVector(wp, vec3(.3, .3, .3), 19.19), spec);
+                    hashVector(viewPos, vec3(.8, .8, .8), 19.19), metalness_value);
+
+    vec4 coords = rayMarch(position, reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);
 
 
-//    reflected *= (1.0 / tan(PI/2 * 0.5));
-    vec4 coords = rayMarch(position,
-                           (vec3(jitt) + reflected * max(minRayStep, -vp_z)),
-                           hitPos, dDepth);
-
-    vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - coords.xy));
+    vec2 dCoords = abs(vec2(0.5, 0.5) - coords.xy);
 
 
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
-    screenEdgefactor = pow(screenEdgefactor, 3.0);  // Stronger falloff
-
-    float ReflectionMultiplier = pow(metalness_value, reflectionSpecularFalloffExponent)
-        * screenEdgefactor * (-reflected.z);
-
-    // Compute distance scaling factor
-    float distanceScale = 1.0 / (abs(hitPos.z - position_value.z) + 1.0);
-
-    // Blend between original and scaled coordinates
-    float blendFactor = smoothstep(0.0, 100.0, distance(hitPos.z, position_value.z));
-    vec2 blendedCoords = mix(coords.xy, coords.xy * distanceScale, blendFactor);
-    blendedCoords = clamp(blendedCoords, 0.01, 0.99);
 
 
-    vec3 SSR = textureLod(albedo_metalness, blendedCoords, 0).rgb
-                * clamp(ReflectionMultiplier, 0.0, 0.9);
+    vec3 SSR = vec3(0);
 
 
     fragment = (1 - shadow_value ) * vec4(Lo + mix(environment_emission_value,
@@ -347,7 +331,10 @@ void main()
     } else {
         bloom = vec4(SSR, 1.0);
     }
-//
-//fragment = vec4(pointLights[6].position, 1);
+//////
+//    fragment = vec4(texture2D(albedo_metalness, coords.xy).rgb,
+//    pow(metalness_value, reflectionSpecularFalloffExponent) *
+//    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
+//    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
 
 }
