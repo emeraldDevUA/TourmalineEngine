@@ -107,15 +107,15 @@ public class Main extends BasicWindow {
         Material land_mat = new Material();
 
 
-        resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/F16/F16_albedo.png");
-        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/F16/F16_normal.png");
+        resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/Eurofighter/Eurofighter_albedo.png");
+        resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/Eurofighter/Eurofighter_normal.png");
         resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
         resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
         resourceLoadScheduler.addResource(metalness,"src/main/resources/3D_Models/F16/F16_metalness.png");
 
 
-        resourceLoadScheduler.addResource(fightingFalcon,"src/main/resources/3D_Models/F16/F16.obj");
-        resourceLoadScheduler.addResource(euroFighter, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
+        resourceLoadScheduler.addResource(euroFighter,"src/main/resources/3D_Models/F16/F16.obj");
+        resourceLoadScheduler.addResource(fightingFalcon, "src/main/resources/3D_Models/Eurofighter/Eurofighter.obj");
         resourceLoadScheduler.addResource(mig29, "src/main/resources/3D_Models/MIG29/MIG29.obj");
 
         resourceLoadScheduler.addResource(land, "src/main/resources/3D_Models/Map/Map.obj");
