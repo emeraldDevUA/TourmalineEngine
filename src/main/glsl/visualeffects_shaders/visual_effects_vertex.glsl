@@ -14,6 +14,9 @@ uniform mat4 model_matrix;
 out vec3 fragPosition;
 out vec3 viewPosition;
 
+
+out vec2 texCoords;
+
 uniform vec3 rocketPos;
 uniform float time;        // Time variable for dynamics
 uniform int effectType;
@@ -39,6 +42,15 @@ void main() {
 
             case 2:
                 processExplosion();
+            break;
+
+            default:
+                     texCoords = uvs;
+                     vec4 worldPosition = model_matrix * vec4(position, 1) ;
+                     fragPosition = worldPosition.xyz;
+
+                    gl_Position  = projection_matrix * view_matrix * worldPosition;
+
             break;
     }
     // Calculate world position and fragment position

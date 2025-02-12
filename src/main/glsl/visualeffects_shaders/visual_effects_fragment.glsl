@@ -4,10 +4,12 @@
 
 in vec3 fragPosition;  // Position of the fragment in world space
 in vec3 viewPosition;  // Camera position in world space
+in vec2 texCoords;
+
 
 layout (location = 1) out vec4 fragColor;    // Output color
 
-
+layout (binding = 4) uniform sampler2D albedo_map;
 
 uniform vec3 rocketPos;
 uniform int effectType;
@@ -35,6 +37,9 @@ void main() {
             processExplosion();
         break;
 
+        default:
+            fragColor = texture(albedo_map, texCoords);
+        break;
     }
 
 }

@@ -1,5 +1,5 @@
 
-
+// 1,0,0,0,1,1,1,1
 struct pointLight{
     vec3 color;
     vec3 position;
@@ -18,7 +18,8 @@ uniform int number_pointLights;
 uniform int number_dirLights;
 
 
+
 layout(std140, binding = 4) uniform LightBlock {
-    directionalLight dirLights[5];
-    pointLight pointLights[50];
-};
+        directionalLight directionalLights[5];
+        pointLight pointLights[50];
+}lightBlock;

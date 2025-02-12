@@ -1,5 +1,4 @@
 #version 460 core
-
 #include <algorithms/blur.glsl>
 
 #define PI 3.1415926
@@ -202,7 +201,7 @@ void main()
     vec3 light_positions[] = {
         vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
         vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
-        pointLights[0].position, pointLights[1].position
+        lightBlock.pointLights[0].position,lightBlock.pointLights[1].position
     };
     vec3 directional_light_colors[] = {
         vec3(2.8, 2.8, 2.8), // White light
@@ -250,9 +249,9 @@ void main()
         float distance = length(light_positions[i] - position_value);
         float attenuation = attenuate_no_cusp(distance, 50,10, 20);
 
-        if(i > 7){
-            light_color= pointLights[0].color* pointLights[0].intensity;
-        }
+//        if(i > 7){
+//            light_color= lightBlock.pointLights[i-8].color * 30;
+//        }
         vec3 radiance = light_color * attenuation;
 
         vec3 F0 = vec3(0.04);
@@ -336,5 +335,6 @@ void main()
 //    pow(metalness_value, reflectionSpecularFalloffExponent) *
 //    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
 //    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
+//fragment = vec4(lightBlock.pointLights[0].color,1);
 
 }

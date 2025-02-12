@@ -3,6 +3,7 @@ package org.tourmaline;
 import Annotations.BasicWindow;
 import Controls.Keyboard;
 import Controls.Mouse;
+import Effects.BoundingBoxEffect;
 import Effects.ExplosionEffect;
 import Effects.JetEffect;
 import Interfaces.InterfaceRenderer;
@@ -31,6 +32,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -60,7 +62,7 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
 public class Main extends BasicWindow {
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
 
         long t1,t2,t3;
         ResourceLoadScheduler resourceLoadScheduler = new ResourceLoadScheduler();
@@ -506,7 +508,11 @@ public class Main extends BasicWindow {
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
+        BoundingBoxEffect BB = new BoundingBoxEffect(visualEffectsShader,
+                new Vector3f(S300.getPosition()), new Vector3f(8,5f,20), S300.getRotQuaternion());
+        BB.compile();
 
+        scene.addEffect(BB);
 
         while (!glfwWindowShouldClose(window_handle)){
             camera.loadViewMatrix();
@@ -521,13 +527,10 @@ public class Main extends BasicWindow {
            shadowPass();
            deferredPass();
 
-
             skyBoxShader.use();
-                glActiveTexture(GL_TEXTURE10);
-                scene.getSkyBox().draw();
+            glActiveTexture(GL_TEXTURE10);
+            scene.getSkyBox().draw();
             skyBoxShader.unbind();
-
-
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 

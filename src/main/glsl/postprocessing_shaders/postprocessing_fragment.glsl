@@ -25,9 +25,9 @@ void main()
     float exposure = 1.0;
 
     vec4 bloomColor = fast_blur(bloom, uv_frag);
-
     uViewportSize = vec2(1, 1);
     vec4 fxaa_color = applyFXAA(color, uv_frag, uViewportSize);
+
 
     //fxaa_color.rgb += bloomColor.rgb;
     if(rgbToGrayScale(bloomColor.rgb) >= 1){
