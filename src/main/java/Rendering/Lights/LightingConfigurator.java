@@ -111,8 +111,8 @@ public class LightingConfigurator {
 
         glBindBufferBase(GL_UNIFORM_BUFFER, Shader.LIGHT_BLOCK, bufferBase);
 
-        shaderProgram.setUniform("number_pointLights", 10);
-        shaderProgram.setUniform("number_dirLights", 2);
+        shaderProgram.setUniform("number_pointLights", boundPoint);
+        shaderProgram.setUniform("number_dirLights", 2+ boundDir);
 
         shaderProgram.unbind();
 
