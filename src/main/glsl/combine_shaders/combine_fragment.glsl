@@ -198,11 +198,7 @@ void main()
 //    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
 //    vec3( -5, -5,  5), vec3( 5, -5,  5), vec3( 5, 5, -5), vec3( -5, 5,  5)}
 //    Real scene lights are not implemented yet so I am using these "built-it" for testing
-    vec3 light_positions[] = {
-        vec3( -5, 500, -5), vec3( 5, 500, -5), vec3( 5, 500, -5), vec3( -5, 500, -5),
-        vec3( -5, 500,  5), vec3( 5, 500,  5), vec3( 5, 500, -5), vec3( -5, 500,  5),
-        lightBlock.pointLights[0].position,lightBlock.pointLights[1].position
-    };
+
     vec3 directional_light_colors[] = {
         vec3(2.8, 2.8, 2.8), // White light
         vec3(0.8, 0.6, 0.4)  // Warm light (slightly orange)
@@ -243,15 +239,15 @@ void main()
 
     for(int i = 0; i < number_pointLights; i++) {
 
-        vec3 L = normalize(light_positions[i] - position_value);
+        vec3 L = normalize( lightBlock.pointLights[i].position - position_value);
         vec3 H = normalize(V + L);
 
-        float distance = length(light_positions[i] - position_value);
+        float distance = length(lightBlock.pointLights[i].position - position_value);
         float attenuation = attenuate_no_cusp(distance, 50,10, 20);
 
-//        if(i > 7){
-//            light_color= lightBlock.pointLights[i-8].color * 30;
-//        }
+
+        light_color = lightBlock.pointLights[i].color * lightBlock.pointLights[i].intensity;
+
         vec3 radiance = light_color * attenuation;
 
         vec3 F0 = vec3(0.04);
@@ -267,7 +263,7 @@ void main()
         vec3 kD = vec3(1.0) - kS;
         kD *= 1.0 - metalness_value;
 
-        float NdotL = max(dot(N, L), 0.0);
+        float NdotL = max(dot(N, L), 0.03);
         Lo += (kD * albedo_value / PI + specular) * radiance * NdotL;
     }
 
@@ -335,6 +331,5 @@ void main()
 //    pow(metalness_value, reflectionSpecularFalloffExponent) *
 //    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
 //    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
-//fragment = vec4(lightBlock.pointLights[0].color,1);
-
+//    fragment = vec4(lightBlock.pointLights[0].intensity);
 }

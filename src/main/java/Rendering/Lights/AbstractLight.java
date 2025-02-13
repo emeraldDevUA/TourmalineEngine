@@ -25,6 +25,6 @@ public abstract class AbstractLight {
     }
 
 
-    public abstract ByteBuffer formLight();
+
 
 }

@@ -33,28 +33,13 @@ public class DirectionalLight extends AbstractLight{
 
 
 
-    public ByteBuffer formLight(){
-        LightBuffer.clear();
 
-        LightBuffer.putFloat(lightColor.x);
-        LightBuffer.putFloat(lightColor.y);
-        LightBuffer.putFloat(lightColor.z);
-
-        LightBuffer.putFloat(lightIntensity);
-        LightBuffer.putFloat(direction.x);
-        LightBuffer.putFloat(direction.y);
-        LightBuffer.putFloat(direction.z);
-        LightBuffer.putFloat(0.0f);
-
-        LightBuffer.flip();
-        return LightBuffer;
-    }
 
     public Float[] getFloatArray(){
         return  new Float[]{
                 lightColor.x, lightColor.y, lightColor.z,
-                lightIntensity,
-                direction.x, direction.y, direction.z, 0f};
+                0f,
+                direction.x, direction.y, direction.z, lightIntensity};
     }
 
 }

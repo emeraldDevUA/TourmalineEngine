@@ -11,6 +11,7 @@ import Interfaces.KeyboardEventHandler;
 import Interfaces.MouseEventHandler;
 import Liquids.LiquidBody;
 import Rendering.Camera;
+import Rendering.Lights.DirectionalLight;
 import Rendering.Lights.LightingConfigurator;
 import Rendering.Lights.PointLight;
 import Rendering.Scene;
@@ -494,17 +495,26 @@ public class Main extends BasicWindow {
 
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
-        pointLight.setLightColor(new Vector3f(1,0,0));
-        pointLight.generatePrimitive();
+        pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();
+
         scene.addLightSources(pointLight);
 
 
 
         PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
-        pointLight2.setLightColor(new Vector3f(0,0,1));
-        pointLight2.generatePrimitive();
+        pointLight2.setLightColor(new Vector3f(0,0,1));  pointLight2.generatePrimitive();
+
         scene.addLightSources(pointLight2);
 
+        PointLight pointLight3 = new PointLight(new Vector3f(90,40,90));
+        pointLight3.setLightColor(new Vector3f(1,1,0));  pointLight3.generatePrimitive();
+
+        scene.addLightSources(pointLight3);
+
+        DirectionalLight directionalLight = new DirectionalLight(new Vector3f(-90,120,2).negate().normalize());
+        directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
+
+        scene.addLightSources(directionalLight);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 

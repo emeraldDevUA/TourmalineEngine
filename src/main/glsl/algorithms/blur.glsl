@@ -41,8 +41,8 @@ vec4 fast_blur(sampler2D color, vec2 uvs) {
     float totalWeight = 0.0;
 
     // Perform a simplified weighted blur using fewer samples
-    for (float x = -radius; x <= radius; x += 2.0) {
-        for (float y = -radius; y <= radius; y += 2.0) {
+    for (float x = -radius; x <= radius; x += 1.0) {
+        for (float y = -radius; y <= radius; y += 1.0) {
             // Compute weight based on distance (Gaussian-like but simplified)
             float weight = exp(-(x * x + y * y) / (2.0 * radius * radius));
 

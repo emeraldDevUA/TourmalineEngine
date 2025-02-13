@@ -44,33 +44,13 @@ public class PointLight extends AbstractLight {
         lightMesh.setPosition(position);
     }
 
-    @Override
-    public ByteBuffer formLight() {
-        LightBuffer.clear();
 
-        // Color (vec3) → Needs padding
-        LightBuffer.putFloat(lightColor.x);
-        LightBuffer.putFloat(lightColor.y);
-        LightBuffer.putFloat(lightColor.z);
-        LightBuffer.putFloat(lightIntensity);
-        // Position (vec3) → Needs padding
-        LightBuffer.putFloat(position.x);
-        LightBuffer.putFloat(position.y);
-        LightBuffer.putFloat(position.z);
-        // Intensity (float) → No extra padding needed
-        LightBuffer.putFloat(0.0f);
-
-        LightBuffer.flip(); // **Important! Ensures OpenGL reads correct data**
-
-
-        return LightBuffer;
-    }
 
     public Float[] getFloatArray(){
         return  new Float[]{
                 lightColor.x, lightColor.y, lightColor.z,
-                lightIntensity,
-                position.x, position.y, position.z, 0f};
+                0f,
+                position.x, position.y, position.z, lightIntensity};
     }
 
     public void generatePrimitive(){
