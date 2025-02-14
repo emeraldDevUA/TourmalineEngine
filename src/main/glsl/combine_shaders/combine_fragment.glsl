@@ -195,19 +195,6 @@ float attenuate_no_cusp(float distance, float radius,
 
 void main()
 {
-//    vec3 light_positions[] = { vec3( -5, -5, -5), vec3( 5, -5, -5), vec3( 5, 5, -5), vec3( -5, 5, -5),
-//    vec3( -5, -5,  5), vec3( 5, -5,  5), vec3( 5, 5, -5), vec3( -5, 5,  5)}
-//    Real scene lights are not implemented yet so I am using these "built-it" for testing
-
-    vec3 directional_light_colors[] = {
-        vec3(2.8, 2.8, 2.8), // White light
-        vec3(0.8, 0.6, 0.4)  // Warm light (slightly orange)
-    };
-
-    vec3 directional_light_directions[] = {
-        normalize(vec3(-1.0, -1.0, -1.0)), // Light coming from top-left diagonal
-        normalize(vec3(0.0, -1.0, 0.0))   // Light coming straight down
-    };
 
     vec3 light_color = vec3(10.0, 10.0, 10.0);
 
@@ -268,11 +255,14 @@ void main()
     }
 
     for (int i = 0; i < number_dirLights; i++) {
-
-        vec3 L = normalize(-directional_light_directions[i]); // Light direction (normalized)
+        // Light direction (normalized)
+        vec3 L = -normalize(
+            (lightBlock.directionalLights[i].direction));
         vec3 H = normalize(V + L);
 
-        vec3 radiance = directional_light_colors[i]; // No attenuation for directional lights
+        vec3 radiance = lightBlock.directionalLights[i].color *
+                        lightBlock.directionalLights[i].intensity;
+        // No attenuation for directional lights
 
         vec3 F0 = vec3(0.04);
         vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
@@ -292,7 +282,7 @@ void main()
     }
 
     vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
-    vec3 viewPos = (vec4(position_value, 1.0)).xyz;
+    vec3 viewPos = (view_matrix*vec4(position_value, 1.0)).xyz;
 
 
     // Reflection vector
@@ -318,8 +308,7 @@ void main()
     vec3 SSR = vec3(0);
 
 
-    fragment = (1 - shadow_value ) * vec4(Lo + mix(environment_emission_value,
-                                                   SSR, metalness_value), 1.0);
+    fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
 
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
@@ -327,9 +316,11 @@ void main()
         bloom = vec4(SSR, 1.0);
     }
 //////
-//    fragment = vec4(texture2D(albedo_metalness, coords.xy).rgb,
-//    pow(metalness_value, reflectionSpecularFalloffExponent) *
-//    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
-//    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
+    vec4 temp = vec4(texture2D(albedo_metalness, coords.xy).rgb,
+    pow(metalness_value, reflectionSpecularFalloffExponent) *
+    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
+    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
+
+
 //    fragment = vec4(lightBlock.pointLights[0].intensity);
 }

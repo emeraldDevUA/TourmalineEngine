@@ -69,7 +69,7 @@ void main()
 
         model_position = model_matrix*vec4(wave_position, 1);
 
-        vs_out.normal    = ( (wave_normal)).xyz;
+        vs_out.normal    = ( (normal_matrix*wave_normal)).xyz;
     }
     else {
 
@@ -80,7 +80,7 @@ void main()
     vec4 shadowCoordinates = shadow_projection_matrix * shadow_view_matrix * model_position;
 
     vs_out.shadow_position = shadowCoordinates.xyz/shadowCoordinates.w;
-    vs_out.bitangent = (model_matrix * vec4(bitangent, 0.0)).xyz;
+    vs_out.bitangent  = normal_matrix * bitangent;
     vs_out.position  = (model_position).xyz;
 
 
