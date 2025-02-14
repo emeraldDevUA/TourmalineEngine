@@ -453,6 +453,8 @@ public class Main extends BasicWindow {
 
         scene.addDrawItem(new MeshTree(new ArrayList<>(), mig29, "name"));
         collisionObject.setEnableGravity(false);
+        plane.setSurfaceArea(50);
+        plane.setEnableAirResistance(true);
         while (!glfwWindowShouldClose(window_handle)){;
 
 
@@ -471,7 +473,7 @@ public class Main extends BasicWindow {
             float thrust = 135000f;
             //plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
 
-            plane.applyForceAtPoint(new Vector3f(-thrust*0.01f,0,0), new Vector3f(0));
+            //plane.applyForceAtPoint(new Vector3f(-thrust*0.01f,0,0), new Vector3f(0));
 
 
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
