@@ -1,14 +1,19 @@
 package Effects;
 
 import ResourceImpl.Mesh;
+import org.joml.Vector3f;
 
 import java.io.IOException;
 
 public class ExplosionEffect  extends BaseEffect{
     private Mesh explosionMesh;
 
-
-
+    @Override
+    public void setMainPosition(Vector3f position){
+        super.setMainPosition(position);
+        if(explosionMesh != null)
+            explosionMesh.setPosition(position);
+    }
 
     @Override
     public void draw(){

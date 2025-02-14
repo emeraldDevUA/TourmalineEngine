@@ -10,10 +10,10 @@ import org.joml.Vector3f;
 @Setter
 
 public abstract class BaseEffect implements Drawable {
+    @Setter
     private Vector3f mainPosition;
     private Quaternionf mainRotation;
     private Vector3f scaleVector;
-
 
 
     @Override

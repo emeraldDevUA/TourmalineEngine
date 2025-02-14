@@ -282,7 +282,7 @@ void main()
     }
 
     vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
-    vec3 viewPos = (view_matrix*vec4(position_value, 1.0)).xyz;
+    vec3 viewPos = (view_matrix * texture2D(position, uv_frag)).xyz;
 
 
     // Reflection vector
@@ -316,11 +316,13 @@ void main()
         bloom = vec4(SSR, 1.0);
     }
 //////
-    vec4 temp = vec4(texture2D(albedo_metalness, coords.xy).rgb,
-    pow(metalness_value, reflectionSpecularFalloffExponent) *
-    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
-    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
-
+//    vec4 temp = vec4(texture2D(albedo_metalness, coords.xy).rgb,
+//    pow(metalness_value, reflectionSpecularFalloffExponent) *
+//    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
+//    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
+//    if(length(temp.xyz-albedo_value) >= 0.2){
+//        bloom = vec4(temp);
+//    }
 
 //    fragment = vec4(lightBlock.pointLights[0].intensity);
 }

@@ -476,7 +476,7 @@ public class Main extends BasicWindow {
 
         ExplosionEffect explosionEffect = new ExplosionEffect();
 
-        explosionEffect.setMainPosition(new Vector3f(200));
+        explosionEffect.setMainPosition(S300.getPosition());
         explosionEffect.compile();
 
         explosionEffect.getMesh().setShader(visualEffectsShader);
@@ -485,9 +485,9 @@ public class Main extends BasicWindow {
         jetStream.getMesh().setShader(visualEffectsShader);
         scene.addEffect(jetStream);
 
-        S300.getNodeValue().setPosition(new Vector3f(150,-49,-280));
+        S300.setPosition(new Vector3f(150,-49,-280));
         S300.getNodeValue().setScale(new Vector3f(2,2,2));
-
+        explosionEffect.setMainPosition(S300.getPosition());
         scene.addDrawItem(S300);
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
@@ -511,9 +511,10 @@ public class Main extends BasicWindow {
 
         scene.addLightSources(pointLight3);
 
-        DirectionalLight directionalLight = new DirectionalLight(new Vector3f(-90,120,2).negate().normalize());
+        DirectionalLight directionalLight = new DirectionalLight(
+                new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
-
+        directionalLight.setLightIntensity(15);
         scene.addLightSources(directionalLight);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
