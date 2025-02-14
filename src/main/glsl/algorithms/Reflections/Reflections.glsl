@@ -1,8 +1,8 @@
 
 const float rayStep = 0.25;
 const float minRayStep = 0.1;
-const float maxSteps = 20;
-const float searchDist = 0.6;
+const float maxSteps = 10;
+const float searchDist = 1;
 const float searchDistInv = 1/searchDist;
 const int numBinarySearchSteps = 5;
 const float maxDDepth = 1.0;
