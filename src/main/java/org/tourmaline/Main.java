@@ -426,7 +426,7 @@ public class Main extends BasicWindow {
 
 
 
-        RigidBody collisionObject = new RigidBody(inertia, mig29.getPosition(), 10000);
+        RigidBody collisionObject = new RigidBody(new Matrix3f(inertia), mig29.getPosition(), 10000);
 
 
         collisionObject.setCollisionPrimitive(
