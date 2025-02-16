@@ -107,8 +107,5 @@ public class AutoloaderTest extends BasicWindow {
     }
 
 
-    @Override
-    public void close() throws IOException {
 
-    }
 }

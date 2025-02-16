@@ -169,18 +169,11 @@ public class Main extends BasicWindow {
         glDepthFunc(GL_LEQUAL);
         glEnable(GL_CULL_FACE);
 
-        SkyBox skyBox = new SkyBox();
-
-        CubeMap cm =
-                new CubeMap("src/main/resources/skybox/skybox", ".hdr", false);
-        CubeMap radiance_cm =
-                new CubeMap("src/main/resources/skybox/radiance", ".hdr", false);
-        CubeMap irradiance_cm =
-                new CubeMap("src/main/resources/skybox/irradiance", ".hdr", false);
-
-        skyBox.setCubeMap(cm);
-        skyBox.setRadiance(radiance_cm);
-        skyBox.setIrradiance(irradiance_cm);
+        SkyBox skyBox = new SkyBox(
+                new CubeMap("src/main/resources/skybox/skybox", ".hdr", false),
+                new CubeMap("src/main/resources/skybox/radiance", ".hdr", false),
+                new CubeMap("src/main/resources/skybox/irradiance", ".hdr", false)
+        );
 
         skyBox.compile();
 
@@ -561,10 +554,6 @@ public class Main extends BasicWindow {
 
     }
 
-    @Override
-    public void close() {
-        glfwDestroyWindow(window_handle);
-    }
 
 
 

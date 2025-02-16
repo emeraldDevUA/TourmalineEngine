@@ -678,4 +678,14 @@ public abstract class BasicWindow implements Closeable {
         // regenerate FBs
     }
 
+    @Override
+    public void close() {
+        wipeDeferredFrameBuffer();
+        wipeShadowFramebuffer();
+        wipeDepthBuffer();
+        wipeFramebuffer();
+        wipeRenderQuad();
+        glfwDestroyWindow(window_handle);
+    }
+
 }
