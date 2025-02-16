@@ -508,7 +508,7 @@ public class Main extends BasicWindow {
             glfwSwapBuffers(window_handle);
             plane.getAngularVelocity().mul(0.99f);
 
-            plane.getAcceleration().mul(0.93f);
+//            plane.getAcceleration().mul(0.93f);
             collisionObject.getVelocity().mul(0.99f);
             plane.update(dt);
             collisionObject.update(dt);
