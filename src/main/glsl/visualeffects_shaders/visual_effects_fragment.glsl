@@ -6,7 +6,7 @@ in vec3 fragPosition;  // Position of the fragment in world space
 in vec3 viewPosition;  // Camera position in world space
 in vec2 texCoords;
 
-
+layout (location = 0) out vec4 fragColorMain;
 layout (location = 1) out vec4 fragColor;    // Output color
 
 layout (binding = 4) uniform sampler2D albedo_map;

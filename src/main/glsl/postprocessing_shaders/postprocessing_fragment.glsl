@@ -38,7 +38,7 @@ void main()
     }
 
 
-    fragment = vec4(pow(fxaa_color.rgb * exposure, vec3(1.0 / gamma)), bloomColor.a);
+    fragment = vec4(pow(fxaa_color.rgb * exposure, vec3(1.0 / gamma)), fxaa_color.a);
     //fragment = bloomColor;
 
 }

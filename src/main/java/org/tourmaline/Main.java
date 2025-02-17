@@ -536,7 +536,7 @@ public class Main extends BasicWindow {
             scene.getSkyBox().draw();
             skyBoxShader.unbind();
 
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glDisable(GL_DEPTH_TEST);
                 postprocessingPass();

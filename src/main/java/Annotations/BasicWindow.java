@@ -276,7 +276,6 @@ public abstract class BasicWindow implements Closeable {
     }
 
     protected static void postprocessingPass() {
-        glDisable(GL_DEPTH_TEST);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -571,6 +570,12 @@ public abstract class BasicWindow implements Closeable {
 
     }
 
+    protected static void skyBoxPass(){
+        skyBoxShader.use();
+        glActiveTexture(GL_TEXTURE10);
+        scene.getSkyBox().draw();
+        skyBoxShader.unbind();
+    }
     private static void generateRenderQuad() {
         float[] vertices = {
                 -1.0f, 1.0f,
