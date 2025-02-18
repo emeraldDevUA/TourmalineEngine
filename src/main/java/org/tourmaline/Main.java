@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.Semaphore;
 
 import static org.joml.Math.*;
 
@@ -68,7 +69,9 @@ public class Main extends BasicWindow {
     static float aileron =0;
     static float elevator = 0;
     static float rudder = 0f;
-    static float dt = 0.01f;
+    static float dt = 5f;
+
+    static Semaphore semaphore = new Semaphore(10, true);
     public static void main(String[] args){
 
         long t1,t2,t3;
@@ -418,10 +421,6 @@ public class Main extends BasicWindow {
         scene.setActiveProgram(deferredShader);
 
 
-        if(glGetUniformBlockIndex(deferredShader.getProgram(), "material_block") == GL_INVALID_INDEX){
-            throw new RuntimeException("Fuck Life");
-        }
-
         measureTime();
 
 
@@ -436,7 +435,7 @@ public class Main extends BasicWindow {
 
         List<Float> frameTimes = new ArrayList<>();
 
-        plane.setPosition(new Vector3f(-400,0,0));
+        plane.setPosition(new Vector3f(-500,0,0));
         plane.setVelocity(new Vector3f(10,0,0));
 
 
@@ -455,8 +454,11 @@ public class Main extends BasicWindow {
         collisionObject.setEnableGravity(false);
         plane.setSurfaceArea(50);
         plane.setEnableAirResistance(true);
-        while (!glfwWindowShouldClose(window_handle)){;
 
+        List<Float> frameTime = new ArrayList<>();
+
+        while (!glfwWindowShouldClose(window_handle)){
+            double time1 = glfwGetTime();
 
            fightingFalcon.getPosition().set(plane.getPosition());
 
@@ -474,6 +476,7 @@ public class Main extends BasicWindow {
             //plane.applyForceAtPoint(new Vector3f(thrust*0.01f,0,0), new Vector3f(0));
 
             //plane.applyForceAtPoint(new Vector3f(-thrust*0.01f,0,0), new Vector3f(0));
+
 
 
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
@@ -510,8 +513,7 @@ public class Main extends BasicWindow {
 
 //            plane.getAcceleration().mul(0.93f);
             collisionObject.getVelocity().mul(0.99f);
-            plane.update(dt);
-            collisionObject.update(dt);
+
             fightingFalcon.setUpdated(true);
 
             fightingFalcon.getRotQuaternion().set(plane.getOrientation());
@@ -526,14 +528,58 @@ public class Main extends BasicWindow {
             camera.loadViewMatrix();
             camera.setViewProjectionMatrix(skyBoxShader);
             measureTime();
+
+
+            double time2 = glfwGetTime();
+
+            frameTime.add((float) (time2-time1));
             frameTimes.add(getCurrentFPS());
+
+            if(frameTime.size() >= 600){
+                frameTime.removeFirst();
+                asyncUpdate(plane, frameTime);
+                asyncUpdate(collisionObject, frameTime);
+            }
+            else{
+                plane.update(0.01f);
+                collisionObject.update(0.01f);
+            }
+
+            if(frameTimes.size() >= 100) {
+                new Thread(() -> {
+                    synchronized (frameTimes) {
+                        writeCsv("data.csv", frameTimes);
+                        frameTimes.clear();
+                    }
+                }).start();
+            }
         }
 
-        writeCsv("data.csv", frameTimes);
+
         physicsProcessor.setRunning(false);
     }
+
+    private static void asyncUpdate(RigidBody plane, List<Float> frameTime) {
+        new Thread(() -> {
+            try {
+                semaphore.acquire();
+                plane.update(dt * computeAverage(frameTime));
+                semaphore.release();
+            }catch (InterruptedException ignored) {}
+        }
+        ).start();
+    }
+
+    private static float computeAverage(List<Float> frameTime) {
+        float sum = 0;
+        for(Float time: frameTime){
+            sum+=time;
+        }
+        return sum/frameTime.size();
+    }
+
     public static void writeCsv(String fileName, List<Float> frameTimes) {
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName, true))) {
             for (int i = 0; i < frameTimes.size(); i++) {
                 writer.write(frameTimes.get(i).toString());
                 if (i < frameTimes.size() - 1) {
