@@ -263,94 +263,92 @@ public class Main extends BasicWindow {
         fightingFalcon.getPosition().set(plane.getPosition().mul(scale, new Vector3f()));
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
-            Vector3f factor = new Vector3f(2.4f, 6f, 4.0f);
-            if (state == GLFW_PRESS) {
+            synchronized (plane) {
+                Vector3f factor = new Vector3f(3.4f, 6f, 6.0f);
+                if (state == GLFW_PRESS) {
 
-                Quaternionf planeOrientation = plane.getOrientation();
-                if(key == GLFW_KEY_W){
-                    plane.applyForceAtPoint(
-                            planeOrientation.transform((new Vector3f(0,factor.x*9000,0))),
-                            planeOrientation.transform(new Vector3f(5,0,0)));
+                    Quaternionf planeOrientation = plane.getOrientation();
+                    if (key == GLFW_KEY_W) {
+                        plane.applyForceAtPoint(
+                                planeOrientation.transform((new Vector3f(0, factor.x * 9000, 0))),
+                                planeOrientation.transform(new Vector3f(5, 0, 0)));
 
-                    //aileron  = move(aileron, factor.x, dt);;
-                    //   aileron =320f;
-                }else if(key == GLFW_KEY_S) {
-                    plane.applyForceAtPoint(    planeOrientation.transform(
-                            new Vector3f(0,-factor.x*9000,0)),
-                            planeOrientation.transform(new Vector3f(5,0,0)));
+                        //aileron  = move(aileron, factor.x, dt);;
+                        //   aileron =320f;
+                    } else if (key == GLFW_KEY_S) {
+                        plane.applyForceAtPoint(planeOrientation.transform(
+                                        new Vector3f(0, -factor.x * 9000, 0)),
+                                planeOrientation.transform(new Vector3f(5, 0, 0)));
 
-                    //aileron  = move(aileron, -factor.x, dt);;
-                    //     aileron =- 320f;
+                        //aileron  = move(aileron, -factor.x, dt);;
+                        //     aileron =- 320f;
+                    } else {
+
+
+                    }
+
+
+                    if (key == GLFW_KEY_A) {
+                        plane.applyForceAtPoint(planeOrientation.transform(
+                                        new Vector3f(0, factor.y * 9000, 0)),
+                                planeOrientation.transform(new Vector3f(wing_offset, 0, 2.7f)));
+
+                        rudder = move(rudder, factor.y, dt);
+
+                    } else if (key == GLFW_KEY_D) {
+
+                        plane.applyForceAtPoint(
+                                planeOrientation.transform(new Vector3f(0, factor.y * 9000, 0)),
+                                planeOrientation.transform(
+                                        new Vector3f(wing_offset, 0, -2.7f)));
+
+                        rudder = move(rudder, -factor.y, dt);
+
+                    }
+                    if (key == GLFW_KEY_C) {
+
+                        plane.applyForceAtPoint(new Vector3f(0, 0, factor.z * 9000),
+                                new Vector3f(tail_offset, 0, 0f));
+                        elevator = move(rudder, factor.z, dt);
+
+                    } else if (key == GLFW_KEY_V) {
+                        plane.applyForceAtPoint(new Vector3f(0, 0, -factor.z * 9000),
+                                new Vector3f(tail_offset, 0, 0f));
+                    } else {
+                        elevator = center(rudder, factor.z, dt);
+                    }
+
+                    if (key == GLFW_KEY_M) {
+                        float thrust = 135000f;
+                        plane.applyForceAtPoint(new Vector3f(thrust, 0, 0), new Vector3f(0));
+
+                        Vector3f dir = fightingFalcon.getRotQuaternion()
+                                .transform(new Vector3f(0, 1, 0));
+                        dir.normalize();
+                        float num = dir.dot(new Vector3f(0, 1, 0));
+                        num /= abs(num);
+                        plane.applyForceAtPoint(new Vector3f(0, num * thrust / 2, 0), new Vector3f(0));
+
+                    } else if (key == GLFW_KEY_N) {
+                        float thrust = 1000;
+                        plane.applyForceAtPoint(new Vector3f(-thrust, 0, 0), new Vector3f(0));
+
+                    }
+
+
+                    Vector3f velocity = new Vector3f(plane.getVelocity()).normalize();
+
+                    Vector3f rotatedVec = planeOrientation
+                            .transform(new Vector3f(1, 0, 0)).normalize();
+                    // Assuming (1, 0, 0) is the default direction
+                    float interpolationFactor = 0.1f;
+                    // Adjust this for how fast you want the interpolation
+                    Vector3f interpolatedDir = velocity
+                            .lerp(rotatedVec, interpolationFactor).normalize();
+                    plane.setVelocity(interpolatedDir.mul(plane.getVelocity().length()));
+
+
                 }
-                else{
-
-
-
-                }
-
-
-                if(key == GLFW_KEY_A){
-                    plane.applyForceAtPoint( planeOrientation.transform(
-                            new Vector3f(0, factor.y*9000 ,0)),
-                            planeOrientation.transform(new Vector3f(wing_offset,0,2.7f)));
-
-                    rudder  = move(rudder, factor.y, dt);
-
-                }else if(key == GLFW_KEY_D) {
-
-                    plane.applyForceAtPoint(
-                            planeOrientation.transform(new Vector3f(0,  factor.y*9000,0)),
-                            planeOrientation.transform(
-                                    new Vector3f(wing_offset,0,-2.7f)));
-
-                    rudder  = move(rudder, -factor.y, dt);
-
-                }
-                if(key == GLFW_KEY_C){
-
-                    plane.applyForceAtPoint(new Vector3f(0, 0,factor.z*9000),
-                            new Vector3f(tail_offset,0,0f));
-                    elevator = move(rudder, factor.z, dt);
-
-                }else if(key == GLFW_KEY_V) {
-                    plane.applyForceAtPoint(new Vector3f(0, 0,-factor.z*9000),
-                            new Vector3f(tail_offset,0,0f));
-                }
-
-                else{
-                   elevator = center(rudder, factor.z, dt);
-                }
-
-                if(key == GLFW_KEY_M) {
-                    float thrust = 135000f;
-                    plane.applyForceAtPoint(new Vector3f(thrust,0,0), new Vector3f(0));
-
-                    Vector3f dir = fightingFalcon.getRotQuaternion()
-                            .transform(new Vector3f(0,1,0));
-                    dir.normalize();
-                    float num = dir.dot(new Vector3f(0,1,0));
-                    num/=abs(num);
-                    plane.applyForceAtPoint(new Vector3f(0,num*thrust/2,0), new Vector3f(0));
-
-            }   else if(key == GLFW_KEY_N) {
-                    float thrust = 1000;
-                    plane.applyForceAtPoint(new Vector3f(-thrust,0,0), new Vector3f(0));
-
-                }
-
-
-                Vector3f velocity = new Vector3f(plane.getVelocity()).normalize();
-                
-                Vector3f rotatedVec = planeOrientation
-                        .transform(new Vector3f(1, 0, 0)).normalize();
-                // Assuming (1, 0, 0) is the default direction
-                float interpolationFactor = 0.1f;
-                // Adjust this for how fast you want the interpolation
-                Vector3f interpolatedDir = velocity
-                        .lerp(rotatedVec, interpolationFactor).normalize();
-                plane.setVelocity(interpolatedDir.mul(plane.getVelocity().length()));
-
-
             }
         };
 
@@ -560,14 +558,22 @@ public class Main extends BasicWindow {
     }
 
     private static void asyncUpdate(RigidBody plane, List<Float> frameTime) {
-        new Thread(() -> {
+       Thread thread = new Thread(() -> {
             try {
                 semaphore.acquire();
                 plane.update(dt * computeAverage(frameTime));
                 semaphore.release();
             }catch (InterruptedException ignored) {}
         }
-        ).start();
+        );
+
+       thread.setPriority(Thread.MAX_PRIORITY);
+       thread.start();
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static float computeAverage(List<Float> frameTime) {
