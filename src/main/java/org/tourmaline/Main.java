@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Semaphore;
 
 import static org.joml.Math.*;
@@ -64,7 +65,7 @@ import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
 public class Main extends BasicWindow {
-
+    private static Quaternionf externalRotation = new Quaternionf();
     static float scale = 1f/10f;
     static float aileron =0;
     static float elevator = 0;
@@ -72,6 +73,7 @@ public class Main extends BasicWindow {
     static float dt = 5f;
 
     static Semaphore semaphore = new Semaphore(10, true);
+
     public static void main(String[] args){
 
         long t1,t2,t3;
@@ -264,7 +266,7 @@ public class Main extends BasicWindow {
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             synchronized (plane) {
-                Vector3f factor = new Vector3f(3.4f, 6f, 6.0f);
+                Vector3f factor = new Vector3f(2.8f, 3.5f, 4.0f);
                 if (state == GLFW_PRESS) {
 
                     Quaternionf planeOrientation = plane.getOrientation();
@@ -353,32 +355,59 @@ public class Main extends BasicWindow {
         };
 
         MouseEventHandler mouse_handler = new MouseEventHandler() {
+            boolean leftBtn = false;
             @Override
             public void processMouseEvent(int key, int action) {
-//                if(action == GLFW_PRESS){
-//                    if(key == GLFW_MOUSE_BUTTON_LEFT){
-//                        fightingFalcon.getRotQuaternion().x = 0;
-//                        fightingFalcon.getRotQuaternion().y = 0;
-//                        fightingFalcon.getRotQuaternion().z = 0;
-//                        fightingFalcon.getRotQuaternion().w = 1;
-//                        //fightingFalcon.setUpdated(true);
-//
-//                        camera.getQuaternionf().x = 0;
-//                        camera.getQuaternionf().y = 0;
-//                        camera.getQuaternionf().z = 0;
-//                        camera.getQuaternionf().w = 1;
-//
-//                        //camera.setPosition(fightingFalcon.getRotQuaternion(), new Vector3f(-3,1,0));
-//                        camera.loadViewMatrix();
-//                    }
-//                }
+                if(action == GLFW_PRESS) {
+
+                    if(key == GLFW_MOUSE_BUTTON_LEFT) {
+                        leftBtn = true;
+                    }
+                }
+                if(action == GLFW_RELEASE) {
+
+                    if(key == GLFW_MOUSE_BUTTON_LEFT) {
+                        leftBtn = false;
+                    }
+                }
+
             }
+            private float lastMouseX = -1, lastMouseY = -1;
+            // Stores mouse-induced rotation
+
             @Override
             public void processMouseMovement(double X, double Y) {
-//                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
                 ImGuiIO io = ImGui.getIO();
                 io.setMousePos((float) X, (float) Y);
+
+                if (leftBtn) {
+                    if (lastMouseX < 0 || lastMouseY < 0) { // First frame initialization
+                        lastMouseX = (float) X;
+                        lastMouseY = (float) Y;
+                        return;
+                    }
+
+                    // Calculate mouse delta
+                    float dx = (float) X - lastMouseX;
+                    float dy = (float) Y - lastMouseY;
+                    lastMouseX = (float) X;
+                    lastMouseY = (float) Y;
+
+                    float sensitivity = 0.002f; // Adjust for smoother or faster rotation
+
+                    // Convert mouse movement to rotation quaternions
+                    Quaternionf pitch = new Quaternionf().rotationX(-dy * sensitivity);
+                    Quaternionf yaw = new Quaternionf().rotationY(-dx * sensitivity);
+
+                    // Combine rotations (yaw first, then pitch)
+                    externalRotation.mul(yaw.mul(pitch));
+                }
+                else{
+                    externalRotation.slerp(new Quaternionf(), 0.01f);
+
+                }
             }
+
         };
 
 
@@ -455,6 +484,7 @@ public class Main extends BasicWindow {
 
         List<Float> frameTime = new ArrayList<>();
 
+
         while (!glfwWindowShouldClose(window_handle)){
             double time1 = glfwGetTime();
 
@@ -475,14 +505,27 @@ public class Main extends BasicWindow {
 
             //plane.applyForceAtPoint(new Vector3f(-thrust*0.01f,0,0), new Vector3f(0));
 
+            synchronized (fightingFalcon) {
+
+                Quaternionf aircraftRotation = new Quaternionf(fightingFalcon.getRotQuaternion());
+
+                aircraftRotation.mul(externalRotation);
 
 
+                float speed = plane.getVelocity().length();
+                camera.setFocus(fightingFalcon.getPosition());
+                camera.setPosition(new Vector3f(fightingFalcon.getPosition()).add((new Vector3f(-3, 1, 0).mul(9f/10f))
+                        .add(new Vector3f(-3, 1, 0).normalize().mul(speed/50))
+                                .rotate(aircraftRotation), new Vector3f()));
+                camera.loadViewMatrix();
+                camera.setViewProjectionMatrix(skyBoxShader);
+            }
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
                 shadowPass();
 
-           camera.setViewProjectionMatrix(deferredShader);
+           //camera.setViewProjectionMatrix(deferredShader);
 
                 deferredPass();
 
@@ -518,13 +561,7 @@ public class Main extends BasicWindow {
             mig29.getRotQuaternion().set(collisionObject.getOrientation());
 
 
-            camera.setFocus(fightingFalcon.getPosition());
-            camera.setPosition(fightingFalcon.getPosition()
-                    .add(new Vector3f(-3,1,0)
-                            .rotate(fightingFalcon.getRotQuaternion()), new Vector3f()));
-            //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
-            camera.loadViewMatrix();
-            camera.setViewProjectionMatrix(skyBoxShader);
+
             measureTime();
 
 
@@ -535,45 +572,39 @@ public class Main extends BasicWindow {
 
             if(frameTime.size() >= 600){
                 frameTime.removeFirst();
-                asyncUpdate(plane, frameTime);
-                asyncUpdate(collisionObject, frameTime);
+                asyncUpdate(plane, frameTime, dt);
+                asyncUpdate(collisionObject, frameTime, dt);
             }
             else{
                 plane.update(0.01f);
                 collisionObject.update(0.01f);
             }
 
-            if(frameTimes.size() >= 100) {
-                new Thread(() -> {
-                    synchronized (frameTimes) {
+            if(frameTimes.size() >= 1000) {
+                executor.submit(() -> {
                         writeCsv("data.csv", frameTimes);
                         frameTimes.clear();
-                    }
-                }).start();
+
+                });
             }
         }
 
 
         physicsProcessor.setRunning(false);
+
     }
 
-    private static void asyncUpdate(RigidBody plane, List<Float> frameTime) {
-       Thread thread = new Thread(() -> {
-            try {
-                semaphore.acquire();
-                plane.update(dt * computeAverage(frameTime));
-                semaphore.release();
-            }catch (InterruptedException ignored) {}
-        }
-        );
+    private static final ForkJoinPool executor = new ForkJoinPool(Runtime.getRuntime().availableProcessors());
 
-       thread.setPriority(Thread.MAX_PRIORITY);
-       thread.start();
-        try {
-            thread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public static void asyncUpdate(RigidBody plane, List<Float> frameTime, float dt) {
+
+        List<Float> finalFtime = new ArrayList<>(frameTime);
+        executor.submit(() -> {
+                synchronized (plane) {
+                    plane.update(dt * computeAverage(finalFtime));
+                    finalFtime.clear();
+                }
+        });
     }
 
     private static float computeAverage(List<Float> frameTime) {

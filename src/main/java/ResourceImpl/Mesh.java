@@ -355,7 +355,7 @@ public class Mesh implements Loadable, Drawable, Closeable {
     }
 
     @Override
-    public void draw() {
+    public synchronized void draw() {
 
         if(updated) {
 
