@@ -30,6 +30,7 @@ import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
 
 import org.tourmaline.Processing.PhysicsProcessor;
+import org.tourmaline.RigidBody.DampingFunctions;
 import org.tourmaline.RigidBody.RigidBody;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -43,22 +44,16 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Semaphore;
 
+
 import static org.joml.Math.*;
-
 import static org.lwjgl.glfw.GLFW.*;
-
-
-import static org.lwjgl.opengl.ARBUniformBufferObject.GL_INVALID_INDEX;
-import static org.lwjgl.opengl.ARBUniformBufferObject.glGetUniformBlockIndex;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
-import static org.tourmaline.PlanePhysics.Airfoil.Airfoil.arrayToList;
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
@@ -452,7 +447,8 @@ public class Main extends BasicWindow {
 
 
 
-        RigidBody collisionObject = new RigidBody(new Matrix3f(inertia), mig29.getPosition(), 10000);
+        RigidBody collisionObject = new RigidBody(new Matrix3f(inertia), mig29.getPosition(),
+                10000);
 
 
         collisionObject.setCollisionPrimitive(
@@ -469,7 +465,7 @@ public class Main extends BasicWindow {
         plane.setCollisionPrimitive(new BoundingBox(plane.getPosition(),
                 new Vector3f(10,10,10), plane.getOrientation()));
 
-        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>(), 0.005f);
+        PhysicsProcessor physicsProcessor = new PhysicsProcessor(new ArrayList<>(), 0.05f);
         physicsProcessor.addRigidBody(plane);
         physicsProcessor.addRigidBody(collisionObject);
         physicsProcessor.start();
@@ -484,6 +480,39 @@ public class Main extends BasicWindow {
 
         List<Float> frameTime = new ArrayList<>();
 
+        collisionObject.setDampingFunctions(new DampingFunctions() {
+            @Override
+            public float getAngularVelocityDamping(float v) {
+                return 0.99f;
+            }
+
+            @Override
+            public float getVelocityDamping(float v) {
+                return 1;
+            }
+
+            @Override
+            public float getAccelerationDamping(float v) {
+                return 1;
+            }
+        });
+
+        plane.setDampingFunctions(new DampingFunctions() {
+            @Override
+            public float getAngularVelocityDamping(float v) {
+                return 0.99f;
+            }
+
+            @Override
+            public float getVelocityDamping(float v) {
+                return 1;
+            }
+
+            @Override
+            public float getAccelerationDamping(float v) {
+                return 1;
+            }
+        });
 
         while (!glfwWindowShouldClose(window_handle)){
             double time1 = glfwGetTime();
@@ -494,7 +523,7 @@ public class Main extends BasicWindow {
            dir.normalize();
 
            float num = dir.dot(new Vector3f(0,1,0));
-           num/=abs(num);
+           num /= abs(num);
 
             plane.applyForceAtPoint(
                    new Vector3f(0,0.1f*plane.getMass() * 9.8f* num,0),new Vector3f(0));
@@ -508,9 +537,7 @@ public class Main extends BasicWindow {
             synchronized (fightingFalcon) {
 
                 Quaternionf aircraftRotation = new Quaternionf(fightingFalcon.getRotQuaternion());
-
                 aircraftRotation.mul(externalRotation);
-
 
                 float speed = plane.getVelocity().length();
                 camera.setFocus(fightingFalcon.getPosition());
@@ -520,13 +547,11 @@ public class Main extends BasicWindow {
                 camera.loadViewMatrix();
                 camera.setViewProjectionMatrix(skyBoxShader);
             }
+
            glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
            glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 
                 shadowPass();
-
-           //camera.setViewProjectionMatrix(deferredShader);
-
                 deferredPass();
 
 
@@ -550,10 +575,7 @@ public class Main extends BasicWindow {
 
             glfwPollEvents();
             glfwSwapBuffers(window_handle);
-            plane.getAngularVelocity().mul(0.99f);
 
-//            plane.getAcceleration().mul(0.93f);
-            collisionObject.getVelocity().mul(0.99f);
 
             fightingFalcon.setUpdated(true);
 

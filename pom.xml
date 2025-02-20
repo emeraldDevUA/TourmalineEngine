@@ -22,13 +22,13 @@
     <dependencies>
 
 
-        <dependency>
-            <groupId>org.tourmaline</groupId>
-            <artifactId>QuartzPhysics</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/QuartzPhysics.jar</systemPath>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.tourmaline</groupId>-->
+<!--            <artifactId>QuartzPhysics</artifactId>-->
+<!--            <version>1.0-SNAPSHOT</version>-->
+<!--            <scope>system</scope>-->
+<!--            <systemPath>${project.basedir}/QuartzPhysics.jar</systemPath>-->
+<!--        </dependency>-->
 
         <!-- https://mvnrepository.com/artifact/org.joml/joml -->
         <dependency>
@@ -90,6 +90,12 @@
             <groupId>com.github.oshi</groupId>
             <artifactId>oshi-core</artifactId>
             <version>6.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.tourmaline</groupId>
+            <artifactId>QuartzPhysics</artifactId>
+            <version>0.0.1</version>
         </dependency>
     </dependencies>
     <build>
