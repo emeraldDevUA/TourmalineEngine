@@ -25,8 +25,6 @@ import org.joml.Vector3f;
 
 import org.lwjgl.BufferUtils;
 import org.tourmaline.Collision.BoundingBox;
-import org.tourmaline.PlanePhysics.Airfoil.Airfoil;
-import org.tourmaline.PlanePhysics.Airfoil.Constants;
 import org.tourmaline.PlanePhysics.Engine;
 
 import org.tourmaline.Processing.PhysicsProcessor;
@@ -60,14 +58,12 @@ import static org.lwjgl.opengl.GL30.glBindFramebuffer;
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
 public class Main extends BasicWindow {
-    private static Quaternionf externalRotation = new Quaternionf();
+    private static final Quaternionf externalRotation = new Quaternionf();
     static float scale = 1f/10f;
     static float aileron =0;
     static float elevator = 0;
     static float rudder = 0f;
     static float dt = 5f;
-
-    static Semaphore semaphore = new Semaphore(10, true);
 
     public static void main(String[] args){
 
