@@ -341,7 +341,10 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         try {
             Mesh clone = (Mesh) super.clone();
             clone.setPosition(new Vector3f(clone.getPosition()));
-
+            clone.setScale(new Vector3f(scale));
+            clone.setShadowScale(new Vector3f(shadowScale));
+            clone.setRotQuaternion(this.getRotQuaternion());
+            clone.setMaterial(clone.getMaterial());
             return clone;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

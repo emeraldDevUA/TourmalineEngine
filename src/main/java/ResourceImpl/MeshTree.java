@@ -5,17 +5,18 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-public class MeshTree extends TreeNode<Mesh> {
+public class MeshTree extends TreeNode<Mesh> implements Cloneable {
     public MeshTree(List<TreeNode<Mesh>> childNodes, Mesh nodeValue, String nodeName) {
         super(childNodes, nodeValue, nodeName);
     }
 
-     public void forwardTransform(){
+    public void forwardTransform(){
         MeshTree currentMesh = this;
 
          traverse(mesh->{
@@ -80,4 +81,15 @@ public class MeshTree extends TreeNode<Mesh> {
 
         getNodeValue().setUpdated(updated);
     }
+
+    @Override
+    public MeshTree clone() {
+        MeshTree clonedNode = new MeshTree(new ArrayList<>(),
+                getNodeValue() != null ? getNodeValue().clone() : null, STR."\{getNodeName()}cloned");
+        for (TreeNode<Mesh> child : this.getChildNodes()) {
+            clonedNode.getChildNodes().add(((MeshTree) child).clone());  // Recursively clone children
+        }
+        return clonedNode;
+    }
+
 }
