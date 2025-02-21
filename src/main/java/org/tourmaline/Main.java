@@ -616,11 +616,11 @@ public class Main extends BasicWindow {
 
     public static void asyncUpdate(RigidBody plane, List<Float> frameTime, float dt) {
 
-        List<Float> finalFtime = new ArrayList<>(frameTime);
+        List<Float> finalFrameTime = new ArrayList<>(frameTime);
         executor.submit(() -> {
                 synchronized (plane) {
-                    plane.update(dt * computeAverage(finalFtime));
-                    finalFtime.clear();
+                    plane.update(dt * computeAverage(finalFrameTime));
+                    finalFrameTime.clear();
                 }
         });
     }
