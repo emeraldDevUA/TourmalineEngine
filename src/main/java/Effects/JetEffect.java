@@ -35,7 +35,13 @@ public class JetEffect  extends BaseEffect{
         Z_MAX = 20;
         radius = .08f;
     }
-
+    public void setJetPosition(Vector3f position){
+        this.jetStream.setPosition(position);
+    }
+    public void setScaleVector(Vector3f scaleVector) {
+        super.setScaleVector(scaleVector);
+        this.jetStream.setScale(scaleVector);
+    }
 
     @Override
     public void draw(){
