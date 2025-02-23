@@ -30,6 +30,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private  Map<String, VBO> map;
 
     private Vector3f pivot;
+    private Vector3f negativePivot;
+
     private Vector3f position;
     private Vector3f scale;
     private Vector3f shadowScale;
@@ -57,6 +59,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         noCull = false;
         useAssimp=false;
         model_matrix = new float[16];
+        pivot = new Vector3f(0);
+        negativePivot = new Vector3f(0);
     }
 
     public Mesh(String name, Map<String, List<?>> params) {
@@ -78,8 +82,9 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
             ));
         }catch (ClassCastException e){
             throw new RuntimeException("an Incorrect Hash Table Was Passed to Mesh.java");
-
         }
+        pivot = new Vector3f(0);
+        negativePivot = new Vector3f(0);
     }
 
 
@@ -229,9 +234,9 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
 
         if(updated) {
             Matrix4f matrix4f = new Matrix4f().identity();
-            matrix4f.translate(position)
+            matrix4f.translate(position).translate(pivot)
                     .scale(scale)
-                    .rotate(rotQuaternion);
+                    .rotate(rotQuaternion).translate(negativePivot);
             model_matrix = matrix4f.get(model_matrix);
         }
         if (shader != null) {
@@ -336,6 +341,21 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         return  new Vector3f(vec.x(), vec.y(), vec.z());
     }
 
+    public List<Vector3f> getVertices() {
+        List<Vector3f> vertexList = new ArrayList<>();
+
+        for (VBO vbo : map.values())
+        {
+            vertexList.addAll(vbo.getFinalVertices());
+            
+        }
+        return vertexList;
+    }
+
+    public void setPivot(Vector3f pivot){
+        this.pivot = pivot;
+        this.negativePivot = new Vector3f(pivot).negate();
+    }
     @Override
     public Mesh clone() {
         try {

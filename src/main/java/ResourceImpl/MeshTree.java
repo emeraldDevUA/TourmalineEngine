@@ -41,6 +41,14 @@ public class MeshTree extends TreeNode<Mesh> implements Cloneable {
         traverse(mesh -> mesh.setShader(shader));
     }
 
+    public List<Vector3f> getVertices(){
+        List<Vector3f> vertexList = new ArrayList<>();
+
+        this.getNodeValue().getMap().values().forEach(VBO-> vertexList.addAll(VBO.getFinalVertices()));
+        this.traverse(Node-> vertexList.addAll(Node.getVertices()));
+
+        return vertexList;
+    }
 
     public void compile() {
         Set<Material> compiledMaterials = new HashSet<>();
