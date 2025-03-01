@@ -73,7 +73,7 @@ void main()
     }
     else {
 
-        vs_out.normal    = normal.xyz;
+        vs_out.normal    = normal_matrix* normal.xyz;
     }
 
 

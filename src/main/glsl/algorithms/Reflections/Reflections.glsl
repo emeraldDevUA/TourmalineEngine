@@ -1,7 +1,7 @@
 
-const float rayStep = 0.25;
+const float rayStep = 30;
 const float minRayStep = 0.1;
-const float maxSteps = 10;
+const float maxSteps = 3;
 const float searchDist = 1;
 const float searchDistInv = 1/searchDist;
 const int numBinarySearchSteps = 5;
@@ -51,7 +51,8 @@ vec3 BinarySearch(sampler2D positionTexture, vec3 dir, inout vec3 hitCoord, out 
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
 
-        depth = texture2D(positionTexture, projectedCoord.xy).z;
+        vec4 temp = (view_matrix*texture2D(positionTexture, projectedCoord.xy));
+        depth = temp.z/temp.w;
 
 
         dDepth = hitCoord.z - depth;
@@ -91,13 +92,14 @@ vec4 rayMarch(sampler2D positionTexture, vec3 dir, inout vec3 hitCoord, out floa
         projectedCoord.xy = projectedCoord.xy * 0.5 + 0.5;
 
 
-        depth = texture2D(positionTexture, projectedCoord.xy).z;
-
+        vec4 temp = (view_matrix*texture2D(positionTexture, projectedCoord.xy));
+        depth = temp.z/temp.w;
 
         dDepth = hitCoord.z - depth;
 
 
         if(dDepth < 0.0)
+
         return vec4(BinarySearch(positionTexture, dir, hitCoord, dDepth), 1.0);
     }
 

@@ -37,6 +37,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private Vector3f shadowScale;
 
     private Quaternionf rotQuaternion;
+    private Quaternionf secondaryRotation;
 
     private Material material;
     private Shader shader;
@@ -44,6 +45,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private boolean updated;
     private boolean noCull;
     private boolean enableBlending;
+    private boolean shadowPass;
     @Setter
     private static boolean useAssimp;
     private float[] model_matrix;
@@ -54,6 +56,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         scale = new Vector3f(1,1,1);
         shadowScale = new Vector3f(1,1,1);
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
+        secondaryRotation = new Quaternionf(0,0,0,1);
         material = new Material();
         updated = true;
         noCull = false;
@@ -61,6 +64,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         model_matrix = new float[16];
         pivot = new Vector3f(0);
         negativePivot = new Vector3f(0);
+        shadowPass = false;
     }
 
     public Mesh(String name, Map<String, List<?>> params) {
@@ -69,6 +73,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         scale = new Vector3f(1,1,1);
         shadowScale = new Vector3f(1,1,1);
         rotQuaternion = new Quaternionf(0, 0, 0, 1);
+        secondaryRotation = new Quaternionf(0,0,0,1);
         material = new Material();
         updated = true;
         model_matrix = new float[16];
@@ -232,11 +237,21 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     @Override
     public void draw() {
 
+
+
         if(updated) {
             Matrix4f matrix4f = new Matrix4f().identity();
-            matrix4f.translate(position).translate(pivot)
-                    .scale(scale)
-                    .rotate(rotQuaternion).translate(negativePivot);
+
+
+
+            matrix4f.translate(position)               // Step 4: Final position in world space
+                    .translate(pivot)                  // Step 3: Move to pivot point
+                    .rotate(secondaryRotation)         // Step 2: Rotate around pivot
+                    .translate(negativePivot)          // Step 1: Return to original position
+                    .rotate(rotQuaternion)             // Global rotation
+                    .scale(scale);
+
+
             model_matrix = matrix4f.get(model_matrix);
         }
         if (shader != null) {
@@ -251,6 +266,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         }
 
         material.use();
+
 
         if(enableBlending){
             glEnable(GL_BLEND);
@@ -268,6 +284,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         }
         if(enableBlending){glDisable(GL_BLEND);
         }
+
+
     }
 
     @Override

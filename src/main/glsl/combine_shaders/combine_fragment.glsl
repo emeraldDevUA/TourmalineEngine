@@ -282,7 +282,7 @@ void main()
     }
 
     vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
-    vec3 viewPos = (view_matrix * texture2D(position, uv_frag)).xyz;
+    vec3 viewPos = (view_matrix*texture2D(position, uv_frag)).xyz;
 
 
     // Reflection vector
@@ -308,21 +308,38 @@ void main()
     vec3 SSR = vec3(0);
 
 
-    fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0);
+
+//////
+
+    vec2 x = clamp(coords.xy, 0.0, 1.0);
+
+    float reflectionFactor = pow(metalness_value, reflectionSpecularFalloffExponent) *
+    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
+    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w;
+
+    vec4 ssr_value = vec4(texture2D(environment_emission, x).rgb, reflectionFactor);
+
+    // Early exits for invalid reflections
+    if (length(x - vec2(1.0)) <= 1e-5 || length(x) >= sqrt(2.0)) {
+        ssr_value = vec4(0.0);
+    }
+
+    vec4 temp = vec4(texture2D(position, x).rgb, reflectionFactor);
+
+    float viewDist = length(temp.rgb - camera_position);
+
+    if (viewDist >= 30.0 || viewDist <= 2.0) {
+        ssr_value = vec4(0.0);
+    }
+
+
+    fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0) + ssr_value;
 
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {
         bloom = vec4(SSR, 1.0);
     }
-//////
-//    vec4 temp = vec4(texture2D(albedo_metalness, coords.xy).rgb,
-//    pow(metalness_value, reflectionSpecularFalloffExponent) *
-//    screenEdgefactor * clamp(-reflected.z, 0.0, 1.0) *
-//    clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w);
-//    if(length(temp.xyz-albedo_value) >= 0.2){
-//        bloom = vec4(temp);
-//    }
 
-//    fragment = vec4(lightBlock.pointLights[0].intensity);
+    //    fragment = vec4(lightBlock.pointLights[0].intensity);
 }
