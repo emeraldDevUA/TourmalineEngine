@@ -13,6 +13,7 @@ layout (location = 0) in vec3 position;
 void main() {
     vec3 scale_factors = scale_vector;
     mat4 scale_matrix = mat4(1.0); // Identity matrix
+
     scale_matrix[0][0] = scale_factors.x; // Scale X
     scale_matrix[1][1] = scale_factors.y; // Scale Y
     scale_matrix[2][2] = scale_factors.z; // Scale Z

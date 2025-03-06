@@ -5,7 +5,6 @@ import ResourceImpl.Material;
 import ResourceImpl.Mesh;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Texture;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +21,7 @@ public class AutoLoader {
     private final ResourceLoadScheduler resourceLoadScheduler;
     public void loadTrees() {
 
-        drawables = new ConcurrentHashMap<String, MeshTree>();
+        drawables = new ConcurrentHashMap<>();
 
         File folder = new File(rootFolder);
 
@@ -39,59 +38,80 @@ public class AutoLoader {
     }
 
 
-    private TreeNode<Mesh>loadMesh(File dir, TreeNode<Mesh> meshTree) {
-
-        final String models_formats = ".obj .fbx .glb .stl";
-        final String texture_formats = ".png .jpg";
+    private TreeNode<Mesh> loadMesh(File dir, TreeNode<Mesh> meshTree) {
+        final Set<String> modelFormats = Set.of("obj", "fbx", "glb", "stl");
+        final Set<String> textureFormats = Set.of("png", "jpg", "jpeg");
 
         File[] files = dir.listFiles();
-        assert files != null;
+        if (files == null) return meshTree;  // or throw an exception, as needed
 
-        Material material = new Material();
-        Mesh mesh = null;
-
+        // Option: Collect textures first.
+        // This map could be used to assign textures to a material.
+        Material sharedMaterial = new Material();
         for (File f : files) {
-            if (f.isDirectory()) {
-                loadMesh(f, meshTree);
-            } else {
-                String extension = f.toPath().toString().split("\\.")[1];
-                if (models_formats.contains(extension)) {
-                    mesh = new Mesh();
-                    resourceLoadScheduler.addResource(mesh, f.getPath());
-                } else if (texture_formats.contains(extension)) {
+            if (!f.isDirectory()) {
+                String fileName = f.getName();
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex == -1) continue; // Skip files without extension
+
+                String extension = fileName.substring(dotIndex + 1).toLowerCase();
+                if (textureFormats.contains(extension)) {
                     Texture texture = new Texture();
                     resourceLoadScheduler.addResource(texture, f.getPath());
 
-                    if(f.getName().toUpperCase().contains("ALBEDO")){
-                        material.addMap(Material.ALBEDO_MAP, texture);
+                    String upperName = fileName.toUpperCase();
+                    if (upperName.contains("ALBEDO")) {
+                        sharedMaterial.addMap(Material.ALBEDO_MAP, texture);
                     }
-                    if(f.getName().toUpperCase().contains("NORMAL")){
-                        material.addMap(Material.NORMAL_MAP, texture);
+                    if (upperName.contains("NORMAL")) {
+                        sharedMaterial.addMap(Material.NORMAL_MAP, texture);
                     }
-                    if(f.getName().toUpperCase().contains("ROUGHNESS")){
-                        material.addMap(Material.ROUGHNESS_MAP, texture);
+                    if (upperName.contains("ROUGHNESS")) {
+                        sharedMaterial.addMap(Material.ROUGHNESS_MAP, texture);
                     }
-
-                    // add them to the material
-                }
-            }
-
-
-            if (mesh != null) {
-
-                mesh.setMaterial(material);
-                TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, f.getName());
-                if(meshTree == null){
-                    meshTree = node;
-                }
-                else{
-                    meshTree.addNode(node);
+                    if (upperName.contains("AMBIENT_OCCLUSION")) {
+                        sharedMaterial.addMap(Material.AO_MAP, texture);
+                    }
                 }
             }
         }
 
+        // Then, process files (including subdirectories) to load meshes.
+        for (File f : files) {
+            if (f.isDirectory()) {
+                // Process subdirectories. You might want to pass the same tree, or create a new node for the folder.
+                TreeNode<Mesh> childNode = loadMesh(f, null);
+                if (childNode != null) {
+                    if (meshTree == null) {
+                        meshTree = childNode;
+                    } else {
+                        meshTree.addNode(childNode);
+                    }
+                }
+            } else {
+                String fileName = f.getName();
+                int dotIndex = fileName.lastIndexOf('.');
+                if (dotIndex == -1) continue;
+                String extension = fileName.substring(dotIndex + 1).toLowerCase();
 
-        //resourceLoadScheduler.getResources();
+                if (modelFormats.contains(extension)) {
+                    // Create a new mesh and assign the shared material.
+                    Mesh mesh = new Mesh();
+                    resourceLoadScheduler.addResource(mesh, f.getPath());
+
+                    // Optionally, if each mesh should have its own material instance,
+                    // clone the sharedMaterial or build a new one.
+                    mesh.setMaterial(sharedMaterial);
+
+                    TreeNode<Mesh> node = new MeshTree(new ArrayList<>(), mesh, fileName);
+                    if (meshTree == null) {
+                        meshTree = node;
+                    } else {
+                        meshTree.addNode(node);
+                    }
+                }
+            }
+        }
         return meshTree;
     }
 

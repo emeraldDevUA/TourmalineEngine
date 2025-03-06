@@ -98,6 +98,47 @@ public class Texture implements EnhancedLoadable {
         loadedInstances.put(path, 1);
     }
 
+    public Texture(ByteBuffer buffer, int channels, int width, int height)
+    {
+        textureData = buffer;
+
+        texture = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+        int format;
+        int internal = switch (channels) {
+            case 1 -> {
+                format = GL_R8;
+                yield GL_RED;
+            }
+            case 2 -> {
+                format = GL_RG8;
+                yield GL_RG;
+            }
+            case 3 -> {
+                format = GL_RGB8;
+                yield GL_RGB;
+            }
+            case 4 -> {
+                format = GL_RGBA8;
+                yield GL_RGBA;
+            }
+            default -> throw new RuntimeException(STR."Wrong texture channel count: \{channels}");
+        };
+
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,
+                internal, GL_UNSIGNED_BYTE, textureData);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        assert textureData != null;
+        stbi_image_free(textureData);
+
+    }
     /**
      * Binds this texture to currently active texture slot
      */
@@ -150,7 +191,7 @@ public class Texture implements EnhancedLoadable {
 
         int format;
         int internal;
-        format = GL_RGBA8;
+        format = GL_RGBA16;
         internal = GL_RGBA;
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth.get(0), textureHeight.get(0), 0,

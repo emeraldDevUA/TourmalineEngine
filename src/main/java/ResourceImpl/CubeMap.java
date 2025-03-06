@@ -19,8 +19,8 @@ import static org.lwjgl.opengl.GL12.GL_CLAMP_TO_EDGE;
 import static org.lwjgl.opengl.GL12.GL_TEXTURE_WRAP_R;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-import static org.lwjgl.opengl.GL30.GL_RGB16F;
-import static org.lwjgl.opengl.GL30.glGenerateMipmap;
+import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL32.GL_TEXTURE_CUBE_MAP_SEAMLESS;
 import static org.lwjgl.stb.STBImage.*;
 
 @SuppressWarnings("SpellCheckingInspection")
@@ -90,7 +90,6 @@ public class CubeMap implements EnhancedLoadable{
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
         glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
     }
 
@@ -103,7 +102,7 @@ public class CubeMap implements EnhancedLoadable{
             try {
                 hdrFace face = (hdrFace) array[i];
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                    0, GL_RGB16F, face.width.get(0), face.height.get(0), 0, GL_RGB, GL_FLOAT, face.texData);
+                    0, GL_RGB32F, face.width.get(0), face.height.get(0), 0, GL_RGB, GL_FLOAT, face.texData);
                 face.close();
             } catch (IOException|ClassCastException|NullPointerException e) {
                 throw new RuntimeException(e);

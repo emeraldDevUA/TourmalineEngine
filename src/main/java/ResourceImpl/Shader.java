@@ -2,9 +2,12 @@ package ResourceImpl;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.joml.*;
+import org.lwjgl.BufferUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +23,9 @@ public class Shader implements Closeable {
     public static final int MODEL_BLOCK = 0;
     public static final int CAMERA_BLOCK = 1;
     public static final int MATERIAL_BLOCK = 2;
+    public static final int WAVE_BLOCK = 3;
+    public static final int LIGHT_BLOCK = 4;
+
     public static final int ALBEDO_MAP_BINDING = 4;
     public static final int METALNESS_MAP_BINDING = 5;
     public static final int ROUGHNESS_MAP_BINDING = 6;
@@ -86,6 +92,51 @@ public class Shader implements Closeable {
     public void unbind(){
         glUseProgram(0);
     }
+
+    public void setUniform(String uniformName, Object uniformObject) {
+        use();
+        int uniformLocation = glGetUniformLocation(program, uniformName);
+        try {
+            if (uniformLocation == -1) {
+                throw new ErroneousUniformLocationException(
+                        String.format("Uniform named %s does not exist.", uniformName)
+                );
+            }
+
+            // Handle different types of uniform objects
+            switch (uniformObject) {
+                case Float v -> glUniform1f(uniformLocation, v);
+                case Integer i -> glUniform1i(uniformLocation, i);
+                case Boolean b -> glUniform1i(uniformLocation, b ? 1 : 0); // Convert boolean to integer
+                case Vector2f vec -> glUniform2f(uniformLocation, vec.x, vec.y);
+                case Vector3f vec -> glUniform3f(uniformLocation, vec.x, vec.y, vec.z);
+                case Vector4f vec -> glUniform4f(uniformLocation, vec.x, vec.y, vec.z, vec.w);
+                case Matrix3f mat -> {
+
+                    FloatBuffer buffer = BufferUtils.createFloatBuffer(9); // Allocate buffer for 3x3 matrix
+                    mat.get(buffer); // Transfer matrix data to the buffer
+                    buffer.flip(); // Prepare buffer for reading
+
+                    glUniformMatrix3fv(uniformLocation, false, buffer);
+                }
+                case Matrix4f mat -> {
+
+                    FloatBuffer buffer = BufferUtils.createFloatBuffer(16); // Allocate buffer for 4x4 matrix
+                    mat.get(buffer); // Transfer matrix data to the buffer
+                    buffer.flip(); // Prepare buffer for reading
+
+                    glUniformMatrix4fv(uniformLocation, false, buffer);
+                }
+                case null, default -> throw new IllegalArgumentException(
+                        String.format("Unsupported uniform type: %s", uniformObject.getClass().getSimpleName())
+                );
+            }
+        } catch (ErroneousUniformLocationException | IllegalArgumentException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+
     @Override
     public void close() {
 
@@ -145,4 +196,16 @@ public class Shader implements Closeable {
         }
     }
 
+}
+
+
+class ErroneousUniformLocationException extends Exception{
+
+    public ErroneousUniformLocationException(String message) {
+        super(message);
+    }
+
+    public ErroneousUniformLocationException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

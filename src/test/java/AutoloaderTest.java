@@ -1,6 +1,10 @@
 import Annotations.BasicWindow;
 import Annotations.OpenGLWindow;
+import Liquids.LiquidBody;
+import ResourceImpl.Mesh;
+import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
+import ResourceImpl.Texture;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 import org.junit.Assert;
@@ -9,6 +13,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -38,9 +44,14 @@ public class AutoloaderTest extends BasicWindow {
 
         System.out.println(STR."Elapsed time: \{t2 - t1} ms");
         loader.getDrawables().values().forEach(Assert::assertNotNull);
+        loader.getDrawables().values().forEach(MeshTree::compile);
 
+        loader.getDrawables().keySet().forEach(System.out::println);
 
         Assert.assertNotNull(loader.getDrawables().get("F16"));
+        loader.getDrawables().get("F16").getChildNodes().forEach(Item->{
+            System.err.println(Item.getNodeName());
+        });
     }
 
     @Test
@@ -80,8 +91,21 @@ public class AutoloaderTest extends BasicWindow {
                         shaderRootPath +"/visualeffects_shaders/visual_effects_fragment.glsl");
         Assert.assertNotEquals(visualEffects.getProgram(), -1);
     }
-    @Override
-    public void close() throws IOException {
+
+
+    @Test
+    public void liquidBodyTest(){
+        LiquidBody liquidBody = new LiquidBody();
+        Map<String, List<?>> list = liquidBody.generateWater(100, 400,800);
+
+        Mesh water = new Mesh("Water", list);
+        water.compile();
+        liquidBody.getWaterMeshes().put(4, water);
+
+       // Texture tex = liquidBody.generateCoefficients();
 
     }
+
+
+
 }

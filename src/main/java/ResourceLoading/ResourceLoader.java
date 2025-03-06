@@ -18,12 +18,15 @@ public class ResourceLoader extends Thread{
 
     @Override
     public void run() {
+        int tmp = 0 ;
         try {
-            for (int i = 0; i < tasks.size(); i++) {
+            for (int i = 0; i < tasks.size(); i++, tmp = i) {
                 tasks.get(i).load(paths.get(i));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (NullPointerException e){
+            System.err.println(STR."Failed to load \{paths.get(tmp)}");
         }
     }
 

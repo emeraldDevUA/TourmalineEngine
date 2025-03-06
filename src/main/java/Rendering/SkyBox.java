@@ -75,6 +75,11 @@ public class SkyBox implements Drawable, EnhancedLoadable {
     @Setter
     private CubeMap radiance, irradiance;
 
+    public SkyBox(CubeMap mainMap, CubeMap radiance, CubeMap irradiance){
+        this.cubeMap = mainMap;
+        this.radiance = radiance;
+        this.irradiance = irradiance;
+    }
 
     @Override
     public void draw() {

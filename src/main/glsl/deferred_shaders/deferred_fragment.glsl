@@ -2,6 +2,8 @@
 
 #define PI 3.1415926
 
+uniform bool isWater;
+
 in VS_OUT
 {
     vec3 position;
@@ -40,12 +42,12 @@ layout (std140, binding = 2) uniform material_block
 };
 
 
-layout (location = 0) out vec3 position;
-layout (location = 1) out vec4 albedo_metalness;
-layout (location = 2) out vec4 normal_roughness;
-layout (location = 3) out vec3 environment_emission;
+layout (location = 0) out highp vec3 position;
+layout (location = 1) out highp vec4 albedo_metalness;
+layout (location = 2) out highp vec4 normal_roughness;
+layout (location = 3) out highp vec3 environment_emission;
 
-layout (location = 4) out vec3 shadow_position;
+layout (location = 4) out highp vec3 shadow_position;
 
 float DistributionGGX(vec3 N, vec3 H, float rough)
 {
@@ -142,15 +144,15 @@ void main()
     vec2 radianceBRDF = texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
     vec3 specular = prefiltered_radiance * (F * radianceBRDF.x + radianceBRDF.y);
 
+
     vec3 environment = kD * diffuse + specular;
 
     if(material_has_ambient_occlusion_map) {
         environment *= texture(ambient_occlusion_map, vs_in.uv).r;
     }
-
     environment_emission = environment;
     if(material_has_emission_map) {
         environment_emission += texture(emission_map, vs_in.uv).rgb;
     }
-    //albedo_metalness.rgb = texture(albedo_map, vs_in.uv).rgb;
+
 }
