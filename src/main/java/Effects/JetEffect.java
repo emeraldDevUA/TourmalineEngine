@@ -35,6 +35,7 @@ public class JetEffect  extends BaseEffect{
         Z_MAX = 20;
         radius = .08f;
     }
+
     public void setJetPosition(Vector3f position){
         this.jetStream.setPosition(position);
     }

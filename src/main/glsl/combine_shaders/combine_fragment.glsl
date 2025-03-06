@@ -230,10 +230,11 @@ void main()
         vec3 H = normalize(V + L);
 
         float distance = length(lightBlock.pointLights[i].position - position_value);
-        float attenuation = attenuate_no_cusp(distance, 50,10, 20);
+        float attenuation =
+        attenuate_no_cusp(distance, 50,
+                        lightBlock.pointLights[i].intensity, 20);
 
-
-        light_color = lightBlock.pointLights[i].color * lightBlock.pointLights[i].intensity;
+        light_color = lightBlock.pointLights[i].color;
 
         vec3 radiance = light_color * attenuation;
 
