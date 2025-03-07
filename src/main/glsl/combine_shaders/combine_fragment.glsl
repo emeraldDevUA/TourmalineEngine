@@ -104,7 +104,6 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
     // Get the depth of the current fragment
     float currentDepth = projCoords.z;
 
-    // Calculate dynamic bias to prevent shadow acne
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 
     // Perform Percentage-Closer Filtering (PCF)
@@ -118,7 +117,7 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
         for (float y = -n; y <= n; y += 0.5) {
             vec2 offset = vec2(x, y) * texelSize;
             float closestDepth = texture(shadow_map, projCoords.xy + offset).r;
-            shadow += (currentDepth - bias > closestDepth) ? 0.8 : 0.0;
+            shadow += (currentDepth - bias >= closestDepth) ? 0.8 : 0.0;
             samples++; // Increment sample counter
         }
     }

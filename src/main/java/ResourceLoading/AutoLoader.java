@@ -128,4 +128,7 @@ public class AutoLoader {
        return resourceLoadScheduler.getReadiness();
     }
 
+    public MeshTree get(String name){
+        return drawables.get(name);
+    }
 }
