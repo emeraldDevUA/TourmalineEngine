@@ -105,8 +105,8 @@ public class Main extends BasicWindow {
 
         resourceLoadScheduler.addResource(albedo,"src/main/resources/3D_Models/Eurofighter/Eurofighter_albedo.png");
         resourceLoadScheduler.addResource(normal,"src/main/resources/3D_Models/Eurofighter/Eurofighter_normal.png");
-        resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/F16_roughness_G.png");
-        resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/F16_roughness_B.png");
+        resourceLoadScheduler.addResource(roughness_g,"src/main/resources/3D_Models/F16/Eurofighter_roughness_G.png");
+        resourceLoadScheduler.addResource(roughness_b,"src/main/resources/3D_Models/F16/Eurofighter_roughness_B.png");
         resourceLoadScheduler.addResource(metalness,"src/main/resources/3D_Models/F16/F16_metalness.png");
 
 
@@ -257,7 +257,7 @@ public class Main extends BasicWindow {
 
         KeyboardEventHandler keyboard_handler = (key, state) -> {
             synchronized (plane) {
-                Vector3f factor = new Vector3f(2.8f, 3.5f, 4.0f);
+                Vector3f factor = new Vector3f(3.8f, 3.5f, 4.0f);
                 if (state == GLFW_PRESS) {
 
                     Quaternionf planeOrientation = plane.getOrientation();

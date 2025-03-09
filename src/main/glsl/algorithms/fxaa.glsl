@@ -13,6 +13,7 @@
 
 vec4 applyFXAA(sampler2D tex, vec2 fragCoord, vec2 uViewportSize)
 {
+    fragCoord = gl_FragCoord.xy;
     vec4 color;
     vec2 inverseVP = vec2(1.0 / uViewportSize.x, 1.0 / uViewportSize.y);
     vec3 rgbNW = texture2D(tex, (fragCoord + vec2(-1.0, -1.0)) * inverseVP).xyz;

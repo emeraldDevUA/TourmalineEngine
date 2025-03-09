@@ -19,15 +19,15 @@ layout (location = 0) out vec4 fragment;
 void main()
 {
 
-    vec2 uViewportSize = vec2(1920, 1080);
+    vec2 uViewportSize = vec2(1920, 1018);
 
     float gamma = 1.4;
     float exposure = 1.0;
 
     vec4 bloomColor = gaussian_blur5(bloom, uv_frag);
-    uViewportSize = vec2(1, 1);
-    vec4 fxaa_color = applyFXAA(color, uv_frag, uViewportSize);
 
+    vec4 fxaa_color = applyFXAA(color, uv_frag, uViewportSize);
+    uViewportSize = vec2(1, 1);
     fxaa_color += bloomColor;
 
     fragment = vec4(pow(fxaa_color.rgb * exposure, vec3(1.0 / gamma)), 1.0);
