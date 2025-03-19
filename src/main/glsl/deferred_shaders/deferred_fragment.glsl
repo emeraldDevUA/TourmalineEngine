@@ -141,7 +141,7 @@ void main()
 
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefiltered_radiance = vec3(textureLod(radiance, R, normal_roughness.a * MAX_REFLECTION_LOD));
-    vec2 radianceBRDF = texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
+    vec2 radianceBRDF = 0.3*texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
     vec3 specular = prefiltered_radiance * (F * radianceBRDF.x + radianceBRDF.y);
 
 

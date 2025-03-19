@@ -516,7 +516,7 @@ public abstract class BasicWindow implements Closeable {
         scene.setActiveProgram(shadowMappingShader);
         shadowMappingShader.use();
 
-        glCullFace(GL_FRONT);
+        glCullFace(GL_NONE);
 
 
         glViewport(0,0, shadowMapSize, shadowMapSize);
