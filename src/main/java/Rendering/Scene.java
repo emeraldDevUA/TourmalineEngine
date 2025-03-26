@@ -114,7 +114,7 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
         }
     }
 
-    public void addLightSources(AbstractLight light) {
+    public void addLightSources(AbstractLight light, boolean addModel) {
 
 
         if(light instanceof DirectionalLight){
@@ -136,16 +136,16 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
                 break;
             }
         }
-
-        if (targetTree == null) {
-            // Create a new "PointLights" tree if not found
-            targetTree = new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), pntLights);
-            drawables.add(targetTree);
-        } else {
-            // Add new PointLight node
-            targetTree.addNode(new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), UUID.randomUUID().toString()));
+        if(addModel) {
+            if (targetTree == null) {
+                // Create a new "PointLights" tree if not found
+                targetTree = new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), pntLights);
+                drawables.add(targetTree);
+            } else {
+                // Add new PointLight node
+                targetTree.addNode(new MeshTree(new ArrayList<>(), pointLight.getLightMesh(), UUID.randomUUID().toString()));
+            }
         }
-
             lights.add(light);
     }
 }

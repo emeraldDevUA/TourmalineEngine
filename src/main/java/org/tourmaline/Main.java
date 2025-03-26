@@ -53,9 +53,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL14.GL_MIN;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
@@ -265,6 +263,11 @@ public class Main extends BasicWindow {
 //                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
                 ImGuiIO io = ImGui.getIO();
                 io.setMousePos((float) X, (float) Y);
+            }
+
+            @Override
+            public void processScrolling(double offSet) {
+
             }
         };
 
@@ -494,25 +497,25 @@ public class Main extends BasicWindow {
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
         pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();
 
-        scene.addLightSources(pointLight);
+        scene.addLightSources(pointLight, true);
 
 
 
         PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
         pointLight2.setLightColor(new Vector3f(0,0,1));  pointLight2.generatePrimitive();
 
-        scene.addLightSources(pointLight2);
+        scene.addLightSources(pointLight2, true);
 
         PointLight pointLight3 = new PointLight(new Vector3f(90,40,90));
         pointLight3.setLightColor(new Vector3f(1,1,0));  pointLight3.generatePrimitive();
 
-        scene.addLightSources(pointLight3);
+        scene.addLightSources(pointLight3, true);
 
         DirectionalLight directionalLight = new DirectionalLight(
                 new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
         directionalLight.setLightIntensity(15);
-        scene.addLightSources(directionalLight);
+        scene.addLightSources(directionalLight, true);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
