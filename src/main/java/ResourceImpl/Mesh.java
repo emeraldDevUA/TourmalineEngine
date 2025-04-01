@@ -46,6 +46,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private boolean noCull;
     private boolean enableBlending;
     private boolean shadowPass;
+    private boolean enableReflection;
     @Setter
     private static boolean useAssimp;
     private float[] model_matrix;
@@ -65,6 +66,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         pivot = new Vector3f(0);
         negativePivot = new Vector3f(0);
         shadowPass = false;
+        enableReflection = true;
     }
 
     public Mesh(String name, Map<String, List<?>> params) {
@@ -78,6 +80,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         updated = true;
         model_matrix = new float[16];
         useAssimp=false;
+        enableReflection = true;
         try {
             map.put(name, new VBO(
                     params.get("Indices") != null ?   (List<Integer>) params.get("Indices") : new ArrayList<>(),
@@ -258,10 +261,15 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
             int shader_pointer = shader.getProgram();
             int scaleVectorLocation = glGetUniformLocation(shader_pointer, "scale_vector");
             int modelMatrixLocation = glGetUniformLocation(shader_pointer, "model_matrix");
+            int reflectionFlag = glGetUniformLocation(shader_pointer, "enableReflection");
 
             glUniformMatrix4fv(modelMatrixLocation, false, model_matrix);
             glUniform3f(scaleVectorLocation, shadowScale.x,shadowScale.y, shadowScale.z);
 
+
+                if(reflectionFlag!=-1){
+                    glUniform1i(reflectionFlag, (enableReflection?1:0));
+                }
 
         }
 

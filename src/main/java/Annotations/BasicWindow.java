@@ -6,6 +6,7 @@ import Liquids.LiquidBody;
 import Rendering.Camera;
 import ResourceImpl.CubeMap;
 import Rendering.Scene;
+import ResourceImpl.Mesh;
 import ResourceImpl.Shader;
 import ResourceImpl.Texture;
 import imgui.ImGui;
@@ -17,6 +18,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
+import org.joml.Vector2f;
 import org.lwjgl.glfw.*;
 
 
@@ -92,7 +94,7 @@ public abstract class BasicWindow implements Closeable {
     protected static int deferredEnvironmentEmissionBuffer;
     protected static int deferredShadowPositionBuffer;
     protected static int deferredPreviousPositionBuffer;
-
+    protected static int deferredReflectionBuffer;
 
     // Forward/Postprocessing pass data
     protected static int frameBuffer;
@@ -105,12 +107,16 @@ public abstract class BasicWindow implements Closeable {
     protected static int sharedDepthBuffer;
     protected static int shadowDepthBuffer;
 
+    protected static int depthTexture;
+
+
     protected static Shader deferredShader;
     protected static Shader combineShader;
     protected static Shader postprocessingShader;
     protected static Shader skyBoxShader;
     protected static Shader shadowMappingShader;
     protected static Shader visualEffectsShader;
+    protected static Shader transparentShader;
 
     protected static Texture BRDFLookUp;
 
@@ -194,6 +200,13 @@ public abstract class BasicWindow implements Closeable {
             public void invoke(long l, int width, int height) {
                 glViewport(0, 0, width, height);
                 resizeWindow(new int[]{width, height});
+
+                if(postprocessingShader!=null){
+                    postprocessingShader.setUniform("uViewportSize", new Vector2f(windowWidth, windowHeight));
+                }
+                if(transparentShader!=null){
+                    transparentShader.setUniform("uViewportSize", new Vector2f(windowWidth, windowHeight));
+                }
             }
         });
         float[] maxAniso = new float[1];
@@ -358,6 +371,30 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, 0);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, deferredShadowPositionBuffer, 0);
 
+        depthTexture = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, depthTexture);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
+                0, GL_RGB, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        float[] borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, depthTexture, 0);
+
+        deferredReflectionBuffer = glGenTextures();
+        glBindTexture(GL_TEXTURE_2D, deferredReflectionBuffer);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
+                0, GL_RGB, GL_FLOAT, 0);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, deferredReflectionBuffer, 0);
+
+
+
         deferredPreviousPositionBuffer = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, deferredPreviousPositionBuffer);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, windowWidth, windowHeight,
@@ -365,6 +402,7 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glBindTexture(GL_TEXTURE_2D, 0);
+
 
 
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
@@ -422,6 +460,20 @@ public abstract class BasicWindow implements Closeable {
 
         scene.drawItems();
 
+
+        glCopyImageSubData(
+                sharedDepthBuffer, GL_TEXTURE_2D, 0, 0, 0, 0,
+                // Source texture, type, level, x, y, z
+                sharedDepthBuffer, GL_TEXTURE_2D, 0, 0, 0, 0,
+                // Destination texture, type, level, x, y, z
+                windowWidth, windowHeight, 1
+                // Width, height, depth
+        );
+//        glBlitFramebuffer(0, 0, windowWidth, windowHeight,
+//                0, 0, windowWidth, windowHeight,
+//                GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+
         glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
 
         camera.setViewProjectionMatrix(combineShader);
@@ -441,6 +493,8 @@ public abstract class BasicWindow implements Closeable {
         glBindTexture(GL_TEXTURE_2D, shadowMap);
         glActiveTexture(GL_TEXTURE6);
         glBindTexture(GL_TEXTURE_2D, deferredPreviousPositionBuffer);
+        glActiveTexture(GL_TEXTURE7);
+        glBindTexture(GL_TEXTURE_2D, deferredReflectionBuffer);
 
         glActiveTexture(GL_TEXTURE9);
         BRDFLookUp.use();
@@ -485,8 +539,6 @@ public abstract class BasicWindow implements Closeable {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glBindTexture(GL_TEXTURE_2D, 0);
-
-
 
 
 
@@ -569,7 +621,22 @@ public abstract class BasicWindow implements Closeable {
 
 
     }
+    protected static void transparentPass() {
+        camera.setViewProjectionMatrix(transparentShader);
+        List<Mesh> list = scene.getTransparentDrawables();
 
+
+        transparentShader.use();
+
+        glActiveTexture(GL_TEXTURE16);
+        glBindTexture(GL_TEXTURE_2D, depthTexture);
+
+        for(Mesh m: list){
+            m.setShader(transparentShader);
+            m.draw();
+        }
+
+    }
     protected static void skyBoxPass(){
         skyBoxShader.use();
         glActiveTexture(GL_TEXTURE10);

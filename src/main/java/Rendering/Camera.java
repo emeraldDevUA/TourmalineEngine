@@ -23,6 +23,7 @@ public class Camera {
   private Matrix4f viewMatrix, invertedViewMatrix;
   private Matrix4f previousViewMatrix;
 
+  private float far, near;
   @Getter
   private Quaternionf quaternionf;
   private final Vector3f positionDifference;
@@ -40,6 +41,8 @@ public class Camera {
 
   public void loadPerspectiveProjection(float fov, float aspect, float far, float near){
        projectionMatrix = projectionMatrix.setPerspective(fov,aspect, near, far);
+       this.far = far;
+       this.near = near;
       // projectionMatrix = projectionMatrix.ortho(-100,100,-100,100,100,0);
   }
   public void loadOrthographicProjection(float left, float right, float bottom, float top, float zNear, float zFar){
@@ -99,7 +102,16 @@ public class Camera {
             //    invertedViewMatrix.get(viewMatrixData);
              //   glUniformMatrix4fv(invViewMatrixLocation, false, viewMatrixData);
             }
+            int farLocation = glGetUniformLocation(shaderPointer, "far");
+            if (viewMatrixLocation != -1) {
 
+                glUniform1f(farLocation, far);
+            }
+            int nearLocation = glGetUniformLocation(shaderPointer, "near");
+            if (viewMatrixLocation != -1) {
+
+                glUniform1f(nearLocation, near);
+            }
 
         }
     }

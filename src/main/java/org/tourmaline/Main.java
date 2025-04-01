@@ -18,7 +18,6 @@ import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
 
-import ResourceImpl.Utils.PivotUtils;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -28,12 +27,6 @@ import imgui.flag.ImGuiCol;
 
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -60,6 +53,7 @@ import static org.lwjgl.opengl.GL13.*;
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
 public class Main extends BasicWindow {
+
 
     public static void main(String[] args) throws IOException {
 
@@ -88,6 +82,9 @@ public class Main extends BasicWindow {
         skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
+
+        transparentShader = new Shader("src/main/glsl/vertex_test.vert",
+                "src/main/glsl/fragment_test.frag");
         Texture.setVerticalFlip(true);
         Mesh.setUseAssimp(true);
 
@@ -121,7 +118,7 @@ public class Main extends BasicWindow {
         Vector3f temp = F16.getNodeValue().getPosition();
 
         camera = new Camera(
-                temp.add(new Vector3f(-3,1,0), new Vector3f()),
+                temp.add(new Vector3f(3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
 
         shadowCamera = new Camera(
@@ -454,17 +451,19 @@ public class Main extends BasicWindow {
         deferredShader.setUniform("waveNumber", 3);
 
         LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
-        liquidBody.wavelength = 5;
+        liquidBody.wavelength = 20;
         liquidBody.amplitude = 1;
         liquidBody.steepness = 0.5f;
         Map<String, List<?>> list =
-                liquidBody.generateWater(768*4, 240, 2200);
+                liquidBody.generateWater(768, 240, 2200);
 
         Mesh water = new Mesh("Water", list);
         water.compile();
         water.setShader(deferredShader);
         water.getPosition().add(new Vector3f(-140,-33,-325));
+        water.getMaterial().addMap(Material.NORMAL_MAP, new Texture("src/main/resources/miscellaneous/waternormals.jpg", 4));
         liquidBody.getWaterMeshes().put(4, water);
+
 
         waterBodies.add(liquidBody);
 
@@ -491,7 +490,7 @@ public class Main extends BasicWindow {
         scene.addDrawItem(S300);
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
-
+        F16.traverse(mesh -> mesh.setEnableReflection(false));
 
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
@@ -548,6 +547,9 @@ public class Main extends BasicWindow {
             glDisable(GL_DEPTH_TEST);
                 postprocessingPass();
             glEnable(GL_DEPTH_TEST);
+            transparentPass();
+
+
 
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);

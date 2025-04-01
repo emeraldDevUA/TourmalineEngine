@@ -8,6 +8,7 @@ import Rendering.Lights.AbstractLight;
 import Rendering.Lights.DirectionalLight;
 import Rendering.Lights.PointLight;
 
+import ResourceImpl.Mesh;
 import ResourceImpl.MeshTree;
 import ResourceImpl.Shader;
 import lombok.Getter;
@@ -29,12 +30,15 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     @Setter
     @Getter
     private SkyBox skyBox;
+    @Getter
+    private final List<Mesh> transparentDrawables;
 
     public Scene(){
         lights = new ArrayList<>();
         effects = new ArrayList<>();
         drawables = new ArrayList<>();
         liquidBodies = new ArrayList<>();
+        transparentDrawables = new ArrayList<>();
     }
     @Override
     public void drawSkyBox() {
@@ -44,7 +48,11 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     @Override
     public void drawItems() {
         for(MeshTree drawable: drawables){
-            drawable.draw();
+            drawable.traverse(mesh -> {
+                if(!mesh.isEnableBlending()){
+                    mesh.draw();
+                }
+            });
         }
 
     }
@@ -73,23 +81,12 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     public void addDrawItem(MeshTree item) {
 
         drawables.add(item);
-        drawables.sort(new Comparator<MeshTree>() {
-            @Override
-            public int compare(MeshTree mesh1, MeshTree mesh2) {
-                boolean b1 = mesh1.getNodeValue().isEnableBlending();
-                boolean b2 = mesh2.getNodeValue().isEnableBlending();
 
-                if(b2){
-                    return -1;
-                }
-                if(b1){
-                    return 1;
-                }
-                return 0;
-
+        item.traverse(mesh -> {
+            if(mesh.isEnableBlending()){
+                transparentDrawables.add(mesh);
             }
         });
-
     }
 
     @Override
