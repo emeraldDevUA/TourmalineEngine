@@ -14,7 +14,7 @@ public abstract class BaseEffect implements Drawable {
     private Vector3f mainPosition;
     private Quaternionf mainRotation;
     private Vector3f scaleVector;
-
+    public boolean obsolete = false;
 
     @Override
     public void draw() {

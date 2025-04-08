@@ -102,7 +102,7 @@ public class Main extends BasicWindow {
 
        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        MeshTree F16 = autoLoader.getDrawables().get("F16");
+        MeshTree F16 = autoLoader.getDrawables().get("Rafale");
 
 
         MeshTree S300 = autoLoader.getDrawables().get("S300");
@@ -136,18 +136,18 @@ public class Main extends BasicWindow {
 
         Material mainMat = F16.getNodeValue().getMaterial();
         mainMat.addProperty(Material.ROUGHNESS_MAP, 0.8);
-        F16.findNode("F16_Aileron1.obj").getMaterial().close();
-        F16.findNode("F16_Aileron2.obj").getMaterial().close();
-        F16.findNode("F16_Elevator.obj").getMaterial().close();
-        F16.findNode("F16_Rudder.obj").getMaterial().close();
-
-
-        F16.findNode("F16_Aileron1.obj").setMaterial(mainMat);
-        F16.findNode("F16_Aileron2.obj").setMaterial(mainMat);
-        F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
-        F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
-
-        F16.findNode("F16_glass.obj").setEnableBlending(true);
+//        F16.findNode("F16_Aileron1.obj").getMaterial().close();
+//        F16.findNode("F16_Aileron2.obj").getMaterial().close();
+//        F16.findNode("F16_Elevator.obj").getMaterial().close();
+//        F16.findNode("F16_Rudder.obj").getMaterial().close();
+//
+//
+//        F16.findNode("F16_Aileron1.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Aileron2.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
+//
+//        F16.findNode("F16_glass.obj").setEnableBlending(true);
 
         Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.6);
         Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.3);
@@ -157,7 +157,7 @@ public class Main extends BasicWindow {
         mat.addProperty(Material.METALNESS, 0.0);
         S300.getNodeValue().setMaterial(mat);
 
-        F16.getNodeValue().setShadowScale(new Vector3f(10));
+        //F16.getNodeValue().setShadowScale(new Vector3f(10));
         F16.forwardTransform();
 
         glEnable(GL_DEPTH_TEST);
@@ -215,7 +215,7 @@ public class Main extends BasicWindow {
                 F16.setUpdated(true);
                 camera.setFocus(F16.getPosition());
                 camera.setPosition(F16.getPosition()
-                        .add(new Vector3f(-3,1,0)
+                        .add(new Vector3f(-20,3,0)
                                 .rotate(F16.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
@@ -475,6 +475,7 @@ public class Main extends BasicWindow {
 
         ExplosionEffect explosionEffect = new ExplosionEffect();
 
+        explosionEffect.setScaleVector(new Vector3f(0.6f));
         explosionEffect.setMainPosition(S300.getPosition());
         explosionEffect.compile();
 
@@ -491,7 +492,7 @@ public class Main extends BasicWindow {
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
         F16.traverse(mesh -> mesh.setEnableReflection(false));
-
+        Island.traverse(mesh -> mesh.setEnableReflection(false));
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
         pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();

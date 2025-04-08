@@ -20,6 +20,7 @@ out vec2 texCoords;
 uniform vec3 rocketPos;
 uniform float time;        // Time variable for dynamics
 uniform int effectType;
+uniform int phase;  // 0 = explosion, 1 = pulse
 
 
 float f(float d){
@@ -57,25 +58,50 @@ void main() {
 
 }
 
-void processExplosion(){
-    float noiseValue = cnoise(position);
-//    vec3 normal = ( model_matrix* vec4(normal, 1) ).xyz;
+void processExplosion() {
+    // Transform center to object space (inverse of model matrix)
+    vec3 center = vec3(0.0);
+    vec3 worldCenter = vec3(model_matrix * vec4(center, 1.0));
+
+    // Calculate direction and distance in WORLD SPACE
+    vec3 worldPos = vec3(model_matrix * vec4(position, 1.0));
+    vec3 worldDirection = normalize(worldPos - worldCenter);
+    float worldDistance = length(worldPos - worldCenter);
 
     mat3 normal_matrix = transpose(inverse(mat3(model_matrix)));
-    vec3 normal = normalize(normal_matrix * normal);
+    vec3 worldNormal = normalize(normal_matrix * normal);
 
-    vec3 newPos = position + normal * noiseValue;
+    // Noise calculation (still in object space for texture consistency)
+    float noiseScale = 3.0;
+    float noiseSpeed = 5.0;
+    float noise = cnoise(position * noiseScale + vec3(time * noiseSpeed));
 
-//    mat4 scaleMatrix = mat4(1.0);
-//    scaleMatrix[0][0] = newPos.x/position.x;
-//    scaleMatrix[1][1] = newPos.y/position.y;
-//    scaleMatrix[2][2] = newPos.z/position.z;
-//
-//    mat4 scaled_model_matrix = model_matrix * scaleMatrix;
-        fragPosition = (model_matrix * vec4(newPos, 1)).xyz;
+    // Apply scaling factor from model matrix
+    float avgScale = length(vec3(model_matrix[0].x, model_matrix[1].y, model_matrix[2].z));
 
+    float explosionStrength = 1.5 * avgScale; // Scale explosion strength
+    float shrinkDuration = 2.0;
 
-    gl_Position = projection_matrix * view_matrix * model_matrix* vec4(newPos, 1);
+    vec3 outward = worldDirection * (worldDistance + noise) * explosionStrength;
+    vec3 surfaceWarp = worldNormal * noise * avgScale;
+
+    // Phase calculations
+    vec3 newPos;
+    if (phase == 0) {
+        float t = smoothstep(0.0, 1.0, time);
+        newPos = worldPos + (outward + surfaceWarp) * t;
+    } else {
+        float normalizedShrinkTime = time / shrinkDuration;
+        float t = 1.0 - smoothstep(0.0, 1.0, normalizedShrinkTime);
+        t = pow(t, 0.5);
+        newPos = worldPos + (outward + surfaceWarp) * t;
+    }
+
+    // Transform back to object space for final rendering
+    newPos = vec3(inverse(model_matrix) * vec4(newPos, 1.0));
+
+    fragPosition = vec3(model_matrix * vec4(newPos, 1.0));
+    gl_Position = projection_matrix * view_matrix * vec4(fragPosition, 1.0);
 }
 
 void processJetEffect(){

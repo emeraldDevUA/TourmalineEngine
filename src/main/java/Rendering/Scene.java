@@ -64,7 +64,15 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
 
     @Override
     public void drawEffects() {
-        effects.forEach(BaseEffect::draw);
+        List<BaseEffect> temp = new ArrayList<>();
+        effects.forEach(effect ->{
+            if(effect.obsolete){
+                temp.add(effect);
+            }else{
+                effect.draw();
+            }
+        });
+        effects.removeAll(temp);
     }
 
     @Override

@@ -1,12 +1,21 @@
 package Effects;
 
 import ResourceImpl.Mesh;
+import ResourceImpl.Shader;
+import lombok.Setter;
 import org.joml.Vector3f;
 
 import java.io.IOException;
 
+import static org.lwjgl.glfw.GLFW.glfwGetTime;
+
 public class ExplosionEffect  extends BaseEffect{
     private Mesh explosionMesh;
+    @Setter
+    private float existenceTime = 5;
+    private float creationTime = -1;
+    private float currentTime = - 1;
+
 
     @Override
     public void setMainPosition(Vector3f position){
@@ -16,15 +25,49 @@ public class ExplosionEffect  extends BaseEffect{
     }
 
     @Override
-    public void draw(){
-        explosionMesh.getShader()
-                .setUniform("effectType", 2);
-        explosionMesh.getShader().setUniform("rocketPos", getMainPosition());
-        explosionMesh.draw();
+    public void draw() {
+        float now = (float) glfwGetTime();
+
+        if (currentTime <= 0) {
+            creationTime = now;
+            currentTime = now;
+        }
+
+        currentTime = now;
+        float elapsed = currentTime - creationTime;
+
+        float totalLife = existenceTime + 2.0f; // existenceTime + 2 seconds of pulsing
+
+        if (elapsed <= totalLife) {
+            Shader shader = explosionMesh.getShader();
+
+            float t;
+            int phase;
+
+            if (elapsed <= existenceTime) {
+                // Phase 1: explosion growth
+                t = elapsed / existenceTime;
+                phase = 0;
+            } else {
+                // Phase 2: pulsing after explosion
+                t = (elapsed - existenceTime) / 2.0f;
+                phase = 1;
+            }
+
+            shader.setUniform("time", t);             // normalized time for current phase
+            shader.setUniform("phase", phase);        // 0 = explode, 1 = pulse
+            shader.setUniform("effectType", 2);       // your custom effect
+            shader.setUniform("rocketPos", getMainPosition());
+
+            explosionMesh.draw();
+        }else {
+            obsolete = true;
+        }
     }
     @Override
     public void compile(){
             explosionMesh = new Mesh();
+            explosionMesh.setScale(getScaleVector());
         try {
             explosionMesh.load("src/main/resources/miscellaneous/Sphere128.obj");
             explosionMesh.compile();
@@ -37,4 +80,5 @@ public class ExplosionEffect  extends BaseEffect{
     public Mesh getMesh() {
         return explosionMesh;
     }
+
 }
