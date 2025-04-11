@@ -36,7 +36,7 @@ public class ExplosionEffect  extends BaseEffect{
         currentTime = now;
         float elapsed = currentTime - creationTime;
 
-        float totalLife = existenceTime + 2.0f; // existenceTime + 2 seconds of pulsing
+        float totalLife = existenceTime + existenceTime/5f; // existenceTime + 2 seconds of pulsing
 
         if (elapsed <= totalLife) {
             Shader shader = explosionMesh.getShader();
@@ -50,7 +50,7 @@ public class ExplosionEffect  extends BaseEffect{
                 phase = 0;
             } else {
                 // Phase 2: pulsing after explosion
-                t = (elapsed - existenceTime) / 2.0f;
+                t = (elapsed - existenceTime) /existenceTime/5;
                 phase = 1;
             }
 

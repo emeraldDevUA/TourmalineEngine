@@ -63,7 +63,7 @@ public class Scene implements DrawableContainer<MeshTree, BaseEffect, LiquidBody
     }
 
     @Override
-    public void drawEffects() {
+    public synchronized void drawEffects() {
         List<BaseEffect> temp = new ArrayList<>();
         effects.forEach(effect ->{
             if(effect.obsolete){

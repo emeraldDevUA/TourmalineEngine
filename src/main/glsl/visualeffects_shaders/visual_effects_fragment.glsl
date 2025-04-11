@@ -51,9 +51,9 @@ void processExplosion(){
     vec4 color4 = vec4(0.2, 0.0, 0.0, 1.0); // Dark red/Almost black
 
     vec3 diff = fragPosition - rocketPos;
-    float t = abs(12.8 - (length(diff)));
+    float t = abs(12.8 - abs(length(diff)));
 
-    fragColorMain = linearGradient4(color1, color2, color3, color4, clamp(t/(20*time), 0.0, 0.9));
+    fragColorMain = linearGradient4(color1, color2, color3, color4, t);
     //    fragColor = vec4(1);
 }
 

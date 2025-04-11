@@ -474,7 +474,7 @@ public class Main extends BasicWindow {
         jetStream.compile();
 
         ExplosionEffect explosionEffect = new ExplosionEffect();
-
+explosionEffect.setExistenceTime(20);
         explosionEffect.setScaleVector(new Vector3f(0.6f));
         explosionEffect.setMainPosition(S300.getPosition());
         explosionEffect.compile();
