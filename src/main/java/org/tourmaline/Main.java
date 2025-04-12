@@ -29,6 +29,7 @@ import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -517,7 +518,11 @@ public class Main extends BasicWindow {
         BB.compile();
 
         scene.addEffect(BB);
+        postprocessingShader.setUniform("uViewportSize",
+                new Vector2f(windowWidth, windowHeight));
 
+        postprocessingShader.setUniform("enableFXAA", true);
+        postprocessingShader.setUniform("gamma", 2.0f);
         while (!glfwWindowShouldClose(window_handle)){
             camera.loadViewMatrix();
 
@@ -555,45 +560,6 @@ public class Main extends BasicWindow {
     }
 
 
-
-
-    public static void saveFramebufferAsImage(int width, int height, String filePath) {
-        // Allocate a buffer to store the pixel data (RGBA, 8-bit per channel)
-        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
-
-        // Read the pixels from the currently bound framebuffer
-        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-        // Create a BufferedImage to store the pixel data
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // Flip Y-axis because OpenGL's origin is at the bottom-left
-                int index = (x + (height - y - 1) * width) * 4;
-
-                int r = buffer.get(index) & 0xFF;
-                int g = buffer.get(index + 1) & 0xFF;
-                int b = buffer.get(index + 2) & 0xFF;
-
-                int a = buffer.get(index + 3) & 0xFF;
-
-                // Create a pixel with ARGB format (Java uses ARGB)
-                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
-
-                image.setRGB(x, y, pixel);
-            }
-        }
-
-        // Save the BufferedImage as a PNG file
-        try {
-
-            ImageIO.write(image, "PNG", new File(filePath));
-
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
 
 }
 

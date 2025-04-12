@@ -67,7 +67,8 @@ public class ExplosionEffect  extends BaseEffect{
     @Override
     public void compile(){
             explosionMesh = new Mesh();
-            explosionMesh.setScale(getScaleVector());
+            if(getScaleVector()!=null)
+                explosionMesh.setScale(getScaleVector());
         try {
             explosionMesh.load("src/main/resources/miscellaneous/Sphere128.obj");
             explosionMesh.compile();

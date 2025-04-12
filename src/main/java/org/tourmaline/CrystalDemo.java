@@ -102,7 +102,7 @@ public class CrystalDemo extends BasicWindow {
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
 
-        camera.loadPerspectiveProjection((float)Math.PI/3,windowWidth/windowHeight + 0.2f, 2000,0.1f);
+        camera.loadPerspectiveProjection((float)Math.PI/3, (float) windowWidth /windowHeight, 2000,0.1f);
         shadowCamera.loadOrthographicProjection(-1500,1500, -1500,
                 1500, -800, 800);
 
