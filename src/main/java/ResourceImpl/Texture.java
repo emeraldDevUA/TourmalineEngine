@@ -53,7 +53,7 @@ public class Texture implements EnhancedLoadable {
         try {
             textureData = stbi_load(path, textureWidth, textureHeight, textureChannels, channels);
         } catch (Exception e) {
-            System.err.println(STR."Texture \"\{path}\" loading failed");
+            System.err.println("the STBI library failed to load the " + path + " texture");
         }
 
         texture = glGenTextures();
@@ -83,7 +83,7 @@ public class Texture implements EnhancedLoadable {
                 internal = GL_RGBA;
                 break;
             default:
-                throw new RuntimeException(STR."Wrong texture channel count: \{channels}");
+                throw new RuntimeException("Wrong texture channel count: "+channels);
         }
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, textureWidth.get(0), textureHeight.get(0), 0,
@@ -127,7 +127,7 @@ public class Texture implements EnhancedLoadable {
                 format = GL_RGBA8;
                 yield GL_RGBA;
             }
-            default -> throw new RuntimeException(STR."Wrong texture channel count: \{channels}");
+            default -> throw new RuntimeException("Wrong texture channel count: "+channels);
         };
 
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0,

@@ -93,7 +93,7 @@ public class MeshTree extends TreeNode<Mesh> implements Cloneable {
     @Override
     public MeshTree clone() {
         MeshTree clonedNode = new MeshTree(new ArrayList<>(),
-                getNodeValue() != null ? getNodeValue().clone() : null, STR."\{getNodeName()}cloned");
+                getNodeValue() != null ? getNodeValue().clone() : null, getNodeName() +"cloned");
         for (TreeNode<Mesh> child : this.getChildNodes()) {
             clonedNode.getChildNodes().add(((MeshTree) child).clone());  // Recursively clone children
         }

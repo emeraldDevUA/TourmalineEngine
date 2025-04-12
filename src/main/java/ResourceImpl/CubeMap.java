@@ -53,7 +53,8 @@ public class CubeMap implements EnhancedLoadable{
             textureData = stbi_loadf(path + faceIndices[i] + extension,
                     width, height, channels, 3);
             if (textureData == null)
-                System.err.println(STR."Cubemap \{path}\{faceIndices[i]}\{extension} is not found");
+                System.err.printf("Cubemap %s%s%s is not found%n", path, faceIndices[i], extension);
+
             else {
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                         0, GL_RGB16F, width.get(0), height.get(0), 0, GL_RGB, GL_FLOAT, textureData);
@@ -71,10 +72,10 @@ public class CubeMap implements EnhancedLoadable{
                     height.clear();
                     channels.clear();
 
-                    textureData = stbi_loadf(STR."\{path}_mip_\{j}\{faceIndices[i]}\{extension}",
+                    textureData = stbi_loadf(String.format("%s_mip_%d%s%s", path, j, faceIndices[i], extension),
                             width, height, channels, 3);
                     if (textureData == null) {
-                        System.err.println(STR."Cubemap mip \{path}_mip_\{j}\{faceIndices[i]}\{extension} is not found");
+                        System.err.println("Cubemap mip "+String.format("%s_mip_%d%s%s", path, j, faceIndices[i], extension) +" is not found");
                         break;
                     }
 
@@ -102,7 +103,7 @@ public class CubeMap implements EnhancedLoadable{
             try {
                 hdrFace face = (hdrFace) array[i];
                 glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                    0, GL_RGB32F, face.width.get(0), face.height.get(0), 0, GL_RGB, GL_FLOAT, face.texData);
+                        0, GL_RGB32F, face.width.get(0), face.height.get(0), 0, GL_RGB, GL_FLOAT, face.texData);
                 face.close();
             } catch (IOException|ClassCastException|NullPointerException e) {
                 throw new RuntimeException(e);
@@ -141,12 +142,12 @@ public class CubeMap implements EnhancedLoadable{
             textureData = stbi_loadf(path + faceIndices[i] + extension,
                     width, height, channels, 3);
             if (textureData == null)
-                System.err.println(STR."Cubemap \{path}\{faceIndices[i]}\{extension} is not found");
+                System.err.println("Cubemap " + path + faceIndices[i] + extension +" is not found");
             else {
-                    faces.put(faceIndices[i], new hdrFace(width, height, textureData, channels));
+                faces.put(faceIndices[i], new hdrFace(width, height, textureData, channels));
             }
 
-     }
+        }
 
 
     }

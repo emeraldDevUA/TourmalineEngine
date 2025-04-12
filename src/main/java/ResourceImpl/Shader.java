@@ -64,13 +64,12 @@ public class Shader implements Closeable {
         glShaderSource(vertexShader, vertexSource);
         glCompileShader(vertexShader);
         if (!glGetShaderInfoLog(vertexShader).isEmpty())
-            System.err.println(STR."\{vertexPath}: \{glGetShaderInfoLog(vertexShader)}");
-
+            System.err.printf("%s : %s%n", vertexPath, glGetShaderInfoLog(vertexShader));
         int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
         glShaderSource(fragmentShader, fragmentSource);
         glCompileShader(fragmentShader);
         if (!glGetShaderInfoLog(fragmentShader).isEmpty())
-            System.err.println(STR."\{fragmentPath}: \{glGetShaderInfoLog(fragmentShader)}");
+            System.err.printf("%s : %s%n", fragmentPath, glGetShaderInfoLog(fragmentShader));
 
         program = glCreateProgram();
         glAttachShader(program, vertexShader);
@@ -143,7 +142,6 @@ public class Shader implements Closeable {
         glDeleteShader(program);
     }
 
-
     @RequiredArgsConstructor
     private static class Preprocessor {
         private final String currentPath;
@@ -157,7 +155,7 @@ public class Shader implements Closeable {
 
             // Define path based on brackets or quotes
             if (includeStatement.contains("<")) {
-                pathToHeaderFile = STR."src/main/glsl/\{headerFileName}";
+                pathToHeaderFile = "src/main/glsl/"+headerFileName;
             } else if (includeStatement.contains("\"")) {
                 pathToHeaderFile = currentPath + headerFileName;
             }
@@ -166,7 +164,7 @@ public class Shader implements Closeable {
             try {
                 return new String(Files.readAllBytes(Paths.get(pathToHeaderFile)));
             } catch (IOException e) {
-                System.err.println(STR."Error loading file: \{pathToHeaderFile}");
+                System.err.println("Error loading file:"+ pathToHeaderFile);
                 System.err.println(e.getMessage());
                 return "";  // Return empty string on failure to avoid null issues
             }

@@ -42,7 +42,7 @@ public class AutoloaderTest extends BasicWindow {
 
         long t2 = System.currentTimeMillis();
 
-        System.out.println(STR."Elapsed time: \{t2 - t1} ms");
+        System.out.println("Elapsed time: " + (t2 - t1) + " ms");
         loader.getDrawables().values().forEach(Assert::assertNotNull);
         loader.getDrawables().values().forEach(MeshTree::compile);
 

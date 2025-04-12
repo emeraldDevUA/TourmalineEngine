@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-import static java.lang.StringTemplate.STR;
+
 
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -413,7 +413,7 @@ public abstract class BasicWindow implements Closeable {
         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharedDepthBuffer);
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            System.err.println(STR."Deferred framebuffer is not ready: \{glCheckFramebufferStatus(GL_FRAMEBUFFER)}");
+            System.err.println("Deferred framebuffer is not ready: " + glCheckFramebufferStatus(GL_FRAMEBUFFER));
 
 
         int[] attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2,
@@ -795,7 +795,7 @@ public abstract class BasicWindow implements Closeable {
         // Save the BufferedImage as a PNG file
         try {
             ImageIO.write(image, "PNG", new File(filePath));
-            System.out.println(STR."Image saved: \{filePath}");
+            System.out.println("Image has been saved: " + filePath);
         } catch (IOException e) {
             System.err.println(e.getMessage());
         }

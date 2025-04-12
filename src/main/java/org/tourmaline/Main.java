@@ -18,6 +18,7 @@ import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
 
+import ResourceImpl.Utils.PivotUtils;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -27,7 +28,7 @@ import imgui.flag.ImGuiCol;
 
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
-import org.joml.Vector2f;
+
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -55,7 +56,6 @@ import static org.lwjgl.opengl.GL13.*;
 
 public class Main extends BasicWindow {
 
-
     public static void main(String[] args) throws IOException {
 
         long t1,t2,t3;
@@ -73,7 +73,7 @@ public class Main extends BasicWindow {
         combineShader = new Shader("src/main/glsl/combine_shaders/combine_vertex.glsl",
                 "src/main/glsl/combine_shaders/combine_fragment.glsl");
 
-         shadowMappingShader =
+        shadowMappingShader =
                 new Shader("src/main/glsl/shadow_shaders/shadow_vertex.glsl",
                         "src/main/glsl/shadow_shaders/shadow_fragment.glsl");
 
@@ -83,9 +83,6 @@ public class Main extends BasicWindow {
         skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
-
-        transparentShader = new Shader("src/main/glsl/vertex_test.vert",
-                "src/main/glsl/fragment_test.frag");
         Texture.setVerticalFlip(true);
         Mesh.setUseAssimp(true);
 
@@ -99,11 +96,11 @@ public class Main extends BasicWindow {
         }
 
         t3 = System.currentTimeMillis();//
-         resourceLoadScheduler.reset();
+        resourceLoadScheduler.reset();
 
-       System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
+        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        MeshTree F16 = autoLoader.getDrawables().get("Rafale");
+        MeshTree F16 = autoLoader.getDrawables().get("Eurofighter");
 
 
         MeshTree S300 = autoLoader.getDrawables().get("S300");
@@ -119,7 +116,7 @@ public class Main extends BasicWindow {
         Vector3f temp = F16.getNodeValue().getPosition();
 
         camera = new Camera(
-                temp.add(new Vector3f(3,1,0), new Vector3f()),
+                temp.add(new Vector3f(-3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
 
         shadowCamera = new Camera(
@@ -158,7 +155,7 @@ public class Main extends BasicWindow {
         mat.addProperty(Material.METALNESS, 0.0);
         S300.getNodeValue().setMaterial(mat);
 
-        //F16.getNodeValue().setShadowScale(new Vector3f(10));
+        F16.getNodeValue().setShadowScale(new Vector3f(10));
         F16.forwardTransform();
 
         glEnable(GL_DEPTH_TEST);
@@ -216,7 +213,7 @@ public class Main extends BasicWindow {
                 F16.setUpdated(true);
                 camera.setFocus(F16.getPosition());
                 camera.setPosition(F16.getPosition()
-                        .add(new Vector3f(-20,3,0)
+                        .add(new Vector3f(-3,1,0)
                                 .rotate(F16.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
@@ -284,8 +281,8 @@ public class Main extends BasicWindow {
         System.out.println(mb);
 
         String cpu_name = processor.getProcessorIdentifier().getName().substring(0, 24).concat("...");
-        String gpu = systemInfo.getHardware().getGraphicsCards().get(1).getName()
-                .substring(0, 24).concat("...");
+        String gpu = systemInfo.getHardware().getGraphicsCards().get(0).getName()
+                .substring(0, 16).concat("...");
 
         ArrayList<Boolean> selected = new ArrayList<>(4);
         List<Boolean> selectedMissile = new ArrayList<>(9);
@@ -302,10 +299,8 @@ public class Main extends BasicWindow {
             ImGui.pushFont(smallFont);
             if (ImGui.begin("System Info")) {
                 ImGui.text(os);
-                ImGui.text(STR."\{mb} GB");
-                ImGui.text(STR."\{processors} Cores");
-                ImGui.text(STR."\{cpu_name}");
-                ImGui.text(STR."\{gpu}");
+
+
                 ImGui.pushID(1);
                 ImGui.pushStyleColor(ImGuiCol.Button, ImGui.getColorU32(1.0f, 0.08f, 0.58f, 1.0f)); // Hot pink
                 ImGui.pushStyleColor(ImGuiCol.ButtonHovered, ImGui.getColorU32(1.0f, 0.4f, 0.7f, 1.0f)); // Brighter hot pink for hover
@@ -368,7 +363,7 @@ public class Main extends BasicWindow {
 
                         // Checkbox column with single selection logic
                         ImGui.tableSetColumnIndex(4);
-                        if (ImGui.checkbox(STR."##checkbox\{i}", selected.get(i))) {
+                        if (ImGui.checkbox("##checkbox"+i, selected.get(i))) {
                             // Deselect all checkboxes
                             Collections.fill(selected, false);
                             // Select the clicked checkbox
@@ -404,7 +399,7 @@ public class Main extends BasicWindow {
                         // Column 1: Checkbox for selection
                         ImGui.tableSetColumnIndex(1);
                         boolean isSelected = selectedMissile.get(i); // Get current state
-                        if (ImGui.checkbox(STR."##checkbox\{i}", isSelected)) {
+                        if (ImGui.checkbox("##checkbox"+i, isSelected)) {
                             Collections.fill(selectedMissile, false);
                             // Select the clicked checkbox
                             selectedMissile.set(i, true);
@@ -452,19 +447,17 @@ public class Main extends BasicWindow {
         deferredShader.setUniform("waveNumber", 3);
 
         LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
-        liquidBody.wavelength = 20;
+        liquidBody.wavelength = 5;
         liquidBody.amplitude = 1;
         liquidBody.steepness = 0.5f;
         Map<String, List<?>> list =
-                liquidBody.generateWater(768, 240, 2200);
+                liquidBody.generateWater(768*4, 240, 2200);
 
         Mesh water = new Mesh("Water", list);
         water.compile();
         water.setShader(deferredShader);
         water.getPosition().add(new Vector3f(-140,-33,-325));
-        water.getMaterial().addMap(Material.NORMAL_MAP, new Texture("src/main/resources/miscellaneous/waternormals.jpg", 4));
         liquidBody.getWaterMeshes().put(4, water);
-
 
         waterBodies.add(liquidBody);
 
@@ -475,8 +468,7 @@ public class Main extends BasicWindow {
         jetStream.compile();
 
         ExplosionEffect explosionEffect = new ExplosionEffect();
-explosionEffect.setExistenceTime(20);
-        explosionEffect.setScaleVector(new Vector3f(0.6f));
+
         explosionEffect.setMainPosition(S300.getPosition());
         explosionEffect.compile();
 
@@ -492,31 +484,31 @@ explosionEffect.setExistenceTime(20);
         scene.addDrawItem(S300);
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
-        F16.traverse(mesh -> mesh.setEnableReflection(false));
-        Island.traverse(mesh -> mesh.setEnableReflection(false));
+
+
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
         pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();
 
-        scene.addLightSources(pointLight, true);
+        scene.addLightSources(pointLight, false);
 
 
 
         PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
         pointLight2.setLightColor(new Vector3f(0,0,1));  pointLight2.generatePrimitive();
 
-        scene.addLightSources(pointLight2, true);
+        scene.addLightSources(pointLight2, false);
 
         PointLight pointLight3 = new PointLight(new Vector3f(90,40,90));
         pointLight3.setLightColor(new Vector3f(1,1,0));  pointLight3.generatePrimitive();
 
-        scene.addLightSources(pointLight3, true);
+        scene.addLightSources(pointLight3, false);
 
         DirectionalLight directionalLight = new DirectionalLight(
                 new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
         directionalLight.setLightIntensity(15);
-        scene.addLightSources(directionalLight, true);
+        scene.addLightSources(directionalLight, false);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
@@ -525,11 +517,7 @@ explosionEffect.setExistenceTime(20);
         BB.compile();
 
         scene.addEffect(BB);
-        postprocessingShader.setUniform("uViewportSize",
-                new Vector2f(windowWidth, windowHeight));
 
-        postprocessingShader.setUniform("enableFXAA", true);
-        postprocessingShader.setUniform("gamma", 2.0f);
         while (!glfwWindowShouldClose(window_handle)){
             camera.loadViewMatrix();
 
@@ -538,10 +526,10 @@ explosionEffect.setExistenceTime(20);
                             .transform(new Vector3f(2.2f,0.1f,-0.015f)))
             );
 
-           glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-           shadowPass();
-           deferredPass();
+            shadowPass();
+            deferredPass();
 
             skyBoxShader.use();
             glActiveTexture(GL_TEXTURE10);
@@ -551,11 +539,8 @@ explosionEffect.setExistenceTime(20);
 //            glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
             glDisable(GL_DEPTH_TEST);
-                postprocessingPass();
+            postprocessingPass();
             glEnable(GL_DEPTH_TEST);
-            transparentPass();
-
-
 
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
@@ -572,7 +557,43 @@ explosionEffect.setExistenceTime(20);
 
 
 
+    public static void saveFramebufferAsImage(int width, int height, String filePath) {
+        // Allocate a buffer to store the pixel data (RGBA, 8-bit per channel)
+        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
+        // Read the pixels from the currently bound framebuffer
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        // Create a BufferedImage to store the pixel data
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                // Flip Y-axis because OpenGL's origin is at the bottom-left
+                int index = (x + (height - y - 1) * width) * 4;
+
+                int r = buffer.get(index) & 0xFF;
+                int g = buffer.get(index + 1) & 0xFF;
+                int b = buffer.get(index + 2) & 0xFF;
+
+                int a = buffer.get(index + 3) & 0xFF;
+
+                // Create a pixel with ARGB format (Java uses ARGB)
+                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
+
+                image.setRGB(x, y, pixel);
+            }
+        }
+
+        // Save the BufferedImage as a PNG file
+        try {
+
+            ImageIO.write(image, "PNG", new File(filePath));
+
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
+    }
 
 }
 

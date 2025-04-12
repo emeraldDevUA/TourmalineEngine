@@ -30,7 +30,7 @@ public class AutoLoader {
                 drawables.put( fileEntry.getName() ,(MeshTree) loadMesh(fileEntry, null));
             }
             else{
-                System.err.println(STR."Only folders are expected to be in the root dir.\n\{fileEntry.getName()}");
+                System.err.println("Only folders are expected to be in the root dir." + fileEntry.getName()+" is not a folder!");
             }
         }
 

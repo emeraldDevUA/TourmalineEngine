@@ -169,7 +169,9 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
                             indices.add(array[0] - 1);
 
                         } catch (NullPointerException e) {
-                            System.err.println(STR."\{vertices.size()}\n\{vectors.size()}\n\{textureCoords.size()}");
+                            System.err.printf("The process of loading the %s model failed with %d vertices, %d normals and %d uv coords loaded",
+                                    path, vertices.size(), vectors.size(), textureCoords.size());
+
                             break;
                         }
                     }

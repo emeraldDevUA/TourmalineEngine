@@ -73,13 +73,13 @@ No ownership is claimed over the libraries or technologies listed above.
 
 ### 📌 Supported Java Versions
 
-| Java Version | Status             |
-|--------------|--------------------|
-| ☕ Java 8    | ❌ Not Supported   |
-| ☕ Java 11   | ❌ Not Supported   |
-| ☕ Java 17   | ❌ Not Supported   |
+| Java Version | Status                          |
+|--------------|---------------------------------|
+| ☕ Java 8    | ❌ Not Supported                 |
+| ☕ Java 11   | ❌ Not Supported                 |
+| ☕ Java 17   | ❌ Not Supported                 |
 | ☕ Java 21   | ✅ Currently Supported (Preview) |
-| ☕ Java 22   | ❌ Not Supported (Intended) |
+| ☕ Java 22   | ✅ Supported (Not fully tested)  |
 
 
 ## License Text
