@@ -13,6 +13,7 @@ layout (location = 0 ) out vec4 fragment;
 
 in vec2 textureCoords;
 in vec4 currentPosition;
+in vec3 camera_position;
 
 uniform vec2 uViewportSize;
 uniform float far;
@@ -23,18 +24,25 @@ uniform float near;
 void main() {
     vec2 uv = gl_FragCoord.xy / uViewportSize;
 
-    float eps = 10e-5;
+    float eps = 10e-24;
     vec4 fetchedPos = texture(positionTexture, uv);
 
-    float linearDepth = (2.0 * near * far) / (far + near - (2.0 * fetchedPos.r - 1.0) * (far - near));
-    //    camera.loadPerspectiveProjection((float)Math.PI/3,1.8f, 2000,0.1f);
-    //    float far = 2000; // move to uniforms later
-    //    float near = 0.1f;
+    float deferredDepth = (2.0 * near * far) / (far + near - (2.0 * fetchedPos.r - 1.0) * (far - near));
+    float z = gl_FragCoord.z;
+    float transparentDepth = (2.0 * near * far) / (far + near - z * (far - near));
 
 
-    if (gl_FragCoord.z < linearDepth - eps) {
-        if(abs(gl_FragCoord.z - (linearDepth - eps))< 1 - eps){discard;}
+    if (transparentDepth > deferredDepth + eps) {
+        // check the depth difference
+        // if it is bigger than the epsilon and in front of the skybox, discard
+        float temp = abs(transparentDepth - (deferredDepth));
+        if(temp > eps && deferredDepth > 1f-eps){
+            if(length(camera_position-currentPosition.xyz) > 12)
+            discard;
+        }
+
     }
-
+    //
     fragment = texture(albedo_map, uv) + vec4(0, 0, 0, 0.2);
+
 }
