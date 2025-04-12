@@ -69,7 +69,7 @@ void main()
 
         model_position = model_matrix*vec4(wave_position, 1);
 
-        vs_out.normal    = ( (normal_matrix*wave_normal)).xyz;
+        vs_out.normal    = (normalize(normal_matrix*wave_normal)).xyz;
     }
     else {
 

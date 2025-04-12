@@ -34,12 +34,12 @@ vec4 applyFXAA(sampler2D tex, vec2 fragCoord, vec2 uViewportSize)
     dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
 
     float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) *
-                          (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
+    (0.25 * FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
 
     float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
     dir = min(vec2(FXAA_SPAN_MAX, FXAA_SPAN_MAX),
-              max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
-                  dir * rcpDirMin)) * inverseVP;
+    max(vec2(-FXAA_SPAN_MAX, -FXAA_SPAN_MAX),
+    dir * rcpDirMin)) * inverseVP;
 
     vec3 rgbA = 0.5 * (
     texture2D(tex, fragCoord * inverseVP + dir * (1.0 / 3.0 - 0.5)).xyz +

@@ -18,7 +18,6 @@ import Rendering.Scene;
 import Rendering.SkyBox;
 import ResourceImpl.*;
 
-import ResourceImpl.Utils.PivotUtils;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
@@ -28,12 +27,6 @@ import imgui.flag.ImGuiCol;
 
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -53,15 +46,14 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL13.*;
-import static org.lwjgl.opengl.GL14.GL_MIN;
-import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
-import static org.lwjgl.opengl.GL30.glBindFramebuffer;
+
 
 
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
 public class Main extends BasicWindow {
+
 
     public static void main(String[] args) throws IOException {
 
@@ -90,6 +82,9 @@ public class Main extends BasicWindow {
         skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
 
+
+        transparentShader = new Shader("src/main/glsl/vertex_test.vert",
+                "src/main/glsl/fragment_test.frag");
         Texture.setVerticalFlip(true);
         Mesh.setUseAssimp(true);
 
@@ -107,7 +102,7 @@ public class Main extends BasicWindow {
 
        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        MeshTree F16 = autoLoader.getDrawables().get("F16");
+        MeshTree F16 = autoLoader.getDrawables().get("Rafale");
 
 
         MeshTree S300 = autoLoader.getDrawables().get("S300");
@@ -123,7 +118,7 @@ public class Main extends BasicWindow {
         Vector3f temp = F16.getNodeValue().getPosition();
 
         camera = new Camera(
-                temp.add(new Vector3f(-3,1,0), new Vector3f()),
+                temp.add(new Vector3f(3,1,0), new Vector3f()),
                 temp.add(new Vector3f(0,0,0), new Vector3f()));
 
         shadowCamera = new Camera(
@@ -141,18 +136,18 @@ public class Main extends BasicWindow {
 
         Material mainMat = F16.getNodeValue().getMaterial();
         mainMat.addProperty(Material.ROUGHNESS_MAP, 0.8);
-        F16.findNode("F16_Aileron1.obj").getMaterial().close();
-        F16.findNode("F16_Aileron2.obj").getMaterial().close();
-        F16.findNode("F16_Elevator.obj").getMaterial().close();
-        F16.findNode("F16_Rudder.obj").getMaterial().close();
-
-
-        F16.findNode("F16_Aileron1.obj").setMaterial(mainMat);
-        F16.findNode("F16_Aileron2.obj").setMaterial(mainMat);
-        F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
-        F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
-
-        F16.findNode("F16_glass.obj").setEnableBlending(true);
+//        F16.findNode("F16_Aileron1.obj").getMaterial().close();
+//        F16.findNode("F16_Aileron2.obj").getMaterial().close();
+//        F16.findNode("F16_Elevator.obj").getMaterial().close();
+//        F16.findNode("F16_Rudder.obj").getMaterial().close();
+//
+//
+//        F16.findNode("F16_Aileron1.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Aileron2.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Elevator.obj").setMaterial(mainMat);
+//        F16.findNode("F16_Rudder.obj").setMaterial(mainMat);
+//
+//        F16.findNode("F16_glass.obj").setEnableBlending(true);
 
         Island.getNodeValue().getMaterial().addProperty(Material.ROUGHNESS_MAP, 0.6);
         Island.getNodeValue().getMaterial().addProperty(Material.METALNESS_MAP, 0.3);
@@ -162,7 +157,7 @@ public class Main extends BasicWindow {
         mat.addProperty(Material.METALNESS, 0.0);
         S300.getNodeValue().setMaterial(mat);
 
-        F16.getNodeValue().setShadowScale(new Vector3f(10));
+        //F16.getNodeValue().setShadowScale(new Vector3f(10));
         F16.forwardTransform();
 
         glEnable(GL_DEPTH_TEST);
@@ -220,7 +215,7 @@ public class Main extends BasicWindow {
                 F16.setUpdated(true);
                 camera.setFocus(F16.getPosition());
                 camera.setPosition(F16.getPosition()
-                        .add(new Vector3f(-3,1,0)
+                        .add(new Vector3f(-20,3,0)
                                 .rotate(F16.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
@@ -265,6 +260,11 @@ public class Main extends BasicWindow {
 //                System.out.println(STR."(X,Y)= {\{X} \{Y}}");
                 ImGuiIO io = ImGui.getIO();
                 io.setMousePos((float) X, (float) Y);
+            }
+
+            @Override
+            public void processScrolling(double offSet) {
+
             }
         };
 
@@ -451,13 +451,19 @@ public class Main extends BasicWindow {
         deferredShader.setUniform("waveNumber", 3);
 
         LiquidBody liquidBody = new LiquidBody("src/main/resources/miscellaneous/water.jpg");
-        Map<String, List<?>> list = liquidBody.generateWater(768, 240, 2200);
+        liquidBody.wavelength = 20;
+        liquidBody.amplitude = 1;
+        liquidBody.steepness = 0.5f;
+        Map<String, List<?>> list =
+                liquidBody.generateWater(768, 240, 2200);
 
         Mesh water = new Mesh("Water", list);
         water.compile();
         water.setShader(deferredShader);
         water.getPosition().add(new Vector3f(-140,-33,-325));
+        water.getMaterial().addMap(Material.NORMAL_MAP, new Texture("src/main/resources/miscellaneous/waternormals.jpg", 4));
         liquidBody.getWaterMeshes().put(4, water);
+
 
         waterBodies.add(liquidBody);
 
@@ -468,7 +474,8 @@ public class Main extends BasicWindow {
         jetStream.compile();
 
         ExplosionEffect explosionEffect = new ExplosionEffect();
-
+explosionEffect.setExistenceTime(20);
+        explosionEffect.setScaleVector(new Vector3f(0.6f));
         explosionEffect.setMainPosition(S300.getPosition());
         explosionEffect.compile();
 
@@ -484,31 +491,31 @@ public class Main extends BasicWindow {
         scene.addDrawItem(S300);
         scene.addDrawItem(Island);
         scene.addDrawItem(F16);
-
-
+        F16.traverse(mesh -> mesh.setEnableReflection(false));
+        Island.traverse(mesh -> mesh.setEnableReflection(false));
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
         pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();
 
-        scene.addLightSources(pointLight);
+        scene.addLightSources(pointLight, true);
 
 
 
         PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
         pointLight2.setLightColor(new Vector3f(0,0,1));  pointLight2.generatePrimitive();
 
-        scene.addLightSources(pointLight2);
+        scene.addLightSources(pointLight2, true);
 
         PointLight pointLight3 = new PointLight(new Vector3f(90,40,90));
         pointLight3.setLightColor(new Vector3f(1,1,0));  pointLight3.generatePrimitive();
 
-        scene.addLightSources(pointLight3);
+        scene.addLightSources(pointLight3, true);
 
         DirectionalLight directionalLight = new DirectionalLight(
                 new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
         directionalLight.setLightIntensity(15);
-        scene.addLightSources(directionalLight);
+        scene.addLightSources(directionalLight, true);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
 
@@ -541,6 +548,9 @@ public class Main extends BasicWindow {
             glDisable(GL_DEPTH_TEST);
                 postprocessingPass();
             glEnable(GL_DEPTH_TEST);
+            transparentPass();
+
+
 
             keyboard.processEvents(keyboard_handler);
             mouse.processEvents(mouse_handler);
@@ -557,43 +567,7 @@ public class Main extends BasicWindow {
 
 
 
-    public static void saveFramebufferAsImage(int width, int height, String filePath) {
-        // Allocate a buffer to store the pixel data (RGBA, 8-bit per channel)
-        ByteBuffer buffer = BufferUtils.createByteBuffer(width * height * 4);
 
-        // Read the pixels from the currently bound framebuffer
-        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
-
-        // Create a BufferedImage to store the pixel data
-        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // Flip Y-axis because OpenGL's origin is at the bottom-left
-                int index = (x + (height - y - 1) * width) * 4;
-
-                int r = buffer.get(index) & 0xFF;
-                int g = buffer.get(index + 1) & 0xFF;
-                int b = buffer.get(index + 2) & 0xFF;
-
-                int a = buffer.get(index + 3) & 0xFF;
-
-                // Create a pixel with ARGB format (Java uses ARGB)
-                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
-
-                image.setRGB(x, y, pixel);
-            }
-        }
-
-        // Save the BufferedImage as a PNG file
-        try {
-
-            ImageIO.write(image, "PNG", new File(filePath));
-            System.out.println(STR."Image saved: \{filePath}");
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-        }
-    }
 
 }
 

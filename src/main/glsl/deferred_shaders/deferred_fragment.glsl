@@ -3,6 +3,7 @@
 #define PI 3.1415926
 
 uniform bool isWater;
+uniform bool enableReflection;
 
 in VS_OUT
 {
@@ -48,6 +49,8 @@ layout (location = 2) out highp vec4 normal_roughness;
 layout (location = 3) out highp vec3 environment_emission;
 
 layout (location = 4) out highp vec3 shadow_position;
+layout (location = 5) out highp vec3 depthPos;
+layout (location = 6) out highp vec3 reflection_value;
 
 float DistributionGGX(vec3 N, vec3 H, float rough)
 {
@@ -141,7 +144,7 @@ void main()
 
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefiltered_radiance = vec3(textureLod(radiance, R, normal_roughness.a * MAX_REFLECTION_LOD));
-    vec2 radianceBRDF = texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
+    vec2 radianceBRDF = 0.3*texture(BRDFlookUp, vec2(max(dot(N, V), 0.0), normal_roughness.a)).rg;
     vec3 specular = prefiltered_radiance * (F * radianceBRDF.x + radianceBRDF.y);
 
 
@@ -154,5 +157,14 @@ void main()
     if(material_has_emission_map) {
         environment_emission += texture(emission_map, vs_in.uv).rgb;
     }
+    depthPos = vec3(gl_FragCoord.z);
 
+    vec3 reflection_vec = vec3(0);
+    if(isWater){
+        reflection_vec.r = 1;
+    }
+    if(enableReflection){
+        reflection_vec.g = 1;
+    }
+   reflection_value = reflection_vec;
 }

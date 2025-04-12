@@ -48,49 +48,62 @@ public class AutoloaderTest extends BasicWindow {
 
         loader.getDrawables().keySet().forEach(System.out::println);
 
-        Assert.assertNotNull(loader.getDrawables().get("F16"));
+        Assert.assertNotNull(loader.get("F16"));
+        System.out.println("F16 SubModels Loaded:");
         loader.getDrawables().get("F16").getChildNodes().forEach(Item->{
-            System.err.println(Item.getNodeName());
+            System.out.println("\t" + Item.getNodeName());
         });
     }
 
     @Test
-    public void testShaders(){
-        System.out.println("Deferred Shader initialization: ");
-        Shader deferredShader =
-                new Shader(shaderRootPath +"/deferred_shaders/deferred_vertex.glsl",
-                        shaderRootPath +"/deferred_shaders/deferred_fragment.glsl");
+    public void testShaders() {
+        System.out.println("===== Starting Shader Initialization Tests =====");
 
-        Assert.assertNotEquals(deferredShader.getProgram(), -1);
-        System.out.println("Combined Shader initialization: ");
-        Shader combineShader =
-                new Shader(shaderRootPath +"/combine_shaders/combine_vertex.glsl",
-                        shaderRootPath +"/combine_shaders/combine_fragment.glsl");
+        testShader("Deferred Shader",
+                shaderRootPath + "/deferred_shaders/deferred_vertex.glsl",
+                shaderRootPath + "/deferred_shaders/deferred_fragment.glsl");
 
-        Assert.assertNotEquals(combineShader.getProgram(), -1);
-        System.out.println("Shadow Shader initialization: ");
-        Shader shadowShader =
-                new Shader(shaderRootPath +"/shadow_shaders/shadow_vertex.glsl",
-                        shaderRootPath +"/shadow_shaders/shadow_fragment.glsl");
+        testShader("Combined Shader",
+                shaderRootPath + "/combine_shaders/combine_vertex.glsl",
+                shaderRootPath + "/combine_shaders/combine_fragment.glsl");
 
-        Assert.assertNotEquals(shadowShader.getProgram(), -1);
-        System.out.println("PostProcessing Shader initialization: ");
-        Shader postProcessingShader =
-                new Shader(shaderRootPath +"/postprocessing_shaders/postprocessing_vertex.glsl",
-                        shaderRootPath +"/postprocessing_shaders/postprocessing_fragment.glsl");
-        Assert.assertNotEquals(postProcessingShader.getProgram(), -1);
-        System.out.println("Skybox Shader initialization: ");
-        Shader skyBoxShader =
-                new Shader(shaderRootPath +"/skybox_shaders/skybox_vertex.glsl",
-                        shaderRootPath +"/skybox_shaders/skybox_frag.glsl");
+        testShader("Shadow Shader",
+                shaderRootPath + "/shadow_shaders/shadow_vertex.glsl",
+                shaderRootPath + "/shadow_shaders/shadow_fragment.glsl");
 
-        Assert.assertNotEquals(skyBoxShader.getProgram(), -1);
-        System.out.println("VisualEffects Shader initialization: ");
-        Shader visualEffects =
-                new Shader(shaderRootPath +"/visualeffects_shaders/visual_effects_vertex.glsl",
-                        shaderRootPath +"/visualeffects_shaders/visual_effects_fragment.glsl");
-        Assert.assertNotEquals(visualEffects.getProgram(), -1);
+        testShader("PostProcessing Shader",
+                shaderRootPath + "/postprocessing_shaders/postprocessing_vertex.glsl",
+                shaderRootPath + "/postprocessing_shaders/postprocessing_fragment.glsl");
+
+        testShader("Skybox Shader",
+                shaderRootPath + "/skybox_shaders/skybox_vertex.glsl",
+                shaderRootPath + "/skybox_shaders/skybox_frag.glsl");
+
+        testShader("Visual Effects Shader",
+                shaderRootPath + "/visualeffects_shaders/visual_effects_vertex.glsl",
+                shaderRootPath + "/visualeffects_shaders/visual_effects_fragment.glsl");
+
+        testShader("Transparent Shader",
+                shaderRootPath + "/vertex_test.vert",
+                shaderRootPath + "/fragment_test.frag");
+
+        System.out.println("===== Shader Initialization Tests Completed =====");
     }
+
+    private void testShader(String name, String vertexPath, String fragmentPath) {
+        System.out.printf("Initializing %s (%s, %s)...%n", name, vertexPath, fragmentPath);
+        Shader shader = new Shader(vertexPath, fragmentPath);
+        int programId = shader.getProgram();
+
+        if (programId == -1) {
+            System.err.printf("❌ %s failed to initialize (program ID: %d)%n", name, programId);
+        } else {
+            System.out.printf("✅ %s initialized successfully (program ID: %d)%n", name, programId);
+        }
+
+        Assert.assertNotEquals("Shader failed to initialize: " + name, programId, -1);
+    }
+
 
 
     @Test

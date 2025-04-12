@@ -15,6 +15,7 @@ layout (binding = 3) uniform sampler2D environment_emission;
 layout (binding = 4) uniform sampler2D shadow_position;
 layout (binding = 5) uniform sampler2D shadow_map;
 layout (binding = 6) uniform sampler2D previous_position;
+layout (binding = 7) uniform sampler2D reflection_value;
 
 layout (binding = 9) uniform sampler2D BRDFlookUp;
 
@@ -104,7 +105,6 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
     // Get the depth of the current fragment
     float currentDepth = projCoords.z;
 
-    // Calculate dynamic bias to prevent shadow acne
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
 
     // Perform Percentage-Closer Filtering (PCF)
@@ -118,7 +118,7 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
         for (float y = -n; y <= n; y += 0.5) {
             vec2 offset = vec2(x, y) * texelSize;
             float closestDepth = texture(shadow_map, projCoords.xy + offset).r;
-            shadow += (currentDepth - bias > closestDepth) ? 0.8 : 0.0;
+            shadow += (currentDepth - bias >= closestDepth) ? 0.8 : 0.0;
             samples++; // Increment sample counter
         }
     }
@@ -230,10 +230,11 @@ void main()
         vec3 H = normalize(V + L);
 
         float distance = length(lightBlock.pointLights[i].position - position_value);
-        float attenuation = attenuate_no_cusp(distance, 50,10, 20);
+        float attenuation =
+        attenuate_no_cusp(distance, 50,
+                        lightBlock.pointLights[i].intensity, 20);
 
-
-        light_color = lightBlock.pointLights[i].color * lightBlock.pointLights[i].intensity;
+        light_color = lightBlock.pointLights[i].color;
 
         vec3 radiance = light_color * attenuation;
 
@@ -282,30 +283,38 @@ void main()
     }
 
     vec3 viewNormal = texture2D(normal_roughness, uv_frag).xyz;
-    vec3 viewPos = (view_matrix*texture2D(position, uv_frag)).xyz;
+
+    vec4 pos = (view_matrix*vec4(texture2D(position, uv_frag).xyz, 1));
+    vec3 viewPos = pos.xyz/pos.w;
 
 
     // Reflection vector
-    vec3 reflected = normalize(reflect(normalize(viewPos), normalize(viewNormal)));
+    vec3 reflected = normalize(reflect(normalize(-viewPos), normalize(viewNormal)));
 
 
     // Ray cast
-    vec3 hitPos = viewPos;
-    float dDepth;
 
+    float dDepth;
+    float selfReflectionBias = 0.2;
+    float minDDepth = 3;
     vec3 jitt = mix(vec3(0.0),
                     hashVector(viewPos, vec3(.8, .8, .8), 19.19), metalness_value);
+    vec3 hitPos = viewPos + normalize(viewNormal) * selfReflectionBias + jitt;
+    ;
 
     vec4 coords = rayMarch(position, reflected * max(minRayStep, -viewPos.z), hitPos, dDepth);
-
-
-    vec2 dCoords = abs(vec2(0.5, 0.5) - coords.xy);
+    if (abs(dDepth) < minDDepth) {
+        coords = vec4(0.0, 0.0, 0.0, 0.0);
+    }
+    vec2 screenSize = vec2(1920, 1018);
+    vec2 dCoords = abs(gl_FragCoord.xy / screenSize - coords.xy);
 
 
     float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 
 
     vec3 SSR = vec3(0);
+
 
 
 
@@ -318,28 +327,33 @@ void main()
     clamp((searchDist - length(viewPos - hitPos)) * searchDistInv, 0.0, 1.0) * coords.w;
 
     vec4 ssr_value = vec4(texture2D(environment_emission, x).rgb, reflectionFactor);
+    if (coords.w <= 10e-12) {
+        ssr_value.rgb = vec3(0.0);
+    }
 
-    // Early exits for invalid reflections
-    if (length(x - vec2(1.0)) <= 1e-5 || length(x) >= sqrt(2.0)) {
+    vec4 reflection = texture(reflection_value, x);
+    vec4 reflected_color = texture(reflection_value, uv_frag);
+
+    if (reflection.r > 0.1) {
         ssr_value = vec4(0.0);
     }
 
-    vec4 temp = vec4(texture2D(position, x).rgb, reflectionFactor);
-
-    float viewDist = length(temp.rgb - camera_position);
-
-    if (viewDist >= 30.0 || viewDist <= 2.0) {
+    if(reflected_color.g < 0.9){
         ssr_value = vec4(0.0);
+
     }
 
+//    if (length(temp2.rgb - camera_position) > 200||length(temp.rgb - camera_position) < 1) {
+//        ssr_value = vec4(0.0);
+//    }
 
     fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0) + ssr_value;
 
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {
-        bloom = vec4(SSR, 1.0);
+       // bloom = vec4(ssr_value);
     }
 
-    //    fragment = vec4(lightBlock.pointLights[0].intensity);
+    //    fragment = vec4(ssr_value);
 }

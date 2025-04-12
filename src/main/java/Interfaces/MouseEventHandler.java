@@ -9,5 +9,5 @@ public interface MouseEventHandler {
      */
     void processMouseMovement(double X, double Y);
 
-   // void processScrolling();
+    void processScrolling(double offSet);
 }

@@ -23,13 +23,13 @@ public class Mouse {
     @Setter
     private long window_pointer = -1;
     private Set<Integer> keys;
-
+    public double scrollOffset = 0.0;
 
     public void processEvents(MouseEventHandler handler){
 
         glfwGetCursorPos(window_pointer, X,Y);
         handler.processMouseMovement(X[0],Y[0]);
-
+        handler.processScrolling(scrollOffset);
         while(!actions.empty()) {
             handler.processMouseEvent(actions.peek().key, actions.peek().state);
             actions.pop();
@@ -73,7 +73,9 @@ public class Mouse {
                 );
             }
         });
-
+        glfwSetScrollCallback(window_pointer, (win, xoffset, yoffset) -> {
+            scrollOffset += yoffset;
+        });
     }
 
     @AllArgsConstructor

@@ -13,10 +13,11 @@ import static org.lwjgl.opengl.GL30.glBindBufferBase;
 import static org.lwjgl.opengl.GL31.GL_UNIFORM_BUFFER;
 
 public class LightingConfigurator {
-    private static final int COMPUTED_SIZE = 2640;
+    private static int COMPUTED_SIZE = 2640;
 
     private static int bufferBase = -1;  // Assuming -1 means “not yet created”
-
+    public static int maxPointLights = 50;
+    public static int maxDirLights = 5;
     public static void printByteBuffer(ByteBuffer buffer, String label) {
         System.out.println("Contents of " + label + ":" + "Size: " + buffer.limit());
         buffer.rewind(); // Reset position to 0 for reading
@@ -36,8 +37,8 @@ public class LightingConfigurator {
     }
     public static void setLights(List<AbstractLight> lights, Shader shaderProgram) {
         // Clear the ByteBuffer so that it can be filled from the beginning.
-
-        float[] finalArray = new float[440];
+        COMPUTED_SIZE = 48*( maxDirLights + maxPointLights);
+        float[] finalArray = new float[(maxDirLights + maxPointLights) * 8];
         Float[] EmptyFloatArray = new Float[8];
         for(int i = 0; i < 8; i++){EmptyFloatArray[i] = 0f;}
 
@@ -67,31 +68,30 @@ public class LightingConfigurator {
             }
         });
 
-        int boundDir = Math.min(5, dirLights.size());
-        int boundPoint = Math.min(50, pointLights.size());
+        int boundDir = Math.min(maxDirLights, dirLights.size());
+        int boundPoint = Math.min(maxPointLights, pointLights.size());
 
         // Fill directional lights data.
         for (int i = 0; i < boundDir; i++) {
             list.add(dirLights.get(i).getFloatArray());
         }
         // Fill remaining directional light slots with empty data.
-        for (int i = boundDir; i < 5; i++) {
-            // Use an appropriately named empty buffer if available.
-
+        for (int i = boundDir; i < maxDirLights; i++) {
             list.add(EmptyFloatArray);
         }
 
         // Fill point lights data.
         for (int i = 0; i < boundPoint; i++) {
             list.add(pointLights.get(i).getFloatArray());
-//ww
         }
+
         // Fill remaining point light slots with empty data.
-        for (int i = boundPoint; i < 50; i++) {
+        for (int i = boundPoint; i < maxPointLights; i++) {
             list.add(EmptyFloatArray);
         }
-      //  printByteBuffer(BufferedLights, "Final Buffer");
-        // Prepare the ByteBuffer for reading.
+
+        //  printByteBuffer(BufferedLights, "Final Buffer");
+        //  Prepare the ByteBuffer for reading.
 
 
         for(int i =0 ; i < list.size(); i ++){
@@ -111,8 +111,8 @@ public class LightingConfigurator {
 
         glBindBufferBase(GL_UNIFORM_BUFFER, Shader.LIGHT_BLOCK, bufferBase);
 
-        shaderProgram.setUniform("number_pointLights", boundPoint);
-        shaderProgram.setUniform("number_dirLights", 2+ boundDir);
+        shaderProgram.setUniform("number_pointLights", (int)(boundPoint));
+        shaderProgram.setUniform("number_dirLights", (int)(boundDir));
 
         shaderProgram.unbind();
 
