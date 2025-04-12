@@ -72,6 +72,9 @@ public class AutoLoader {
                     if (upperName.contains("AMBIENT_OCCLUSION")) {
                         sharedMaterial.addMap(Material.AO_MAP, texture);
                     }
+                    if (upperName.contains("EMISSIVE")) {
+                        sharedMaterial.addMap(Material.EMISSION_MAP, texture);
+                    }
                 }
             }
         }

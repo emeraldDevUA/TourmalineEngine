@@ -25,7 +25,7 @@ public class ResourceLoader extends Thread{
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
-        } catch (NullPointerException e){
+        } catch (NullPointerException|IndexOutOfBoundsException e){
             System.err.println(STR."Failed to load \{paths.get(tmp)}");
         }
     }

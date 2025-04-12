@@ -1,9 +1,9 @@
 # TourmalineEngine V0.1 (Alpha)
 
-<div style="text-align: center;">
-  <img style="scale: 85%" src="https://www.gemporia.com/image/asset/358823/Watermelon-Tourmaline-In-Article.jpg" alt="Description" />
+<div style="text-align: center; margin-bottom: 50pt">
+  <img style="width: 65%; height: 65%; margin-bottom: 0" src="src/main/resources/miscellaneous/Preview.png" alt="Description" />
+<h5> Engine Render </h5>
 </div>
-
 Greetings, this is a follow-up project to my previous endeavour (TanksProj)
 This Framework aims at being an easy and intuitive tool for 3D graphics and physical simulation.
 
@@ -28,10 +28,15 @@ My engine is strictly divided into the following modules:
 1. Mouse 
 2. Keyboard
 
-- ## Tourmaline Sound
+- ## Tourmaline Sound (Future)
 1. OpenAL
 
-[![Watch the video](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://drive.google.com/drive/folders/1SzLoZUziSHOF4AMeiH-g8LQQSRYiA4iq)
+<div style="text-align: center; margin-bottom: 50pt;">
+  <a href="https://drive.google.com/drive/folders/1SzLoZUziSHOF4AMeiH-g8LQQSRYiA4iq" target="_blank">
+    <img src="src/main/resources/miscellaneous/PlanePreview.jpg" alt="Watch the video" style="width: 65%; height: auto;" />
+  </a>
+  <h5>Flight Simulator Preview(Clickable)</h5>
+</div>
 
 
 

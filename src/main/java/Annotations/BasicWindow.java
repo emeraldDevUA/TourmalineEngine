@@ -19,6 +19,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 
 import org.joml.Vector2f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 
 
@@ -26,8 +27,12 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 
 
-
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
@@ -758,6 +763,42 @@ public abstract class BasicWindow implements Closeable {
         wipeFramebuffer();
         wipeRenderQuad();
         glfwDestroyWindow(window_handle);
+    }
+
+
+
+    public static void saveFramebufferAsImage(int width, int height, String filePath) {
+        // Allocate a buffer to store the pixel data (RGBA, 8-bit per channel)
+
+       ByteBuffer buffer =
+               BufferUtils.createByteBuffer(width * height * 4);
+
+        glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+
+        // Create a BufferedImage to store the pixel data
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int index = (x + (height - y - 1) * width) * 4;
+
+                int r = buffer.get(index) & 0xFF;
+                int g = buffer.get(index + 1) & 0xFF;
+                int b = buffer.get(index + 2) & 0xFF;
+                int a = buffer.get(index + 3) & 0xFF;
+                int pixel = (a << 24) | (r << 16) | (g << 8) | b;
+
+                image.setRGB(x, y, pixel);
+            }
+        }
+
+        // Save the BufferedImage as a PNG file
+        try {
+            ImageIO.write(image, "PNG", new File(filePath));
+            System.out.println(STR."Image saved: \{filePath}");
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
 }
