@@ -1,9 +1,11 @@
-# TourmalineEngine V0.1 (Alpha)
+# TourmalineEngine V0.0.3 (Beta)
 
-<div style="text-align: center; margin-bottom: 50pt">
-  <img style="width: 65%; height: 65%; margin-bottom: 0" src="src/main/resources/miscellaneous/Preview.png" alt="Description" />
-<h5> Engine Render </h5>
-</div>
+<p align="center">
+  <img src="src/main/resources/miscellaneous/Preview.png" alt="Engine Render" width="65%">
+  <br>
+  <strong>Engine Render</strong>
+</p>
+
 Greetings, this is a follow-up project to my previous endeavour (TanksProj)
 This Framework aims at being an easy and intuitive tool for 3D graphics and physical simulation.
 
@@ -31,12 +33,14 @@ My engine is strictly divided into the following modules:
 - ## Tourmaline Sound (Future)
 1. OpenAL
 
-<div style="text-align: center; margin-bottom: 50pt;">
+<p align="center">
   <a href="https://drive.google.com/drive/folders/1SzLoZUziSHOF4AMeiH-g8LQQSRYiA4iq" target="_blank">
-    <img src="src/main/resources/miscellaneous/PlanePreview.jpg" alt="Watch the video" style="width: 65%; height: auto;" />
+    <img src="src/main/resources/miscellaneous/PlanePreview.jpg" alt="Flight Simulator Preview" width="65%">
   </a>
-  <h5>Flight Simulator Preview(Clickable)</h5>
-</div>
+  <br>
+  <em>Flight Simulator Preview</em>
+</p>
+
 
 
 
