@@ -27,6 +27,7 @@ import imgui.flag.ImGuiCol;
 
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import oshi.SystemInfo;
@@ -524,7 +525,11 @@ explosionEffect.setExistenceTime(20);
         BB.compile();
 
         scene.addEffect(BB);
+        postprocessingShader.setUniform("uViewportSize",
+                new Vector2f(windowWidth, windowHeight));
 
+        postprocessingShader.setUniform("enableFXAA", true);
+        postprocessingShader.setUniform("gamma", 2.0f);
         while (!glfwWindowShouldClose(window_handle)){
             camera.loadViewMatrix();
 

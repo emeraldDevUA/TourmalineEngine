@@ -42,6 +42,44 @@ My engine is strictly divided into the following modules:
 </p>
 
 
+This project uses the following open-source libraries and technologies:
+
+### 📌 Dependencies and Attribution
+
+This project uses the following open-source libraries and technologies:
+
+- **LWJGL** (Lightweight Java Game Library)  
+  License: [LWJGL License](https://www.lwjgl.org/license)
+
+- **JOML** (Java OpenGL Math Library)  
+  License: [JOML License](https://github.com/JOML-CI/JOML/blob/main/LICENSE)
+
+- **OpenGL** (by the Khronos Group)  
+  License: [OpenGL License](https://github.com/TheCherno/OpenGL/blob/master/LICENSE)
+
+- **Additional used material can be found in my thesis on the drive**
+
+All trademarks, logos, and brand names are the property of their respective owners. 
+No ownership is claimed over the libraries or technologies listed above.
+
+
+### 📌 Tested Operating Systems
+
+| OS           | Version  | Status     |
+|--------------|----------|------------|
+| 🪟 Windows   | 11       | ✅ Tested  |
+| 🐧 Ubuntu    | 24.10    | ✅ Tested  |
+
+
+### 📌 Supported Java Versions
+
+| Java Version | Status             |
+|--------------|--------------------|
+| ☕ Java 8    | ❌ Not Supported   |
+| ☕ Java 11   | ❌ Not Supported   |
+| ☕ Java 17   | ❌ Not Supported   |
+| ☕ Java 21   | ✅ Currently Supported (Preview) |
+| ☕ Java 22   | ❌ Not Supported (Intended) |
 
 
 ## License Text
