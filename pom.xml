@@ -239,6 +239,55 @@
                 </dependency>
             </dependencies>
         </profile>
+
+        <profile>
+            <id>macos-arm64</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                    <arch>aarch64</arch> <!-- Detect ARM64 on macOS -->
+                </os>
+            </activation>
+            <dependencies>
+                <!-- LWJGL macOS ARM64 native libraries -->
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl</artifactId>
+                    <version>${lwjgl-version}</version>
+                    <classifier>natives-macos-arm64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-opengl</artifactId>
+                    <version>${lwjgl-version}</version>
+                    <classifier>natives-macos-arm64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-glfw</artifactId>
+                    <version>${lwjgl-version}</version>
+                    <classifier>natives-macos-arm64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-stb</artifactId>
+                    <version>${lwjgl-version}</version>
+                    <classifier>natives-macos-arm64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>org.lwjgl</groupId>
+                    <artifactId>lwjgl-assimp</artifactId>
+                    <version>${lwjgl-version}</version>
+                    <classifier>natives-macos-arm64</classifier>
+                </dependency>
+                <dependency>
+                    <groupId>io.github.spair</groupId>
+                    <artifactId>imgui-java-natives-macos-arm64</artifactId>
+                    <version>${imgui-version}</version>
+                </dependency>
+            </dependencies>
+        </profile>
+
     </profiles>
 
 
