@@ -139,6 +139,7 @@ public class CrystalDemo extends BasicWindow {
             cameraPos.x = 100 * cos(phi);
             cameraPos.z = 100 * sin(phi);
             camera.loadViewMatrix();
+            camera.setViewProjectionMatrix(skyBoxShader);
 
             glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
