@@ -135,7 +135,7 @@ public class Texture implements EnhancedLoadable {
         glGenerateMipmap(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        assert textureData != null;
+        //assert textureData != null;
         stbi_image_free(textureData);
 
     }

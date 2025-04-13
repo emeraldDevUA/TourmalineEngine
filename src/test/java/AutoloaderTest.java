@@ -1,10 +1,7 @@
 import Annotations.BasicWindow;
 import Annotations.OpenGLWindow;
 import Liquids.LiquidBody;
-import ResourceImpl.Mesh;
-import ResourceImpl.MeshTree;
-import ResourceImpl.Shader;
-import ResourceImpl.Texture;
+import ResourceImpl.*;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 import org.junit.Assert;
@@ -53,6 +50,56 @@ public class AutoloaderTest extends BasicWindow {
         loader.getDrawables().get("F16").getChildNodes().forEach(Item->{
             System.out.println("\t" + Item.getNodeName());
         });
+
+
+
+            t1 = System.currentTimeMillis();
+            loader = new AutoLoader("src/main/resources/autoloaderTestData", new ResourceLoadScheduler());
+            loader.loadTrees();
+            loader.asyncLoad();
+
+            while (loader.getReadiness() < 1){
+                System.out.println();
+            }
+
+            t2 = System.currentTimeMillis();
+
+            long[] time_comparison = new long[2];
+
+            time_comparison[0] = t2-t1;
+            System.out.println(t2-t1 +" ms");
+
+            loader.getDrawables().clear();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            String[] meshPaths = new String[]{"crystal", "FuelTank", "MI-8", "MIG29", "Rafale", "StormShadow"};
+            t1 = System.currentTimeMillis();
+
+            for(String path: meshPaths){
+                Mesh mesh = new Mesh();
+                try {
+                    mesh.load("src/main/resources/autoloaderTestData/%s/%s.obj".formatted(path, path));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                mesh.getMaterial().addMap(Material.ALBEDO_MAP, new Texture(
+                        String.format("src/main/resources/autoloaderTestData/%s/%s_albedo.png", path, path)
+                        ,4));
+            }
+
+            t2 = System.currentTimeMillis();
+
+
+            time_comparison[1] = t2-t1;
+
+            System.out.printf("\nRESULTS:\ndt = %d, t1/t0 = %f",
+                    time_comparison[1] - time_comparison[0],
+                    (float)time_comparison[1]/(float)time_comparison[0]
+                    );
+
     }
 
     @Test
@@ -118,6 +165,7 @@ public class AutoloaderTest extends BasicWindow {
        // Texture tex = liquidBody.generateCoefficients();
 
     }
+
 
 
 
