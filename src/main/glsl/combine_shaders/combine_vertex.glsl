@@ -12,15 +12,15 @@ layout (location = 2) in vec2 uv;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
+uniform vec3 camera_position;
 
 out vec2 uv_frag;
-out vec3 camera_position;
 
 void main()
 {
     uv_frag = uv;
     // Simple but ineffective way to extract camera position
-    mat4 camera_direction = inverse(view_matrix);
-    camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
+    //mat4 camera_direction = inverse(view_matrix);
+    //camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
     gl_Position = vec4(position, 0.0, 1.0);
 }

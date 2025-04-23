@@ -14,6 +14,8 @@ uniform mat4 model_matrix;
 uniform mat4 shadow_view_matrix;
 uniform mat4 shadow_projection_matrix;
 
+uniform vec3 camera_position;
+
 uniform bool isWater;
 uniform int waveNumber;
 uniform float time;
@@ -48,8 +50,9 @@ out VS_OUT
 
 void main()
 {
-    mat4 camera_direction = inverse(view_matrix);
-    vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
+    //mat4 camera_direction = inverse(view_matrix);
+    //vs_out.camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
+    vs_out.camera_position = camera_position;
     vs_out.uv = uv;
 
     mat3 normal_matrix = transpose(inverse(mat3(model_matrix)));

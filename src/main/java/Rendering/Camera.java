@@ -112,7 +112,11 @@ public class Camera {
 
                 glUniform1f(nearLocation, near);
             }
+            int camera_position_location = glGetUniformLocation(shaderPointer, "camera_position");
+            if (camera_position_location != -1) {
 
+                glUniform3f(camera_position_location, position.x,position.y, position.z );
+            }
         }
     }
 

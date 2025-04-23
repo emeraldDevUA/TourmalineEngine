@@ -10,16 +10,14 @@ uniform mat4 projection_matrix;
 uniform mat4 view_matrix;
 uniform mat4 model_matrix;
 
+uniform vec3 camera_position;
 
 out vec2 textureCoords;
 out vec4 currentPosition;
-out vec3 camera_position;
 
 void main() {
     // WHY IS THIS NOT WORKING???
     gl_Position = (projection_matrix*view_matrix*model_matrix * vec4(position, 1));
     currentPosition = model_matrix * vec4(position, 1);
     textureCoords = uv;
-    mat4 camera_direction = inverse(view_matrix);
-    camera_position = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
 }

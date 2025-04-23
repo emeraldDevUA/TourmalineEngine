@@ -13,12 +13,12 @@ layout (location = 0 ) out vec4 fragment;
 
 in vec2 textureCoords;
 in vec4 currentPosition;
-in vec3 camera_position;
+//in vec3 camera_position;
 
 uniform vec2 uViewportSize;
 uniform float far;
 uniform float near;
-
+uniform vec3 camera_position;
 #include <algorithms/fxaa.glsl>
 
 void main() {

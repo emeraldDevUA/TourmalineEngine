@@ -4,7 +4,6 @@
 #define PI 3.1415926
 
 in vec2 uv_frag;
-in vec3 camera_position;
 
 
 layout (binding = 0) uniform sampler2D position;
@@ -25,6 +24,7 @@ layout (binding = 9) uniform sampler2D BRDFlookUp;
 uniform mat4 view_matrix;
 uniform mat4 previous_view_matrix;
 uniform mat4 projection_matrix;
+uniform vec3 camera_position;
 
 #include <algorithms/Reflections/Reflections.glsl>
 
@@ -348,7 +348,6 @@ void main()
 //    }
 
     fragment = (1 - shadow_value ) * vec4(Lo + environment_emission_value, 1.0) + ssr_value;
-
     if(dot(fragment.rgb, vec3(0.2126, 0.7152, 0.0722)) > 1) {
         bloom = vec4(fragment.rgb, 1.0);
     } else {

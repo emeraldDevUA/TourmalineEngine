@@ -10,6 +10,7 @@ uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 uniform mat4 model_matrix;
 
+uniform vec3 camera_position;
 
 out vec3 fragPosition;
 out vec3 viewPosition;
@@ -33,7 +34,7 @@ void processExplosion();
 
 void main() {
     mat4 camera_direction = inverse(view_matrix);
-    viewPosition = vec3(camera_direction[3][0], camera_direction[3][1], camera_direction[3][2]);
+    viewPosition = camera_position;
 
 
     switch(effectType){
