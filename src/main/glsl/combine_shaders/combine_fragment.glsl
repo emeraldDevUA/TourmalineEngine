@@ -25,6 +25,7 @@ uniform mat4 view_matrix;
 uniform mat4 previous_view_matrix;
 uniform mat4 projection_matrix;
 uniform vec3 camera_position;
+uniform vec3 incidenceAtZero;
 
 #include <algorithms/Reflections/Reflections.glsl>
 
@@ -265,7 +266,7 @@ void main()
                         lightBlock.directionalLights[i].intensity;
         // No attenuation for directional lights
 
-        vec3 F0 = vec3(0.04);
+        vec3 F0 = incidenceAtZero;
         vec3 F = fresnelSchlick(max(dot(H, V), 0.0), F0);
         float NDF = DistributionGGX(N, H, roughness_value);
         float G = GeometrySmith(N, V, L, roughness_value);

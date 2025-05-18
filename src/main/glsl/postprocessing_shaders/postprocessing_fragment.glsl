@@ -21,7 +21,7 @@ void main()
 {
 
     float exposure = 1.0;
-    vec4 bloomColor = fast_blur(bloom, uv_frag);
+    vec4 bloomColor = gaussian_blur_vertical(bloom, uv_frag);
     vec4 fxaa_color;
 
 

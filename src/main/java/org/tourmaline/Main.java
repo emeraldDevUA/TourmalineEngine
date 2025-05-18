@@ -56,6 +56,7 @@ import static org.lwjgl.opengl.GL13.*;
 public class Main extends BasicWindow {
 
 
+
     public static void main(String[] args) throws IOException {
 
         long t1,t2,t3;
@@ -82,6 +83,7 @@ public class Main extends BasicWindow {
 
         skyBoxShader = new Shader("src/main/glsl/skybox_shaders/skybox_vertex.glsl",
                 "src/main/glsl/skybox_shaders/skybox_frag.glsl");
+
 
 
         transparentShader = new Shader("src/main/glsl/vertex_test.vert",

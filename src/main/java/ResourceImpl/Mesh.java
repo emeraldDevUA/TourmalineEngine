@@ -32,6 +32,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
     private Vector3f pivot;
     private Vector3f negativePivot;
 
+    private Vector3f incidenceAtZero;
+
     private Vector3f position;
     private Vector3f scale;
     private Vector3f shadowScale;
@@ -67,6 +69,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         negativePivot = new Vector3f(0);
         shadowPass = false;
         enableReflection = true;
+        incidenceAtZero = new Vector3f(0.04f);
     }
 
     public Mesh(String name, Map<String, List<?>> params) {
@@ -93,6 +96,8 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         }
         pivot = new Vector3f(0);
         negativePivot = new Vector3f(0);
+        incidenceAtZero = new Vector3f(0.04f);
+
     }
 
 
@@ -262,15 +267,19 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
             int scaleVectorLocation = glGetUniformLocation(shader_pointer, "scale_vector");
             int modelMatrixLocation = glGetUniformLocation(shader_pointer, "model_matrix");
             int reflectionFlag = glGetUniformLocation(shader_pointer, "enableReflection");
+            int incidenceLocation = glGetUniformLocation(shader_pointer, "incidenceAtZero");
 
             glUniformMatrix4fv(modelMatrixLocation, false, model_matrix);
             glUniform3f(scaleVectorLocation, shadowScale.x,shadowScale.y, shadowScale.z);
 
 
-                if(reflectionFlag!=-1){
-                    glUniform1i(reflectionFlag, (enableReflection?1:0));
-                }
+            if(reflectionFlag!=-1){
+                glUniform1i(reflectionFlag, (enableReflection?1:0));
+            }
 
+            if(incidenceLocation!=-1){
+                glUniform3f(incidenceLocation, incidenceAtZero.x, incidenceAtZero.y, incidenceAtZero.z);
+            }
         }
 
         material.use();

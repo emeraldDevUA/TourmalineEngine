@@ -4,7 +4,7 @@
 
 uniform bool isWater;
 uniform bool enableReflection;
-
+uniform vec3 incidenceAtZero;
 in VS_OUT
 {
     vec3 position;
@@ -131,7 +131,7 @@ void main()
     vec3 N = normalize(normal_roughness.rgb);
     vec3 V = normalize(vs_in.camera_position - position);
 
-    vec3 F0 = vec3(0.04);
+    vec3 F0 = incidenceAtZero;;
     F0 = mix(F0, albedo_metalness.rgb, albedo_metalness.a);
 
     vec3 F = FresnelSchlickRoughness(max(dot(N, V), 0.0), F0, normal_roughness.a);

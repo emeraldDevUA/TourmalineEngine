@@ -29,6 +29,38 @@ vec4 gaussian_blur(sampler2D color, vec2 uvs){
 
     return vec4(blurredVertex, 1.0);
 }
+
+vec4 gaussian_blur_horizontal(sampler2D color, vec2 uvs) {
+    vec2 texOffset = vec2(1.0 / textureSize(color, 0)); // per-pixel offset
+    float weights[5] = float[](0.204164, 0.304005, 0.193067, 0.091578, 0.040726); // symmetric
+
+    vec3 result = texture(color, uvs).rgb * weights[0];
+
+    for (int i = 1; i < 5; ++i) {
+        vec2 offset = vec2(float(i), 0.0) * texOffset;
+        result += texture(color, uvs + offset).rgb * weights[i];
+        result += texture(color, uvs - offset).rgb * weights[i];
+    }
+
+    return vec4(result, 1.0);
+}
+
+vec4 gaussian_blur_vertical(sampler2D color, vec2 uvs) {
+    vec2 texOffset = vec2(1.0 / textureSize(color, 0));
+    float weights[5] = float[](0.204164, 0.304005, 0.193067, 0.091578, 0.040726);
+
+    vec3 result = texture(color, uvs).rgb * weights[0];
+
+    for (int i = 1; i < 5; ++i) {
+        vec2 offset = vec2(0.0, float(i)) * texOffset;
+        result += texture(color, uvs + offset).rgb * weights[i];
+        result += texture(color, uvs - offset).rgb * weights[i];
+    }
+
+    return vec4(result, 1.0);
+}
+
+
 vec4 fast_blur(sampler2D color, vec2 uvs) {
     // Define the blur radius (higher = stronger blur)
     float radius = 5.0;
@@ -48,7 +80,7 @@ vec4 fast_blur(sampler2D color, vec2 uvs) {
 
             // Sample the texture
             vec3 sampleColor = texture(color,
-                 clamp(uvs + vec2(x, y) * texOffset, 0.01, 0.99)).xyz;
+            clamp(uvs + vec2(x, y) * texOffset, 0.01, 0.99)).xyz;
 
             // Accumulate weighted color
             blurredColor += sampleColor * weight;
