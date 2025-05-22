@@ -36,9 +36,10 @@ void main() {
         // check the depth difference
         // if it is bigger than the epsilon and in front of the skybox, discard
         float temp = abs(transparentDepth - (deferredDepth));
-        if(temp > eps && deferredDepth > 1f-eps){
-            if(length(camera_position-currentPosition.xyz) > 12)
-            discard;
+        if(temp > eps && deferredDepth > 1.0-eps){
+            if(length(camera_position.xyz-currentPosition.xyz) > 150.0){
+                discard;
+            }
         }
 
     }

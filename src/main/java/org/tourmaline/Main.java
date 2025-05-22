@@ -105,7 +105,7 @@ public class Main extends BasicWindow {
 
        System.out.printf("Async load took %d ms, Resource init took %d ms", t2-t1, t3-t2);
 
-        MeshTree F16 = autoLoader.getDrawables().get("Rafale");
+        MeshTree F16 = autoLoader.getDrawables().get("F16");
 
 
         MeshTree S300 = autoLoader.getDrawables().get("S300");
@@ -218,7 +218,7 @@ public class Main extends BasicWindow {
                 F16.setUpdated(true);
                 camera.setFocus(F16.getPosition());
                 camera.setPosition(F16.getPosition()
-                        .add(new Vector3f(-20,3,0)
+                        .add(new Vector3f(-3,1,0)
                                 .rotate(F16.getRotQuaternion()), new Vector3f()));
                 //camera.setPosition(camera.getQuaternionf(), new Vector3f(-3, 1, 0));
                 camera.loadViewMatrix();
@@ -498,7 +498,9 @@ explosionEffect.setExistenceTime(20);
         Island.traverse(mesh -> mesh.setEnableReflection(false));
 
         PointLight pointLight = new PointLight(new Vector3f(10,10,10));
-        pointLight.setLightColor(new Vector3f(1,0,0));  pointLight.generatePrimitive();
+        pointLight.setLightColor(new Vector3f(1,0,0));
+        pointLight.setLightIntensity(100);
+        pointLight.generatePrimitive();
 
         scene.addLightSources(pointLight, true);
 
@@ -506,11 +508,13 @@ explosionEffect.setExistenceTime(20);
 
         PointLight pointLight2 = new PointLight(new Vector3f(10,50,10));
         pointLight2.setLightColor(new Vector3f(0,0,1));  pointLight2.generatePrimitive();
+        pointLight2.setLightIntensity(100);
 
         scene.addLightSources(pointLight2, true);
 
         PointLight pointLight3 = new PointLight(new Vector3f(90,40,90));
         pointLight3.setLightColor(new Vector3f(1,1,0));  pointLight3.generatePrimitive();
+        pointLight3.setLightIntensity(100);
 
         scene.addLightSources(pointLight3, true);
 

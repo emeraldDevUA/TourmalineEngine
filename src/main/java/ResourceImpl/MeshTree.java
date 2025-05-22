@@ -99,5 +99,7 @@ public class MeshTree extends TreeNode<Mesh> implements Cloneable {
         }
         return clonedNode;
     }
-
+    public static void close_functional(MeshTree meshTree){
+        meshTree.traverse(Mesh::close_functional);
+    }
 }

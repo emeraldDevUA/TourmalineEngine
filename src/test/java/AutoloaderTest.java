@@ -9,8 +9,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -53,53 +58,89 @@ public class AutoloaderTest extends BasicWindow {
 
 
 
-            t1 = System.currentTimeMillis();
-            loader = new AutoLoader("src/main/resources/autoloaderTestData", new ResourceLoadScheduler());
-            loader.loadTrees();
-            loader.asyncLoad();
+        int n = 6  ;
+        File csvOutputFile = new File("performance_log.csv");
+        try (PrintWriter writer = new PrintWriter(new FileWriter(csvOutputFile))) {
+            // Write CSV header
+            writer.println("Iteration,tp,ts,dt,s,e");
 
-            while (loader.getReadiness() < 1){
-                System.out.println();
-            }
-
-            t2 = System.currentTimeMillis();
-
-            long[] time_comparison = new long[2];
-
-            time_comparison[0] = t2-t1;
-            System.out.println(t2-t1 +" ms");
-
-            loader.getDrawables().clear();
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            String[] meshPaths = new String[]{"crystal", "FuelTank", "MI-8", "MIG29", "Rafale", "StormShadow"};
-            t1 = System.currentTimeMillis();
-
-            for(String path: meshPaths){
-                Mesh mesh = new Mesh();
+            for (int i = 0; i < n; i++) {
                 try {
-                    mesh.load("src/main/resources/autoloaderTestData/%s/%s.obj".formatted(path, path));
-                } catch (IOException e) {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
-                mesh.getMaterial().addMap(Material.ALBEDO_MAP, new Texture(
-                        String.format("src/main/resources/autoloaderTestData/%s/%s_albedo.png", path, path)
-                        ,4));
+
+                AutoLoader loader = new AutoLoader("src/main/resources/autoloaderTestData", new ResourceLoadScheduler());
+
+                t1 = System.currentTimeMillis();
+                loader.loadTrees();
+                loader.asyncLoad();
+
+                while (loader.getReadiness() < 1) {
+                    System.out.println();
+                }
+
+                 t2 = System.currentTimeMillis();
+                long[] time_comparison = new long[2];
+                time_comparison[0] = t2 - t1;
+                System.out.println(time_comparison[0] + " ms");
+                loader.getDrawables().values().forEach(MeshTree::close_functional);
+                loader.getDrawables().clear();
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+                String[] meshPaths = new String[]{"crystal", "FuelTank", "MI-8", "MIG29", "Rafale", "StormShadow", "F16"};
+                List<Mesh> meshes = new ArrayList<>();
+                t1 = System.currentTimeMillis();
+
+                for (String path : meshPaths) {
+                    Mesh mesh = new Mesh();
+                    try {
+                        mesh.load(String.format("src/main/resources/autoloaderTestData/%s/%s.obj", path, path));
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    mesh.getMaterial().addMap(Material.ALBEDO_MAP, new Texture(
+                            String.format("src/main/resources/autoloaderTestData/%s/%s_albedo.png", path, path), 4));
+                    meshes.add(mesh);
+                }
+
+                t2 = System.currentTimeMillis();
+                meshes.forEach(Mesh::close);
+                time_comparison[1] = t2 - t1;
+
+                long deltaTime = time_comparison[0] - time_comparison[1];
+                double efficiency = ((double) time_comparison[1]) / time_comparison[0];
+                double speedup = efficiency / 6;
+
+                System.out.println("tp = " + time_comparison[0]);
+                System.out.println("ts = " + time_comparison[1]);
+                System.out.println("dt = " + deltaTime);
+                System.out.println("s = " + efficiency);
+                System.out.println("e = " + speedup);
+
+                // Save to CSV
+                writer.printf(Locale.US, "%d,%d,%d,%d,%.6f,%.6f%n", i + 1, time_comparison[0], time_comparison[1], deltaTime, efficiency, speedup);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.gc();
+
             }
 
-            t2 = System.currentTimeMillis();
+            System.out.println("Performance data saved to performance_log.csv");
 
-
-            time_comparison[1] = t2-t1;
-
-            System.out.printf("\nRESULTS:\ndt = %d, t1/t0 = %f",
-                    time_comparison[1] - time_comparison[0],
-                    (float)time_comparison[1]/(float)time_comparison[0]
-                    );
-
+    } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Test

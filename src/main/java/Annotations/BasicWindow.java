@@ -643,6 +643,7 @@ public abstract class BasicWindow implements Closeable {
 
     }
     protected static void skyBoxPass(){
+        camera.setViewProjectionMatrix(skyBoxShader);
         skyBoxShader.use();
         glActiveTexture(GL_TEXTURE10);
         scene.getSkyBox().draw();

@@ -119,7 +119,7 @@ float ShadowCalculation(vec3 fragPosLightSpace, vec3 normal, vec3 lightDir)
         for (float y = -n; y <= n; y += 0.5) {
             vec2 offset = vec2(x, y) * texelSize;
             float closestDepth = texture(shadow_map, projCoords.xy + offset).r;
-            shadow += (currentDepth - bias >= closestDepth) ? 0.8 : 0.0;
+            shadow += (currentDepth - 0.001 >= closestDepth) ? 0.8 : 0.0;
             samples++; // Increment sample counter
         }
     }

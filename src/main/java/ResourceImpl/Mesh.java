@@ -314,6 +314,7 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
 
     @Override
     public void close(){
+        map.values().forEach(VBO::close);
         map.clear();
         material.close();
     }
@@ -404,5 +405,9 @@ public class Mesh implements Loadable, Drawable, Closeable, Cloneable {
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
+    }
+
+    public static void close_functional(Mesh mesh){
+        mesh.close();
     }
 }

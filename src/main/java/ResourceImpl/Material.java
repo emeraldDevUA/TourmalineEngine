@@ -80,6 +80,7 @@ public class Material implements Closeable {
     @Override
     public void close() {
         physicalProperties.clear();
+
         pbrMaps.clear();
         colors.clear();
         materialBuffer.clear();

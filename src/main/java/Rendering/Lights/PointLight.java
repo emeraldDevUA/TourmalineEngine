@@ -56,8 +56,10 @@ public class PointLight extends AbstractLight {
     public void generatePrimitive(){
         try {
             lightMesh.load("src/main/resources/miscellaneous/Sphere32.obj");
-            lightMesh.setScale(new Vector3f(lightIntensity/50f));
+            lightMesh.setScale(new Vector3f(1/40F));
             lightMesh.compile();
+            lightMesh.setEnableReflection(false);
+            lightMesh.setShadowScale(new Vector3f(0));
             lightMesh.getMaterial().addColor(Material.ALBEDO_MAP, lightColor);
             lightMesh.setNoCull(true);
         }

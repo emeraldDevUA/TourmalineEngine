@@ -170,6 +170,7 @@ public class VBO implements Drawable, Closeable {
 
     @Override
     public void close() {
+        finalVertices.clear();
         glDeleteVertexArrays(vao);
         glDeleteBuffers(verticesBuffer);
         glDeleteBuffers(normalsBuffer);
