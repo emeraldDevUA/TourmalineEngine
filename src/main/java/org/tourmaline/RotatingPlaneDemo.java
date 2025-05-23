@@ -1,38 +1,30 @@
 package org.tourmaline;
 import Annotations.BasicWindow;
 import Controls.Keyboard;
-import Controls.Mouse;
-import Effects.BoundingBoxEffect;
-import Effects.ExplosionEffect;
-import Effects.JetEffect;
-import Interfaces.InterfaceRenderer;
-import Interfaces.KeyboardEventHandler;
-import Interfaces.MouseEventHandler;
-import Liquids.LiquidBody;
+
 import Rendering.Camera;
 import Rendering.Lights.DirectionalLight;
 import Rendering.Lights.LightingConfigurator;
-import Rendering.Lights.PointLight;
 import Rendering.Scene;
 import Rendering.SkyBox;
-import ResourceImpl.*;
 
+import ResourceImpl.*;
 import ResourceLoading.AutoLoader;
 import ResourceLoading.ResourceLoadScheduler;
 
-import Annotations.OpenGLWindow;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-
 import static org.joml.Math.cos;
 import static org.joml.Math.sin;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.GL_FRAMEBUFFER;
 import static org.lwjgl.opengl.GL30.glBindFramebuffer;
 
+import Annotations.OpenGLWindow;
 @OpenGLWindow(windowName = "Complex Example", defaultDimensions = {1920,1018},
         windowHints = {GLFW_DECORATED}, windowHintsValues={GLFW_TRUE}, shadowMapResolution = 8192)
 
@@ -62,7 +54,7 @@ public class RotatingPlaneDemo extends BasicWindow {
         MeshTree F16Tree = autoLoader.getDrawables().get("F16");
         F16Tree.compile();
 
-        Vector3f scaleVector = new Vector3f(80);
+        Vector3f scaleVector = new Vector3f(50);
 
         Material mainMat = F16Tree.getNodeValue().getMaterial();
         mainMat.addProperty(Material.METALNESS, 0.0);
@@ -122,7 +114,7 @@ public class RotatingPlaneDemo extends BasicWindow {
         skyBox.compile();
 
         camera = new Camera(
-                new Vector3f(5,1,3).normalize().mul(200),
+                new Vector3f(5,1,3).normalize().mul(180),
                 new Vector3f(0,0,0));
 
         shadowCamera = new Camera(
@@ -161,12 +153,12 @@ public class RotatingPlaneDemo extends BasicWindow {
 
         transparentShader.setUniform("uViewportSize", screenDimensions);
 
-
+        measureTime();
         while (!glfwWindowShouldClose(window_handle)) {
 
             Vector3f cameraPos = camera.getPosition();
-            phi+=0.001f;
-
+            phi += (0.001f);
+            if(phi >= Math.PI*2){phi = 0;}
             cameraPos.x = ro * cos(phi);
             cameraPos.z = ro * sin(phi);
             camera.loadViewMatrix();
@@ -194,7 +186,5 @@ public class RotatingPlaneDemo extends BasicWindow {
                 }
             });
         }
-
     }
-
 }

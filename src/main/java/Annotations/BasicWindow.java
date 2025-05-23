@@ -722,7 +722,7 @@ public abstract class BasicWindow implements Closeable {
         glDeleteTextures(deferredEnvironmentEmissionBuffer);
     }
 
-    protected float getCurrentFPS() {
+    protected static float getCurrentFPS() {
 
         return 1.0f / (t2 - t1);
     }
