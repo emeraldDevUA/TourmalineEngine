@@ -102,7 +102,7 @@ public class CrystalDemo extends BasicWindow {
         camera.loadViewMatrix();
         shadowCamera.loadViewMatrix();
 
-        camera.loadPerspectiveProjection((float)Math.PI/3, (float) windowWidth /windowHeight, 2000,0.1f);
+        camera.loadPerspectiveProjection((float)Math.PI/3, (float) windowWidth /windowHeight - 0.1f, 2000,0.1f);
         shadowCamera.loadOrthographicProjection(-1500,1500, -1500,
                 1500, -800, 800);
 
@@ -116,7 +116,7 @@ public class CrystalDemo extends BasicWindow {
         DirectionalLight directionalLight = new DirectionalLight(
                 new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
-        directionalLight.setLightIntensity(15);
+        directionalLight.setLightIntensity(15f);
         scene.addLightSources(directionalLight, true);
 
         Keyboard keyboard = new Keyboard();

@@ -508,7 +508,7 @@ public class Main extends BasicWindow {
         DirectionalLight directionalLight = new DirectionalLight(
                 new Vector3f(-90,120,20).negate().normalize());
         directionalLight.setLightColor(new Vector3f(2.8f, 2.8f, 2.8f).div(10));
-        directionalLight.setLightIntensity(15);
+        directionalLight.setLightIntensity(15f);
         scene.addLightSources(directionalLight, false);
 
         LightingConfigurator.setLights(scene.getLights(), combineShader);
